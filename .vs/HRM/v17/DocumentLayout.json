@@ -1,17 +1,17 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\",
+  "WorkspaceRootPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -32,11 +32,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "HRMDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
               "RelativeDocumentMoniker": "HRM.Data\\Data\\HRMDbContext.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
               "RelativeToolTip": "HRM.Data\\Data\\HRMDbContext.cs",
-              "ViewState": "AQIAAEkAAAAAAAAAAAA8wFcAAAAeAAAA",
+              "ViewState": "AQIAADkAAAAAAAAAAAAIwFcAAAAeAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-07T09:26:40.176Z",
               "EditorCaption": ""
@@ -45,27 +45,25 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Employee.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Employee.cs",
               "RelativeDocumentMoniker": "HRM.Data\\Entities\\Employee.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Employee.cs",
               "RelativeToolTip": "HRM.Data\\Entities\\Employee.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAuAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-07T09:20:12.619Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-07T09:20:12.619Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "PartimePlan.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
               "RelativeDocumentMoniker": "HRM.Data\\Entities\\PartimePlan.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
               "RelativeToolTip": "HRM.Data\\Entities\\PartimePlan.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-07T09:19:13.835Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-07T09:19:13.835Z"
             }
           ]
         }

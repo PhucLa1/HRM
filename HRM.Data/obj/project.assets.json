@@ -4172,11 +4172,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\HRM.Data.csproj",
+      "projectUniqueName": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\HRM.Data.csproj",
       "projectName": "HRM.Data",
-      "projectPath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\HRM.Data.csproj",
+      "projectPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\HRM.Data.csproj",
       "packagesPath": "C:\\Users\\Hong Phuc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\obj\\",
+      "outputPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "G4O2VX25F24=",
+  "dgSpecHash": "yo8OGcggvDc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM\\HRM.Apis.csproj",
+  "projectFilePath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\HRM.Apis.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Hong Phuc\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
