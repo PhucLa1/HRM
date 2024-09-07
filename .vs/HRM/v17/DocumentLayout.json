@@ -1,0 +1,75 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HRMDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Data\\HRMDbContext.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "RelativeToolTip": "HRM.Data\\Data\\HRMDbContext.cs",
+              "ViewState": "AQIAAEkAAAAAAAAAAAA8wFcAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-07T09:26:40.176Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Employee.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Employee.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "RelativeToolTip": "HRM.Data\\Entities\\Employee.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-07T09:20:12.619Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PartimePlan.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Entities\\PartimePlan.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
+              "RelativeToolTip": "HRM.Data\\Entities\\PartimePlan.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-07T09:19:13.835Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
