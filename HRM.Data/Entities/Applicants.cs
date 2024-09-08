@@ -12,5 +12,11 @@ namespace HRM.Data.Entities
         public double Rate { get; set; }
         public int TestId { get; set; }
         public int EmployeeId { get; set; }
+        public Job? Job { get; set; }
+        public Test? Test { get; set; }
+        public Employee? Employee { get; set; }
+        public ICollection<TestResult>? testResults { get; set; }
+
+
     }
 }

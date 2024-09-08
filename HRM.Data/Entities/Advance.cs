@@ -7,5 +7,6 @@ namespace HRM.Data.Entities
         public double Amount { get; set; }
         public string? PayPeriod { get; set; }
         public int EmployeeId { get; set; }
+
     }
 }

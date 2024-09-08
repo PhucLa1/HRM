@@ -8,5 +8,7 @@ namespace HRM.Data.Entities
         public double PercentEmployee { get; set; }
         public double PercentCompany { get; set; }
         public string? ParameterName { get; set; }
+        public ICollection<ContractInsurance>? ContractInsurance { get; set; }
+
     }
 }

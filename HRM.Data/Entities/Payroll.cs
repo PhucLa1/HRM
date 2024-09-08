@@ -11,5 +11,13 @@ namespace HRM.Data.Entities
         public double OtherBonus { get; set; }
         public int TaxRateId { get; set; }
         public int FomulaId { get; set; }
+        public Contract? Contract { get; set; }
+        public ICollection<DeductionDetails>? DeductionDetails { get; set; }
+        public ICollection<BonusDetails>? bonusDetails { get; set; }
+        public Fomula? Fomula { get; set; }
+        public ICollection<History>? History { get; set; }
+        public TaxRate? TaxRate { get; set; }
+
+        
     }
 }

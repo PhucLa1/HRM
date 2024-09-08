@@ -1,18 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\",
+  "WorkspaceRootPath": "C:\\Users\\ADMIN\\HRM\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\admin\\hrm\\hrm.data\\migrations\\20240908171537_initalcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\migrations\\20240908171537_initalcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\admin\\hrm\\hrm.data\\entities\\payroll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\payroll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\admin\\hrm\\hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\source\\repos\\hrm\\hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\partimeplan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\admin\\hrm\\hrm.data\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|c:\\users\\admin\\hrm\\hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323F3D2E-CDA0-4ADD-9A45-DE4A7E87C444}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\data\\hrmdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\admin\\hrm\\hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,50 +34,92 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "HRMDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Data\\HRMDbContext.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
-              "RelativeToolTip": "HRM.Data\\Data\\HRMDbContext.cs",
-              "ViewState": "AQIAAEkAAAAAAAAAAAA8wFcAAAAeAAAA",
+              "DocumentIndex": 3,
+              "Title": "Department.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Department.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Department.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Department.cs",
+              "RelativeToolTip": "HRM.Data\\Entities\\Department.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAA9AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-07T09:26:40.176Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-08T17:23:02.668Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Employee.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Employee.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\Employee.cs",
-              "RelativeToolTip": "HRM.Data\\Entities\\Employee.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAuAAAA",
+              "DocumentIndex": 0,
+              "Title": "20240908171537_InitalCreate.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Migrations\\20240908171537_InitalCreate.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Migrations\\20240908171537_InitalCreate.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Migrations\\20240908171537_InitalCreate.cs",
+              "RelativeToolTip": "HRM.Data\\Migrations\\20240908171537_InitalCreate.cs",
+              "ViewState": "AQIAAL0CAAAAAAAAAAAUwM0CAAAwAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-07T09:20:12.619Z",
+              "WhenOpened": "2024-09-08T17:15:37.691Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "PartimePlan.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Entities\\PartimePlan.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\source\\repos\\HRM\\HRM.Data\\Entities\\PartimePlan.cs",
-              "RelativeToolTip": "HRM.Data\\Entities\\PartimePlan.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAAAAAA",
+              "Title": "Employee.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Employee.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Employee.cs",
+              "RelativeToolTip": "HRM.Data\\Entities\\Employee.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-07T09:19:13.835Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-08T17:12:34.031Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Payroll.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Payroll.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Payroll.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Entities\\Payroll.cs",
+              "RelativeToolTip": "HRM.Data\\Entities\\Payroll.cs",
+              "ViewState": "AQIAAAoAAAAAAAAAAAAkwBEAAAA6AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-08T17:11:16.483Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HRMDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "RelativeDocumentMoniker": "HRM.Data\\Data\\HRMDbContext.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM.Data\\Data\\HRMDbContext.cs",
+              "RelativeToolTip": "HRM.Data\\Data\\HRMDbContext.cs",
+              "ViewState": "AQIAAEcAAAAAAAAAAAAswEsAAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-08T17:11:47.894Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\HRM\\HRM\\appsettings.json",
+              "RelativeDocumentMoniker": "HRM\\appsettings.json",
+              "ToolTip": "C:\\Users\\ADMIN\\HRM\\HRM\\appsettings.json",
+              "RelativeToolTip": "HRM\\appsettings.json",
+              "ViewState": "AQIAAAQAAAAAAAAAAAAUwAkAAAA5AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-09-08T15:54:46.501Z"
             }
           ]
         }

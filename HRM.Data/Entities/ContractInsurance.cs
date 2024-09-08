@@ -6,5 +6,6 @@ namespace HRM.Data.Entities
     {
         public int ContractId { get; set; }
         public int InsuranceId { get; set; }
+
     }
 }

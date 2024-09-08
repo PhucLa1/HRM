@@ -7,6 +7,7 @@ namespace HRM.Data.Entities
         public StatusHistory StatusHistory { get; set; }
         public DateTime TimeSweep { get; set; }
         public int PayrollId { get; set; }
+        public Payroll? Payroll { get; set; }
     }
     public enum StatusHistory
     {

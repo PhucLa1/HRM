@@ -12,3 +12,18 @@ C:\Users\Hong Phuc\source\repos\HRM\HRM.Data\obj\Debug\net8.0\refint\HRM.Data.dl
 C:\Users\Hong Phuc\source\repos\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.pdb
 C:\Users\Hong Phuc\source\repos\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.genruntimeconfig.cache
 C:\Users\Hong Phuc\source\repos\HRM\HRM.Data\obj\Debug\net8.0\ref\HRM.Data.dll
+C:\Users\ADMIN\HRM\HRM.Data\bin\Debug\net8.0\HRM.Data.deps.json
+C:\Users\ADMIN\HRM\HRM.Data\bin\Debug\net8.0\HRM.Data.runtimeconfig.json
+C:\Users\ADMIN\HRM\HRM.Data\bin\Debug\net8.0\HRM.Data.dll
+C:\Users\ADMIN\HRM\HRM.Data\bin\Debug\net8.0\HRM.Data.pdb
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.csproj.AssemblyReference.cache
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.AssemblyInfoInputs.cache
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.AssemblyInfo.cs
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.csproj.CoreCompileInputs.cache
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.sourcelink.json
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.dll
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\refint\HRM.Data.dll
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.pdb
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\HRM.Data.genruntimeconfig.cache
+C:\Users\ADMIN\HRM\HRM.Data\obj\Debug\net8.0\ref\HRM.Data.dll

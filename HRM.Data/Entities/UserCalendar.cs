@@ -6,5 +6,7 @@ namespace HRM.Data.Entities
     {
         public int CalendarId { get; set; }
         public int PartimePlanId { get; set; }
-    }
+
+
+	}
 }

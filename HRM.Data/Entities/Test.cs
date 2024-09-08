@@ -6,5 +6,6 @@ namespace HRM.Data.Entities
     {
         public required string Name { get; set; }
         public string? Description { get; set; }
+        public ICollection<Questions>? Questions { get; set; }
     }
 }

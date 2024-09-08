@@ -13,7 +13,11 @@ namespace HRM.Data.Entities
         public CompanySignStatus CompanySignStatus { get; set; }
         public ContractStatus ContractStatus { get; set; }
         public TypeContract TypeContract { get; set; }
-    }
+        public ContractSalary? ContractSalary { get; set; }
+        public ICollection<ContractAllowance>? ContractAllowances { get; set; }
+        public ICollection<ContractInsurance>? ContractInsurances { get; set; }
+        
+	}
     public enum EmployeeSignStatus
     {
         Signed = 1, 

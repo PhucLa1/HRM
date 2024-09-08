@@ -6,5 +6,6 @@ namespace HRM.Data.Entities
     {
         public int JobJd { get; set; }
         public int WebId { get; set; }
+
     }
 }

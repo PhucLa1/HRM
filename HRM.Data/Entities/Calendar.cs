@@ -8,6 +8,7 @@ namespace HRM.Data.Entities
         public DateTime TimeEnd { get; set; }
         public DateTime TimeStart { get; set; }
         public ShiftTime ShiftTime { get; set; }
+        public ICollection<UserCalendar>? UserCalendars { get; set; }
     }
     public enum ShiftTime
     {

@@ -7,5 +7,6 @@ namespace HRM.Data.Entities
         public string? ParameterName { get; set; }
         public double Amount { get; set; }
         public required string Name { get; set; }
+        public ICollection<BonusDetails>? bonusDetails { get; set; }
     }
 }

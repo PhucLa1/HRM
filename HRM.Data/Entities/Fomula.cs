@@ -7,6 +7,5 @@ namespace HRM.Data.Entities
         public required string Name { get; set; }
         public string? FomulaDetail { get; set; }
         public string? Note { get; set; }
-
     }
 }
