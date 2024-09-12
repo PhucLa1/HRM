@@ -29,3 +29,19 @@ C:\Users\ADMIN\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.dll
 C:\Users\ADMIN\HRM\HRM.Repositories\obj\Debug\net8.0\refint\HRM.Repositories.dll
 C:\Users\ADMIN\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.pdb
 C:\Users\ADMIN\HRM\HRM.Repositories\obj\Debug\net8.0\ref\HRM.Repositories.dll
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\bin\Debug\net8.0\HRM.Repositories.deps.json
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\bin\Debug\net8.0\HRM.Repositories.dll
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\bin\Debug\net8.0\HRM.Repositories.pdb
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\bin\Debug\net8.0\HRM.Data.dll
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\bin\Debug\net8.0\HRM.Data.pdb
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.csproj.AssemblyReference.cache
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.AssemblyInfoInputs.cache
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.AssemblyInfo.cs
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.csproj.CoreCompileInputs.cache
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.sourcelink.json
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repo.B768EE61.Up2Date
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.dll
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\refint\HRM.Repositories.dll
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\HRM.Repositories.pdb
+C:\Users\Hong Phuc\Desktop\Study\Ki1-Nam4\Project1\HRM\HRM.Repositories\obj\Debug\net8.0\ref\HRM.Repositories.dll

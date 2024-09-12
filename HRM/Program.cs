@@ -1,6 +1,10 @@
-﻿using HRM.Data.Data;
+﻿using FluentValidation;
+using HRM.Data.Data;
 using HRM.Data.Jwt;
+using HRM.Repositories;
 using HRM.Repositories.Base;
+using HRM.Repositories.Dtos.Models;
+using HRM.Services.Manager;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,8 +27,20 @@ builder.Services.AddCors(options =>
             .AllowCredentials() // Cho phép sử dụng credentials (cookies, xác thực)
     );
 });
+
+//Validation
+builder.Services.AddScoped<IValidator<PositionAdd>, PositionAddValidator>();
+builder.Services.AddScoped<IValidator<PositionUpdate>, PositionUpdateValidator>();
+
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+
+//Services
+builder.Services.AddScoped<IPositionsService, PositionsService>();
+
+//Mapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
