@@ -20,16 +20,13 @@ namespace HRM.Services.Manager
         private readonly IBaseRepository<Position> _baseRepository;
         private readonly IValidator<PositionAdd> _positionAddValidator;
         private readonly IValidator<PositionUpdate> _positionUpdateValidator;
-        private readonly IMapper _mapper;
         public PositionsService(IBaseRepository<Position> baseRepository, 
             IValidator<PositionAdd> positionAddValidator,
-            IValidator<PositionUpdate> positionUpdateValidator,
-            IMapper mapper)
+            IValidator<PositionUpdate> positionUpdateValidator)
         {
             _baseRepository = baseRepository;
             _positionAddValidator = positionAddValidator;
             _positionUpdateValidator = positionUpdateValidator;
-            _mapper = mapper;
         }
         public async Task<ApiResponse<IEnumerable<PositionResult>>> GetAllPosition()
         {
@@ -37,14 +34,11 @@ namespace HRM.Services.Manager
             {
                 return new ApiResponse<IEnumerable<PositionResult>>
                 {
-                    /*
                     Metadata = await _baseRepository.GetAllQueryAble().Select(e => new PositionResult
                     {
                         Id = e.Id,
                         Name = e.Name
                     }).ToListAsync(),
-                    */
-                    Metadata = _mapper.Map<IEnumerable<PositionResult>>(await _baseRepository.GetAllQueryAble().ToListAsync()),
                     IsSuccess = true
                 };
             }

@@ -19,18 +19,21 @@ namespace HRM.Apis.Controllers
         {
             return Ok(await _positionService.GetAllPosition());
         }
+
         [HttpPost]
         [Route("")]
         public async Task<IActionResult> AddNew([FromBody] PositionAdd positionAdd)
         {
             return Ok(await _positionService.AddNewPosition(positionAdd));
         }
+
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdatePosition(int id, [FromBody]PositionUpdate positionUpdate)
         {
             return Ok(await _positionService.UpdatePosition(id, positionUpdate));
         }
+
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> RemovePosition(int id)
