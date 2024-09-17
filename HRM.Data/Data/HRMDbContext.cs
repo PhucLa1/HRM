@@ -12,6 +12,10 @@ namespace HRM.Data.Data
         {
             _httpContextAccessor = httpContextAccessor;
         }
+        public HRMDbContext(DbContextOptions<HRMDbContext> options)
+    : base(options) 
+        { 
+        }
         public override int SaveChanges()
         {
             UpdateAuditFields();
@@ -47,10 +51,27 @@ namespace HRM.Data.Data
 
         private int GetCurrentUserId()
         {
-            // Assuming the user ID is stored in the claims of the current user
-            return _httpContextAccessor.HttpContext.Items["UserId"] == null ? 0 : int.Parse(_httpContextAccessor.HttpContext.Items["UserId"] as string);
+            if (_httpContextAccessor == null || _httpContextAccessor.HttpContext == null)
+            {
+                return 0; 
+            }
+            if (!_httpContextAccessor.HttpContext.Items.ContainsKey("UserId"))
+            {
+                return 0; 
+            }
+            var userIdObj = _httpContextAccessor.HttpContext.Items["UserId"];
+            if (userIdObj == null)
+            {
+                return 0;
+            }
+            if (int.TryParse(userIdObj.ToString(), out int userId))
+            {
+                return userId;
+            }
+            return 0;
         }
 
+        public DbSet<Admin> Admins { get; set; }
         public DbSet<Advance> Advances { get; set; }
         public DbSet<Allowance> Allowances { get; set; }
         public DbSet<Applicants> Applicants { get; set; }
@@ -77,13 +98,11 @@ namespace HRM.Data.Data
         public DbSet<Position> Positions { get; set; }
         public DbSet<Questions> Questions { get; set; }
         public DbSet<RecruitmentWeb> RecruitmentWebs { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<TaxDeduction> TaxDeductions { get; set; }
         public DbSet<TaxDeductionDetails> TaxDeductionDetails { get; set; }
         public DbSet<TaxRate> TaxRates { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<TestResult> TestResults { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<UserCalendar> UserCalendars { get; set; }
         public DbSet<Web> Webs { get; set; }
 

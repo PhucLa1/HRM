@@ -20,15 +20,13 @@ namespace HRM.Data.Entities
         public int UserId { get; set; }
         public Contract? Contract { get; set; }
         public ICollection<JobPosting>? jobPostings { get; set; }
-        public Department? Department { get; set; } 
-        public User? User { get; set; }
+        public Department? Department { get; set; }
+        public string? Password { get; set; }
         public ICollection<PartimePlan>? partimePlans { get; set; }
         public ICollection<LeaveApplication>? leaveApplications { get; set; }
         public ICollection<TaxDeductionDetails>? taxDeductionDetails { get; set; }
         public ICollection<Advance>? advances { get; set; }
         public ICollection<Payroll>? payrolls { get; set; }
-
-
 
 	}
     public enum StatusEmployee

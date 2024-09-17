@@ -3,15 +3,16 @@ using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.Manager;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-    [ApiVersion(2)]
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/positions")]
     [ApiController]
+    [Authorize(Policy = "AdminRole")]
     public class PositionsController : ControllerBase
     {
         private readonly IPositionsService _positionService;

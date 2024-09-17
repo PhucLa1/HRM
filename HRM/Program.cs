@@ -1,15 +1,17 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using FluentValidation;
+using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
+using HRM.Repositories.Dtos.Results;
 using HRM.Services.Manager;
+using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -51,18 +53,35 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
+#region
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
+builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+#endregion
 
+
+
+
+
+#region
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+#endregion
 
 
+
+#region
 //Services
 builder.Services.AddScoped<IPositionsService, PositionsService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+#endregion
 
+
+
+#region
 //Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+#endregion
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -94,13 +113,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Role", policy => policy.RequireClaim("Role", "1")); //1: User, 2: Admin
+    options.AddPolicy("AdminRole", policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
 });
 
 //Logging
 builder.Host.UseSerilog((context, configuration) => 
     configuration.ReadFrom.Configuration(context.Configuration)
 );
+
+
+#region
+//Setting config
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
+#endregion
+
+
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -113,6 +142,14 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 var app = builder.Build();
+
+//Seeding data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    SeedData.Initialize(services);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -135,7 +172,5 @@ app.UseJwtMiddleware();
 app.UseCors("AllowOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
