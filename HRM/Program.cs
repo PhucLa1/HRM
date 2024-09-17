@@ -1,6 +1,4 @@
-﻿using Asp.Versioning;
-using Asp.Versioning.ApiExplorer;
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
 using HRM.Data.Jwt;
