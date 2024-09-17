@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRM.Apis</name>
+    </assembly>
+    <members>
+        <member name="M:HRM.Apis.Controllers.PositionsController.GetAll">
+            <summary>
+            Get all positions in company
+            </summary>
+            <response code="200">Return all the positions in the company in the metadata of api response</response>
+        </member>
+        <member name="M:HRM.Apis.Controllers.PositionsController.AddNew(HRM.Repositories.Dtos.Models.PositionUpsert)">
+            <summary>
+            Add new position in the company
+            </summary>
+            <response code="200">Return the api response</response>
+        </member>
+        <member name="M:HRM.Apis.Controllers.PositionsController.UpdatePosition(System.Int32,HRM.Repositories.Dtos.Models.PositionUpsert)">
+            <summary>
+            Update a position in the company by id
+            </summary>
+            <response code="200">Return the api response </response>
+        </member>
+        <member name="M:HRM.Apis.Controllers.PositionsController.RemovePosition(System.Int32)">
+            <summary>
+            Delete a position in the company by id
+            </summary>
+            <response code="200">Return the api response </response>
+        </member>
+    </members>
+</doc>

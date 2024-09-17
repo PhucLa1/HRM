@@ -1,10 +1,16 @@
-﻿using HRM.Repositories.Dtos.Models;
+﻿using Asp.Versioning;
+using HRM.Apis.Swagger.Examples.Responses;
+using HRM.Repositories.Dtos.Models;
+using HRM.Repositories.Dtos.Results;
 using HRM.Services.Manager;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-    [Route("api/v1/positions")]
+    [ApiVersion(2)]
+    [ApiVersion(1)]
+    [Route("api/v{v:apiVersion}/positions")]
     [ApiController]
     public class PositionsController : ControllerBase
     {
@@ -13,26 +19,57 @@ namespace HRM.Apis.Controllers
         {
             _positionService = positionService;
         }
-        [HttpGet]
+        /// <summary>
+        /// Get all positions in company
+        /// </summary>
+        /// <response code="200">Return all the positions in the company in the metadata of api response</response>
+        [ApiVersion(1)]
+        [HttpGet] 
         [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PositionResult>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PositionResponseExample))]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _positionService.GetAllPosition());
         }
+
+
+        /// <summary>
+        /// Add new position in the company
+        /// </summary>
+        /// <response code="200">Return the api response</response>
+        [ApiVersion(1)]
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> AddNew([FromBody] PositionAdd positionAdd)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> AddNew([FromBody] PositionUpsert positionAdd)
         {
             return Ok(await _positionService.AddNewPosition(positionAdd));
         }
+
+
+        /// <summary>
+        /// Update a position in the company by id
+        /// </summary>
+        /// <response code="200">Return the api response </response>
+        [ApiVersion(1)]
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> UpdatePosition(int id, [FromBody]PositionUpdate positionUpdate)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> UpdatePosition(int id, [FromBody] PositionUpsert positionUpdate)
         {
             return Ok(await _positionService.UpdatePosition(id, positionUpdate));
         }
+
+
+        /// <summary>
+        /// Delete a position in the company by id
+        /// </summary>
+        /// <response code="200">Return the api response </response>
+        [ApiVersion(1)]
         [HttpDelete]
         [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
         public async Task<IActionResult> RemovePosition(int id)
         {
             return Ok(await _positionService.RemovePosition(id));

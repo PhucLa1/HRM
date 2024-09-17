@@ -2,13 +2,13 @@
 
 namespace HRM.Repositories.Dtos.Models
 {
-    public class PositionAdd
+    public class PositionUpsert
     {
         public required string Name { get; set; }
     }
-    public class PositionAddValidator : AbstractValidator<PositionAdd>
+    public class PositionUpsertValidator : AbstractValidator<PositionUpsert>
     {
-        public PositionAddValidator()
+        public PositionUpsertValidator()
         {
             RuleFor(p => p.Name.Trim())
                 .NotEmpty().WithMessage("Tên không được để trống.");

@@ -1,4 +1,7 @@
-﻿using FluentValidation;
+﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using FluentValidation;
+using HRM.Apis.Swagger;
 using HRM.Data.Data;
 using HRM.Data.Jwt;
 using HRM.Repositories;
@@ -6,9 +9,14 @@ using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Services.Manager;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +35,24 @@ builder.Services.AddCors(options =>
             .AllowCredentials() // Cho phép sử dụng credentials (cookies, xác thực)
     );
 });
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("X-Api-Version"));
+})
+.AddMvc() // This is needed for controllers
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 //Validation
-builder.Services.AddScoped<IValidator<PositionAdd>, PositionAddValidator>();
-builder.Services.AddScoped<IValidator<PositionUpdate>, PositionUpdateValidator>();
+builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
 
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -75,20 +97,39 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Role", policy => policy.RequireClaim("Role", "1")); //1: User, 2: Admin
 });
 
+//Logging
+builder.Host.UseSerilog((context, configuration) => 
+    configuration.ReadFrom.Configuration(context.Configuration)
+);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+builder.Services.AddSwaggerGen(options =>
+{
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+    options.ExampleFilters();
+});
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        // Hiển thị từng phiên bản trong UI Swagger
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                                    description.GroupName.ToUpperInvariant());
+        }
+    });
 }
-
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseJwtMiddleware();
 app.UseCors("AllowOrigin");

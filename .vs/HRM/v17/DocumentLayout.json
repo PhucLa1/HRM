@@ -3,72 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\controllers\\positionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\controllers\\positionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\base\\ibaserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\base\\ibaserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\base\\baserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\base\\baserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8DC45347-D558-487C-A831-C56DB3C8557F}|HRM.Services\\HRM.Services.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.services\\manager\\positionsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8DC45347-D558-487C-A831-C56DB3C8557F}|HRM.Services\\HRM.Services.csproj|solutionrelative:hrm.services\\manager\\positionsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\dtos\\models\\positionupdate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\dtos\\models\\positionupdate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\controllers\\positionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\controllers\\positionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\dtos\\models\\positionadd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\dtos\\models\\positionadd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\swagger\\examples\\responses\\positionresponseexample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\swagger\\examples\\responses\\positionresponseexample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\dtos\\results\\positionresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\dtos\\results\\positionresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\dtos\\results\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\dtos\\results\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\entities\\position.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\position.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8DC45347-D558-487C-A831-C56DB3C8557F}|HRM.Services\\HRM.Services.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.services\\hrm.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{8DC45347-D558-487C-A831-C56DB3C8557F}|HRM.Services\\HRM.Services.csproj|solutionrelative:hrm.services\\hrm.services.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.repositories\\helper\\pagination.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{286D121E-4534-405E-8E02-93EFE04C7C33}|HRM.Repositories\\HRM.Repositories.csproj|solutionrelative:hrm.repositories\\helper\\pagination.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\entities\\base\\baseentities.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\entities\\base\\baseentities.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm.data\\data\\iauditable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{299310C9-8CDE-49BB-BF67-AFB7C80ED6AF}|HRM.Data\\HRM.Data.csproj|solutionrelative:hrm.data\\data\\iauditable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\jwt\\jwtmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\jwt\\jwtmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|c:\\users\\hong phuc\\desktop\\study\\ki1-nam4\\project1\\hrm\\hrm\\swagger\\examples\\requests\\positionupsertrequestexample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC937DA8-6C95-4F37-AC07-5D87BF25D9AD}|HRM\\HRM.Apis.csproj|solutionrelative:hrm\\swagger\\examples\\requests\\positionupsertrequestexample.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -78,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -86,223 +38,67 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MappingProfile.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\MappingProfile.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\MappingProfile.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\MappingProfile.cs",
-              "RelativeToolTip": "HRM.Repositories\\MappingProfile.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T08:28:29.669Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "PositionsService.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Services\\Manager\\PositionsService.cs",
-              "RelativeDocumentMoniker": "HRM.Services\\Manager\\PositionsService.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Services\\Manager\\PositionsService.cs",
-              "RelativeToolTip": "HRM.Services\\Manager\\PositionsService.cs",
-              "ViewState": "AQIAACIAAAAAAAAAAAAwwC4AAAB9AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:44:22.334Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Program.cs",
-              "RelativeDocumentMoniker": "HRM\\Program.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Program.cs",
-              "RelativeToolTip": "HRM\\Program.cs",
-              "ViewState": "AQIAABgAAAAAAAAAAAAAACoAAAA0AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-10T03:55:20.268Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "BaseRepository.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Base\\BaseRepository.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Base\\BaseRepository.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Base\\BaseRepository.cs",
-              "RelativeToolTip": "HRM.Repositories\\Base\\BaseRepository.cs",
-              "ViewState": "AQIAABUAAAAAAAAAAAAYwDAAAAAhAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:55:40.206Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IBaseRepository.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Base\\IBaseRepository.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Base\\IBaseRepository.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Base\\IBaseRepository.cs",
-              "RelativeToolTip": "HRM.Repositories\\Base\\IBaseRepository.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAxAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:34:46.78Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "PositionsController.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Controllers\\PositionsController.cs",
-              "RelativeDocumentMoniker": "HRM\\Controllers\\PositionsController.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Controllers\\PositionsController.cs",
-              "RelativeToolTip": "HRM\\Controllers\\PositionsController.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAAQAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:43:30.709Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "PositionUpdate.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Models\\PositionUpdate.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Dtos\\Models\\PositionUpdate.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Models\\PositionUpdate.cs",
-              "RelativeToolTip": "HRM.Repositories\\Dtos\\Models\\PositionUpdate.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAmAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T08:13:58.486Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "PositionAdd.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Models\\PositionAdd.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Dtos\\Models\\PositionAdd.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Models\\PositionAdd.cs",
-              "RelativeToolTip": "HRM.Repositories\\Dtos\\Models\\PositionAdd.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAFAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T08:00:06.86Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "PositionResult.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Results\\PositionResult.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Dtos\\Results\\PositionResult.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Results\\PositionResult.cs",
-              "RelativeToolTip": "HRM.Repositories\\Dtos\\Results\\PositionResult.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAEAAAABAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:46:59.935Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "ApiResponse.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Results\\ApiResponse.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Dtos\\Results\\ApiResponse.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Dtos\\Results\\ApiResponse.cs",
-              "RelativeToolTip": "HRM.Repositories\\Dtos\\Results\\ApiResponse.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAzAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:37:20.627Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Pagination.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Helper\\Pagination.cs",
-              "RelativeDocumentMoniker": "HRM.Repositories\\Helper\\Pagination.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Repositories\\Helper\\Pagination.cs",
-              "RelativeToolTip": "HRM.Repositories\\Helper\\Pagination.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAEAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:42:32.785Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "HRM.Services",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Services\\HRM.Services.csproj",
-              "RelativeDocumentMoniker": "HRM.Services\\HRM.Services.csproj",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Services\\HRM.Services.csproj",
-              "RelativeToolTip": "HRM.Services\\HRM.Services.csproj",
-              "ViewState": "AQIAABEAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-12T07:33:13.886Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Position.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Position.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Position.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Position.cs",
-              "RelativeToolTip": "HRM.Data\\Entities\\Position.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAApAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:46:13.635Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "BaseEntities.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Base\\BaseEntities.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Entities\\Base\\BaseEntities.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Entities\\Base\\BaseEntities.cs",
-              "RelativeToolTip": "HRM.Data\\Entities\\Base\\BaseEntities.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAjAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:35:30.206Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "IAuditable.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Data\\IAuditable.cs",
-              "RelativeDocumentMoniker": "HRM.Data\\Data\\IAuditable.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM.Data\\Data\\IAuditable.cs",
-              "RelativeToolTip": "HRM.Data\\Data\\IAuditable.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-12T07:35:19.51Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "JwtMiddleware.cs",
-              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Jwt\\JwtMiddleware.cs",
-              "RelativeDocumentMoniker": "HRM\\Jwt\\JwtMiddleware.cs",
-              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Jwt\\JwtMiddleware.cs",
-              "RelativeToolTip": "HRM\\Jwt\\JwtMiddleware.cs",
-              "ViewState": "AQIAAAoAAAAAAAAAAAAQwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-10T04:05:54.975Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\appsettings.json",
               "RelativeDocumentMoniker": "HRM\\appsettings.json",
               "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\appsettings.json",
               "RelativeToolTip": "HRM\\appsettings.json",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAmAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAjAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-09-10T03:55:18.075Z",
+              "WhenOpened": "2024-09-17T01:54:46.963Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Program.cs",
+              "RelativeDocumentMoniker": "HRM\\Program.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Program.cs",
+              "RelativeToolTip": "HRM\\Program.cs",
+              "ViewState": "AQIAAGcAAAAAAAAAAAAAAIMAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-16T23:24:16.546Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PositionUpsertRequestExample.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Swagger\\Examples\\Requests\\PositionUpsertRequestExample.cs",
+              "RelativeDocumentMoniker": "HRM\\Swagger\\Examples\\Requests\\PositionUpsertRequestExample.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Swagger\\Examples\\Requests\\PositionUpsertRequestExample.cs",
+              "RelativeToolTip": "HRM\\Swagger\\Examples\\Requests\\PositionUpsertRequestExample.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAABAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-17T00:43:54.846Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PositionResponseExample.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Swagger\\Examples\\Responses\\PositionResponseExample.cs",
+              "RelativeDocumentMoniker": "HRM\\Swagger\\Examples\\Responses\\PositionResponseExample.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Swagger\\Examples\\Responses\\PositionResponseExample.cs",
+              "RelativeToolTip": "HRM\\Swagger\\Examples\\Responses\\PositionResponseExample.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABgAAAAhAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-17T00:25:51.522Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PositionsController.cs",
+              "DocumentMoniker": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Controllers\\PositionsController.cs",
+              "RelativeDocumentMoniker": "HRM\\Controllers\\PositionsController.cs",
+              "ToolTip": "C:\\Users\\Hong Phuc\\Desktop\\Study\\Ki1-Nam4\\Project1\\HRM\\HRM\\Controllers\\PositionsController.cs",
+              "RelativeToolTip": "HRM\\Controllers\\PositionsController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-16T23:28:05.038Z",
               "EditorCaption": ""
             }
           ]
