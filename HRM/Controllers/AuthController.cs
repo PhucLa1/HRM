@@ -28,7 +28,6 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return the api response</response>
         [HttpPost]
         [Route("login")]
-        [ApiVersion(1)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
         public async Task<IActionResult> Login([FromBody] AdminLogin adminLogin)
         {
@@ -47,7 +46,6 @@ namespace HRM.Apis.Controllers
         /// <returns>Return the api response with T is bool</returns>
         [HttpDelete]
         [Route("log-out")]
-        [ApiVersion(1)]
         public async Task<ActionResult> SignOut()
         {
             DeleteJWT();

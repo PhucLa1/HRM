@@ -6,7 +6,7 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRM.Services.Manager
+namespace HRM.Services.Briefcase
 {
     public interface IPositionsService
     {
@@ -20,7 +20,8 @@ namespace HRM.Services.Manager
         private readonly IBaseRepository<Position> _baseRepository;
         private readonly IValidator<PositionUpsert> _positionUpsertValidator;
         private readonly IMapper _mapper;
-        public PositionsService(IBaseRepository<Position> baseRepository, 
+        public PositionsService(
+            IBaseRepository<Position> baseRepository,
             IValidator<PositionUpsert> positionUpsertValidator,
             IMapper mapper)
         {
@@ -63,7 +64,7 @@ namespace HRM.Services.Manager
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -83,10 +84,10 @@ namespace HRM.Services.Manager
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            } 
+            }
         }
         public async Task<ApiResponse<bool>> RemovePosition(int id)
         {

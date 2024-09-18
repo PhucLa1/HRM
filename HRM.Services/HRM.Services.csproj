@@ -15,4 +15,10 @@
     <ProjectReference Include="..\HRM.Repositories\HRM.Repositories.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TimeKeeping\" />
+    <Folder Include="Recruitment\" />
+    <Folder Include="Salary\" />
+  </ItemGroup>
+
 </Project>
