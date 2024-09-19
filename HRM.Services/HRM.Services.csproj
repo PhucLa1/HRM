@@ -8,11 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MailKit" Version="4.7.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="MimeKit" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HRM.Repositories\HRM.Repositories.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TimeKeeping\" />
+    <Folder Include="Recruitment\" />
+    <Folder Include="Salary\" />
   </ItemGroup>
 
 </Project>

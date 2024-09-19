@@ -9,7 +9,7 @@ using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Manager;
+using HRM.Services.Briefcase;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -54,9 +54,13 @@ builder.Services.AddApiVersioning(options =>
 });
 
 #region
+
+
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+
+
 #endregion
 
 
@@ -64,23 +68,37 @@ builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
 
 
 #region
+
+
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+
 #endregion
 
 
 
 #region
+
+
 //Services
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+
 #endregion
 
 
 
 #region
+
+
 //Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+
 #endregion
 
 builder.Services.AddHttpContextAccessor();
@@ -123,9 +141,13 @@ builder.Host.UseSerilog((context, configuration) =>
 
 
 #region
+
+
 //Setting config
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
+
+
 #endregion
 
 

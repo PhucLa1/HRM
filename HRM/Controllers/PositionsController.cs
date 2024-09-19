@@ -2,7 +2,7 @@
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Manager;
+using HRM.Services.Briefcase;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
@@ -20,11 +20,12 @@ namespace HRM.Apis.Controllers
         {
             _positionService = positionService;
         }
+
+
         /// <summary>
         /// Get all positions in company
         /// </summary>
         /// <response code="200">Return all the positions in the company in the metadata of api response</response>
-        [ApiVersion(1)]
         [HttpGet] 
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PositionResult>))]
@@ -39,7 +40,6 @@ namespace HRM.Apis.Controllers
         /// Add new position in the company
         /// </summary>
         /// <response code="200">Return the api response</response>
-        [ApiVersion(1)]
         [HttpPost]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
@@ -53,7 +53,6 @@ namespace HRM.Apis.Controllers
         /// Update a position in the company by id
         /// </summary>
         /// <response code="200">Return the api response </response>
-        [ApiVersion(1)]
         [HttpPut]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
@@ -67,7 +66,6 @@ namespace HRM.Apis.Controllers
         /// Delete a position in the company by id
         /// </summary>
         /// <response code="200">Return the api response </response>
-        [ApiVersion(1)]
         [HttpDelete]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
