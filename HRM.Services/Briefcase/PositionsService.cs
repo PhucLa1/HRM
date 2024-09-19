@@ -6,27 +6,28 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRM.Services.Manager
+namespace HRM.Services.Briefcase
 {
     public interface IPositionsService
     {
         Task<ApiResponse<IEnumerable<PositionResult>>> GetAllPosition();
-        Task<ApiResponse<bool>> AddNewPosition(PositionAdd positionAdd);
-        Task<ApiResponse<bool>> UpdatePosition(int id, PositionUpdate positionUpdate);
+        Task<ApiResponse<bool>> AddNewPosition(PositionUpsert positionAdd);
+        Task<ApiResponse<bool>> UpdatePosition(int id, PositionUpsert positionUpdate);
         Task<ApiResponse<bool>> RemovePosition(int id);
     }
     public class PositionsService : IPositionsService
     {
         private readonly IBaseRepository<Position> _baseRepository;
-        private readonly IValidator<PositionAdd> _positionAddValidator;
-        private readonly IValidator<PositionUpdate> _positionUpdateValidator;
-        public PositionsService(IBaseRepository<Position> baseRepository, 
-            IValidator<PositionAdd> positionAddValidator,
-            IValidator<PositionUpdate> positionUpdateValidator)
+        private readonly IValidator<PositionUpsert> _positionUpsertValidator;
+        private readonly IMapper _mapper;
+        public PositionsService(
+            IBaseRepository<Position> baseRepository,
+            IValidator<PositionUpsert> positionUpsertValidator,
+            IMapper mapper)
         {
             _baseRepository = baseRepository;
-            _positionAddValidator = positionAddValidator;
-            _positionUpdateValidator = positionUpdateValidator;
+            _positionUpsertValidator = positionUpsertValidator;
+            _mapper = mapper;
         }
         public async Task<ApiResponse<IEnumerable<PositionResult>>> GetAllPosition()
         {
@@ -47,11 +48,11 @@ namespace HRM.Services.Manager
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<ApiResponse<bool>> AddNewPosition(PositionAdd positionAdd)
+        public async Task<ApiResponse<bool>> AddNewPosition(PositionUpsert positionAdd)
         {
             try
             {
-                var resultValidation = _positionAddValidator.Validate(positionAdd);
+                var resultValidation = _positionUpsertValidator.Validate(positionAdd);
                 if (!resultValidation.IsValid)
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
@@ -60,16 +61,16 @@ namespace HRM.Services.Manager
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<ApiResponse<bool>> UpdatePosition(int id, PositionUpdate positionUpdate)
+        public async Task<ApiResponse<bool>> UpdatePosition(int id, PositionUpsert positionUpdate)
         {
             try
             {
-                var resultValidation = _positionUpdateValidator.Validate(positionUpdate);
+                var resultValidation = _positionUpsertValidator.Validate(positionUpdate);
                 if (!resultValidation.IsValid)
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
@@ -80,10 +81,10 @@ namespace HRM.Services.Manager
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            } 
+            }
         }
         public async Task<ApiResponse<bool>> RemovePosition(int id)
         {

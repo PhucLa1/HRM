@@ -24,6 +24,22 @@ namespace HRM.Repositories.Base
             await _dbSet.AddRangeAsync(entities);
         }
 
+        public async Task<List<T>> CallStoredProcedureAsync(string storedProcedure, params object[] parameters)
+        {
+            var sql = storedProcedure + " " + string.Join(", ", parameters.Select((p, i) => $"@p{i}"));
+            return await _dbSet.FromSqlRaw(sql, parameters).ToListAsync();
+        }
+        public async Task<T> CallStoredProcedureAsyncDetail(string storedProcedure, params object[] parameters)
+        {
+            var sql = storedProcedure + " " + string.Join(", ", parameters.Select((p, i) => $"@p{i}"));
+            return await _dbSet.FromSqlRaw(sql, parameters).FirstAsync();
+        }
+        public async Task<int> ExecuteStoredProcedureAsync(string storedProcedure, params object[] parameters)
+        {
+            var sql = storedProcedure + " " + string.Join(", ", parameters.Select((p, i) => $"@p{i}"));
+            return await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+        }
+
         public IQueryable<T> GetAllQueryAble()
         {
             return _dbSet;
