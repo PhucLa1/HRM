@@ -52,6 +52,7 @@ namespace HRM.Apis.Controllers
             return Ok(new ApiResponse<bool> { IsSuccess = true });
         }
 
+
         private void SetJWT(string encryptedToken)
         {
             HttpContext.Response.Cookies.Append("X-Access-Token", encryptedToken,
