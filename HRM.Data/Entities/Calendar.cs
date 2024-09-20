@@ -5,8 +5,8 @@ namespace HRM.Data.Entities
     public class Calendar : BaseEntities
     {
         public Day Day { get; set; }
-        public DateTime TimeEnd { get; set; }
-        public DateTime TimeStart { get; set; }
+        public TimeOnly TimeEnd { get; set; }
+        public TimeOnly TimeStart { get; set; }
         public ShiftTime ShiftTime { get; set; }
         public ICollection<UserCalendar>? UserCalendars { get; set; }
     }

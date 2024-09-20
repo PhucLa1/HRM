@@ -9,7 +9,9 @@ using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
+using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +61,7 @@ builder.Services.AddApiVersioning(options =>
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 
 
 #endregion
@@ -85,6 +88,7 @@ builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 
 
 
@@ -129,10 +133,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+#region
+
+//Role
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminRole", policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
+    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString()));
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.HR_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.DEPARTMENT_HEAD_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString()));
+});
+
+
+#endregion
 
 //Logging
 builder.Host.UseSerilog((context, configuration) => 
@@ -146,6 +169,7 @@ builder.Host.UseSerilog((context, configuration) =>
 //Setting config
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<CompanySetting>(builder.Configuration.GetSection("Company"));
 
 
 #endregion

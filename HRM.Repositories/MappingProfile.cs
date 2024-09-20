@@ -9,9 +9,19 @@ namespace HRM.Repositories
         public MappingProfile() 
         {
             #region 
+            //Briefcase
 
             CreateMap<Position,PositionResult >()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+
+            #endregion
+
+
+            #region
+            //TimeKeeping
+            CreateMap<Calendar, CalendarResult>()
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+
 
             #endregion
 
