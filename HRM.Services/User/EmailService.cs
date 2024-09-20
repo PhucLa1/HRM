@@ -9,6 +9,10 @@ using MailKit.Net.Smtp;
 
 namespace HRM.Services.User
 {
+    public enum EmailType
+    {
+
+    }
     public interface IEmailService
     {
         Task SendEmailToRecipient(Email emailRequest);
