@@ -10,6 +10,7 @@ using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.Briefcase;
+using HRM.Services.Salary;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -53,23 +54,21 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
-#region
-
-
+#region + Validation
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
 
-
+builder.Services.AddScoped<IValidator<DeductionUpsert>, DeductionUpsertValidator>();
+builder.Services.AddScoped<IValidator<BonusUpsert>, BonusUpsertValidator>();
+builder.Services.AddScoped<IValidator<TaxDeductionUpsert>, TaxDeductionUpsertValidator>();
+builder.Services.AddScoped<IValidator<TaxRateUpsert>, TaxRateUpsertValidator>();
+builder.Services.AddScoped<IValidator<FomulaUpsert>, FomulaUpsertValidator>();
 #endregion
 
 
 
-
-
-#region
-
-
+#region +Repositories
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
@@ -78,7 +77,7 @@ builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>
 
 
 
-#region
+#region + Services
 
 
 //Services
@@ -86,13 +85,18 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<IDeductionsService, DeductionsService>();
+builder.Services.AddScoped<IBonusService, BonusService>();
+builder.Services.AddScoped<ITaxDeductionsService, TaxDeductionsService>();
+builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
+builder.Services.AddScoped<IFomulasService, FomulasService>();
 
 
 #endregion
 
 
 
-#region
+#region + Mapper
 
 
 //Mapper

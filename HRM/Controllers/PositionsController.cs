@@ -12,7 +12,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/positions")]
     [ApiController]
-    [Authorize(Policy = "AdminRole")]
+    //[Authorize(Policy = "AdminRole")]
     public class PositionsController : ControllerBase
     {
         private readonly IPositionsService _positionService;
