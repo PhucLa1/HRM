@@ -86,9 +86,8 @@ builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>
 //Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
-builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 
 
 #endregion

@@ -14,14 +14,20 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     new DepartmentResult
                     {
                         Id = 1,
-                        Name = "Human Resources",
+                        Name = "Human Resources department",
                         ManagerId = 101
                     },
                     new DepartmentResult
                     {
                         Id = 2,
-                        Name = "Engineering",
+                        Name = "Engineering department",
                         ManagerId = 102
+                    },
+                    new DepartmentResult
+                    {
+                        Id = 3,
+                        Name = "System a department",
+                        ManagerId = 103
                     }
                 },
                 IsSuccess = true,

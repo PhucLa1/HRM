@@ -30,6 +30,7 @@ namespace HRM.Apis.Controllers
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<DepartmentResult>))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(DepartmentResponseExample))]
+
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _departmentService.GetAllDepartment());
@@ -42,7 +43,8 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return the api response</response>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<bool>))]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
         public async Task<IActionResult> AddNew([FromBody] DepartmentUpsert departmentAdd)
         {
             return Ok(await _departmentService.AddNewDepartment(departmentAdd));
@@ -55,7 +57,8 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return the api response </response>
         [HttpPut]
         [Route("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<bool>))]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
         public async Task<IActionResult> UpdateDepartment(int id, [FromBody] DepartmentUpsert departmentUpdate)
         {
             return Ok(await _departmentService.UpdateDepartment(id, departmentUpdate));
@@ -68,7 +71,8 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return the api response </response>
         [HttpDelete]
         [Route("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<bool>))]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
         public async Task<IActionResult> RemoveDepartment(int id)
         {
             return Ok(await _departmentService.RemoveDepartment(id));
