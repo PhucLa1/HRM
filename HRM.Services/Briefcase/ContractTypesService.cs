@@ -78,9 +78,9 @@ namespace HRM.Services.Briefcase
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
-                var postion = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
-                postion.Name = contractTypeUpdate.Name.Trim();
-                _baseRepository.Update(postion);
+                var contractType = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+                contractType.Name = contractTypeUpdate.Name.Trim();
+                _baseRepository.Update(contractType);
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }

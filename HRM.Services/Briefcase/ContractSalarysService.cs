@@ -86,15 +86,15 @@ namespace HRM.Services.Briefcase
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
-                var postion = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
-                postion.BaseSalary = contractSalaryUpdate.BaseSalary;
-                postion.BaseInsurance = contractSalaryUpdate.BaseInsurance;
-                postion.RequiredDays = contractSalaryUpdate.RequiredDays;
-                postion.RequiredHours = contractSalaryUpdate.RequiredHours;
-                postion.WageDaily = contractSalaryUpdate.WageDaily;
-                postion.WageHourly = contractSalaryUpdate.WageHourly;
-                postion.Factor = contractSalaryUpdate.Factor;
-                _baseRepository.Update(postion);
+                var contractSalary = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+                contractSalary.BaseSalary = contractSalaryUpdate.BaseSalary;
+                contractSalary.BaseInsurance = contractSalaryUpdate.BaseInsurance;
+                contractSalary.RequiredDays = contractSalaryUpdate.RequiredDays;
+                contractSalary.RequiredHours = contractSalaryUpdate.RequiredHours;
+                contractSalary.WageDaily = contractSalaryUpdate.WageDaily;
+                contractSalary.WageHourly = contractSalaryUpdate.WageHourly;
+                contractSalary.Factor = contractSalaryUpdate.Factor;
+                _baseRepository.Update(contractSalary);
                 await _baseRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
             }

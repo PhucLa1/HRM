@@ -24,7 +24,7 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     },
                     new ContractSalaryResult
                     {
-                        Id = 1,
+                        Id = 2,
                         BaseSalary = 8000000,
                         BaseInsurance = 1000000,
                         RequiredDays = 30,
