@@ -12,6 +12,10 @@ namespace HRM.Repositories
 
             CreateMap<Position,PositionResult >()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<ContractType, ContractTypeResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<ContractSalary, ContractSalaryResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
             #endregion
 
