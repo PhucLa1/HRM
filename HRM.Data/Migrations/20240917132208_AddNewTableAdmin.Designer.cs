@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240917132208_AddNewTableAdmin")]
+    partial class AddNewTableAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,11 +315,11 @@ namespace HRM.Data.Migrations
                     b.Property<int>("ShiftTime")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly>("TimeEnd")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("TimeEnd")
+                        .HasColumnType("datetime2");
 
-                    b.Property<TimeOnly>("TimeStart")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("TimeStart")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
@@ -731,6 +734,9 @@ namespace HRM.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Role")
                         .HasColumnType("int");
 
                     b.Property<int>("StatusEmployee")
