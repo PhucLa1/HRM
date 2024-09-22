@@ -64,6 +64,8 @@ builder.Services.AddScoped<IValidator<InsuranceUpsert>, InsuranceUpsertValidator
 builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+builder.Services.AddScoped<IValidator<DepartmentUpsert>, DepartmentUpsertValidator>();
+
 
 
 #endregion
@@ -94,7 +96,7 @@ builder.Services.AddScoped<IInsurancesService, InsurancesService>();
 builder.Services.AddScoped<IContractTypesService, ContractTypesService>();
 builder.Services.AddScoped<IContractSalarysService, ContractSalarysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 
 
 #endregion

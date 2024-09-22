@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HRM.Data.Entities;
 using HRM.Repositories.Dtos.Results;
-using TestResult = HRM.Repositories.Dtos.Results.TestResult;
 
 namespace HRM.Repositories
 {
@@ -10,8 +9,13 @@ namespace HRM.Repositories
         public MappingProfile() 
         {
             #region 
-            //Briefcase
 
+
+           
+
+            //Briefcase
+            CreateMap<Department, DepartmentResult>()
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
             CreateMap<Position,PositionResult >()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
             CreateMap<ContractType, ContractTypeResult>()
@@ -24,9 +28,10 @@ namespace HRM.Repositories
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
 
-               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+              
+            #endregion
 
-			#endregion
+
 
 			#region
 			//RecruitmentManager
@@ -41,9 +46,9 @@ namespace HRM.Repositories
 			//TimeKeeping
 			CreateMap<Calendar, CalendarResult>()
                 .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
-
-
-
+                
+                
+      #endregion
 
 
 
