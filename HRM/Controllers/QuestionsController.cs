@@ -12,7 +12,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace HRM.Apis.Controllers
 {
 	[ApiVersion(1)]
-	[Route("api/[controller]")]
+	[Route("api/v{v:apiVersion}/questions")]
 	[ApiController]
 	[Authorize(Policy = RoleExtensions.HR_ROLE)]
 	public class QuestionsController : ControllerBase

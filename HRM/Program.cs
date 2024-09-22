@@ -11,6 +11,7 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.RecruitmentManager;
 using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -63,7 +64,10 @@ builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>(
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 
-
+builder.Services.AddScoped<IValidator<JobUpsert>, JobUpsertValidator>();
+builder.Services.AddScoped<IValidator<QuestionUpsert>, QuestionUpsertValidator>();
+builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
+builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 #endregion
 
 
@@ -90,8 +94,10 @@ builder.Services.AddScoped<IPositionsService, PositionsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 
-
-
+builder.Services.AddScoped<IJobsService, JobsService>();
+builder.Services.AddScoped<IQuestionsService, QuestionsService>();
+builder.Services.AddScoped<ITestsService, TestsService>();
+builder.Services.AddScoped<IWebsService, WebsService>();
 #endregion
 
 
