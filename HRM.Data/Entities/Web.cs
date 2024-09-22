@@ -6,7 +6,7 @@ namespace HRM.Data.Entities
     {
         public string? Name { get; set; }
         public string? WebApi { get; set; }
-        public ICollection<RecruitmentWeb> recruitmentWebs { get; set; }
+        public ICollection<RecruitmentWeb>? recruitmentWebs { get; set; }
 
     }
 }
