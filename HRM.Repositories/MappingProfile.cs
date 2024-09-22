@@ -10,12 +10,45 @@ namespace HRM.Repositories
         {
             #region 
 
+
+           
+
+            //Briefcase
+            CreateMap<Department, DepartmentResult>()
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
             CreateMap<Position,PositionResult >()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
-
-            CreateMap<Department, DepartmentResult>()
+            CreateMap<ContractType, ContractTypeResult>()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<ContractSalary, ContractSalaryResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<Allowance, AllowanceResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<Insurance, InsuranceResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+
+
+              
             #endregion
+
+
+
+			#region
+			//RecruitmentManager
+			CreateMap<Web, WebResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+			CreateMap<Job, JobResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+			CreateMap<Test, TestResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+			CreateMap<Questions, QuestionResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+
+			#endregion
+
+			#region
+			//TimeKeeping
+			CreateMap<Calendar, CalendarResult>()
+                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+                
+                
+      #endregion
 
 
 

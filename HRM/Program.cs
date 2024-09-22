@@ -4,6 +4,7 @@ using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
+using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
@@ -58,6 +59,10 @@ builder.Services.AddApiVersioning(options =>
 
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
+builder.Services.AddScoped<IValidator<AllowanceUpsert>, AllowanceUpsertValidator>();
+builder.Services.AddScoped<IValidator<InsuranceUpsert>, InsuranceUpsertValidator>();
+builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertValidator>();
+builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
 builder.Services.AddScoped<IValidator<DepartmentUpsert>, DepartmentUpsertValidator>();
 
@@ -86,6 +91,10 @@ builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>
 //Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
+builder.Services.AddScoped<IAllowancesService, AllowancesService>();
+builder.Services.AddScoped<IInsurancesService, InsurancesService>();
+builder.Services.AddScoped<IContractTypesService, ContractTypesService>();
+builder.Services.AddScoped<IContractSalarysService, ContractSalarysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 
@@ -198,3 +207,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
