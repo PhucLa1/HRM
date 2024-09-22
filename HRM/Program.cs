@@ -4,15 +4,13 @@ using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
+using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
-using HRM.Services.RecruitmentManager;
-using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -61,13 +59,13 @@ builder.Services.AddApiVersioning(options =>
 
 //Validation
 builder.Services.AddScoped<IValidator<PositionUpsert>, PositionUpsertValidator>();
+builder.Services.AddScoped<IValidator<AllowanceUpsert>, AllowanceUpsertValidator>();
+builder.Services.AddScoped<IValidator<InsuranceUpsert>, InsuranceUpsertValidator>();
+builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertValidator>();
+builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
-builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 
-builder.Services.AddScoped<IValidator<JobUpsert>, JobUpsertValidator>();
-builder.Services.AddScoped<IValidator<QuestionUpsert>, QuestionUpsertValidator>();
-builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
-builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
+
 #endregion
 
 
@@ -91,13 +89,14 @@ builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>
 //Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPositionsService, PositionsService>();
+builder.Services.AddScoped<IAllowancesService, AllowancesService>();
+builder.Services.AddScoped<IInsurancesService, InsurancesService>();
+builder.Services.AddScoped<IContractTypesService, ContractTypesService>();
+builder.Services.AddScoped<IContractSalarysService, ContractSalarysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICalendarService, CalendarService>();
 
-builder.Services.AddScoped<IJobsService, JobsService>();
-builder.Services.AddScoped<IQuestionsService, QuestionsService>();
-builder.Services.AddScoped<ITestsService, TestsService>();
-builder.Services.AddScoped<IWebsService, WebsService>();
+
+
 #endregion
 
 
@@ -139,29 +138,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
-
-#region
-
-//Role
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString()));
+    options.AddPolicy("AdminRole", policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
 });
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
-});
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(RoleExtensions.HR_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
-});
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(RoleExtensions.DEPARTMENT_HEAD_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString()));
-});
-
-
-#endregion
 
 //Logging
 builder.Host.UseSerilog((context, configuration) => 
@@ -175,7 +155,6 @@ builder.Host.UseSerilog((context, configuration) =>
 //Setting config
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<CompanySetting>(builder.Configuration.GetSection("Company"));
 
 
 #endregion
@@ -226,3 +205,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
