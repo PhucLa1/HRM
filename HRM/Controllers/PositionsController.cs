@@ -1,4 +1,4 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
@@ -12,7 +12,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/positions")]
     [ApiController]
-    //[Authorize(Policy = "AdminRole")]
+    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class PositionsController : ControllerBase
     {
         private readonly IPositionsService _positionService;
@@ -28,7 +28,7 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return all the positions in the company in the metadata of api response</response>
         [HttpGet] 
         [Route("")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PositionResult>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PositionResult>>))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PositionResponseExample))]
         public async Task<IActionResult> GetAll()
         {
