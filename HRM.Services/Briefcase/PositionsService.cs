@@ -35,14 +35,11 @@ namespace HRM.Services.Briefcase
             {
                 return new ApiResponse<IEnumerable<PositionResult>>
                 {
-                    /*
                     Metadata = await _baseRepository.GetAllQueryAble().Select(e => new PositionResult
                     {
                         Id = e.Id,
                         Name = e.Name
                     }).ToListAsync(),
-                    */
-                    Metadata = _mapper.Map<IEnumerable<PositionResult>>(await _baseRepository.GetAllQueryAble().ToListAsync()),
                     IsSuccess = true
                 };
             }
