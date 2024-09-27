@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240923033647_UpdateDBEmployeeAndContract")]
+    partial class UpdateDBEmployeeAndContract
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,10 +168,10 @@ namespace HRM.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FileDataUrl")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("InterviewerName")
+                    b.Property<string>("FileDataUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("JobId")
@@ -196,6 +199,8 @@ namespace HRM.Data.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("JobId");
 
@@ -367,9 +372,6 @@ namespace HRM.Data.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("EmployeeSignStatus")
                         .HasColumnType("int");
 
@@ -394,17 +396,14 @@ namespace HRM.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NationalAddress")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("NationalAddress")
+                        .HasColumnType("date");
 
                     b.Property<string>("NationalID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("NationalStartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PositionId")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("NationalStartDate")
+                        .HasColumnType("date");
 
                     b.Property<DateTime>("SignDate")
                         .HasColumnType("datetime2");
@@ -428,10 +427,6 @@ namespace HRM.Data.Migrations
                     b.HasIndex("ContractSalaryId");
 
                     b.HasIndex("ContractTypeId");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("PositionId");
 
                     b.ToTable("Contracts");
                 });
@@ -744,7 +739,7 @@ namespace HRM.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("created_by");
 
-                    b.Property<int?>("DepartmentId")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -756,7 +751,7 @@ namespace HRM.Data.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PositionId")
+                    b.Property<int>("PositionId")
                         .HasColumnType("int");
 
                     b.Property<int>("StatusEmployee")
@@ -1591,6 +1586,12 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.Applicants", b =>
                 {
+                    b.HasOne("HRM.Data.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HRM.Data.Entities.Job", "Job")
                         .WithMany()
                         .HasForeignKey("JobId")
@@ -1602,6 +1603,8 @@ namespace HRM.Data.Migrations
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Employee");
 
                     b.Navigation("Job");
 
@@ -1637,23 +1640,7 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HRM.Data.Entities.Position", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ContractSalary");
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.ContractAllowance", b =>
@@ -1709,15 +1696,21 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.Department", null)
+                    b.HasOne("HRM.Data.Entities.Department", "Department")
                         .WithMany("Employees")
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HRM.Data.Entities.Position", null)
                         .WithMany("Employees")
-                        .HasForeignKey("PositionId");
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contract");
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.History", b =>

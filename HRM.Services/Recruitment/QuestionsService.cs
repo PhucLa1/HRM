@@ -4,17 +4,11 @@ using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Briefcase;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Services.RecruitmentManager
 {
-	public interface IQuestionsService
+    public interface IQuestionsService
 	{
 		Task<ApiResponse<IEnumerable<QuestionResult>>> GetAllQuestion();
 		Task<ApiResponse<bool>> AddNewQuestion(QuestionUpsert questionAdd);

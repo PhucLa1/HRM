@@ -1,6 +1,4 @@
 ﻿using HRM.Repositories.Dtos.Results;
-using MathNet.Numerics.LinearAlgebra;
-using NPOI.SS.Formula;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Swagger.Examples.Responses

@@ -2,16 +2,13 @@
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Briefcase;
 using HRM.Services.RecruitmentManager;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-	[ApiVersion(1)]
+    [ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/jobs")]
 	[ApiController]
 	//[Authorize(Policy = RoleExtensions.HR_ROLE)]

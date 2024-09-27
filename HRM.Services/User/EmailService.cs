@@ -5,6 +5,8 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using MailKit.Net.Smtp;
+using HRM.Repositories.Setting;
+using HRM.Repositories.Helper;
 
 
 namespace HRM.Services.User
@@ -15,16 +17,31 @@ namespace HRM.Services.User
     }
     public interface IEmailService
     {
+        string TemplateContent { get; }
         Task SendEmailToRecipient(Email emailRequest);
         Task SendEmailToMultipleRecipients(MultiRecipientEmail emailRequests);
     }
     public class EmailService : IEmailService
     {
         private readonly EmailSetting _serverMailSetting;
+        private readonly CompanySetting _serverCompanySetting;
+        private string templateContent;
+        private const string FOLDER = "Email";
+        private const string TEMPLATE_FILE = "Template.html";
 
-        public EmailService(IOptions<EmailSetting> serverMailSetting)
+        public string TemplateContent => templateContent;
+
+        public EmailService(
+            IOptions<EmailSetting> serverMailSetting,
+            IOptions<CompanySetting> serverCompanySetting
+            )
         {
             _serverMailSetting = serverMailSetting.Value;
+            _serverCompanySetting = serverCompanySetting.Value;
+            templateContent = HandleFile.READ_FILE(FOLDER, TEMPLATE_FILE)
+                .Replace("{title}", _serverCompanySetting.CompanyName)
+                .Replace("{logoImage}", _serverCompanySetting.CompanyHost + _serverCompanySetting.AvatarUrl)
+                .Replace("{currentYear}", DateTime.Now.Year.ToString());
         }
         public async Task SendEmailToRecipient(Email emailRequest)
         {

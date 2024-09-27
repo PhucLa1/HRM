@@ -1,4 +1,6 @@
-﻿namespace HRM.Repositories.Base
+﻿using HRM.Data.Data;
+
+namespace HRM.Repositories.Base
 {
     public interface IBaseRepository<T>
         where T : class
@@ -9,6 +11,7 @@
         Task<IEnumerable<T>> GetPaginatedAsync(int pageNumber, int pageSize);
         Task<int> SaveChangeAsync();
         IQueryable<T> GetAllQueryAble();
+        HRMDbContext Context { get; }
         Task AddRangeAsync(IEnumerable<T> entities);
         void UpdateMany(IEnumerable<T> entities);
         Task<List<T>> CallStoredProcedureAsync(string storedProcedure, params object[] parameters);

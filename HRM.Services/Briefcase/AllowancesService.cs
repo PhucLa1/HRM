@@ -4,9 +4,7 @@ using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using MathNet.Numerics.LinearAlgebra;
 using Microsoft.EntityFrameworkCore;
-using NPOI.SS.Formula.Functions;
 
 namespace HRM.Services.Briefcase
 {

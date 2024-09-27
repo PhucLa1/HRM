@@ -8,7 +8,7 @@ namespace HRM.Data.Entities
         public int FomulaType { get; set; }
         public string? Terms { get; set; }
         public string? ParameterName { get; set; }
-        public ICollection<TaxDeduction>? taxDeductions { get; set; }
+        public ICollection<TaxDeductionDetails>? taxDeductionDetails { get; set; }
 
     }
 }

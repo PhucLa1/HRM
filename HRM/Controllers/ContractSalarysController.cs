@@ -12,7 +12,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/ContractSalarys")]
     [ApiController]
-    [Authorize(Policy = "AdminRole")]
+    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class ContractSalarysController : ControllerBase
     {
         private readonly IContractSalarysService _ContractSalaryService;

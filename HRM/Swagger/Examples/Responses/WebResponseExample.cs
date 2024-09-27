@@ -1,10 +1,9 @@
 ﻿using HRM.Repositories.Dtos.Results;
-using MailKit;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Swagger.Examples.Responses
 {
-	public class WebResponseExample : IExamplesProvider<ApiResponse<IEnumerable<WebResult>>>
+    public class WebResponseExample : IExamplesProvider<ApiResponse<IEnumerable<WebResult>>>
 	{
 		public ApiResponse<IEnumerable<WebResult>> GetExamples()
 		{

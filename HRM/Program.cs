@@ -4,13 +4,14 @@ using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
-using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
+using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -64,18 +65,23 @@ builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertVal
 builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
 builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
 builder.Services.AddScoped<IValidator<DepartmentUpsert>, DepartmentUpsertValidator>();
-
-
 builder.Services.AddScoped<IValidator<DeductionUpsert>, DeductionUpsertValidator>();
 builder.Services.AddScoped<IValidator<BonusUpsert>, BonusUpsertValidator>();
 builder.Services.AddScoped<IValidator<TaxDeductionUpsert>, TaxDeductionUpsertValidator>();
 builder.Services.AddScoped<IValidator<TaxRateUpsert>, TaxRateUpsertValidator>();
 builder.Services.AddScoped<IValidator<FomulaUpsert>, FomulaUpsertValidator>();
+builder.Services.AddScoped<IValidator<JobUpsert>, JobUpsertValidator>();
+builder.Services.AddScoped<IValidator<QuestionUpsert>, QuestionUpsertValidator>();
+builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
+builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
+builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
+builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
+
 #endregion
 
 
 
-#region +Repositories
+#region + Repositories
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
@@ -95,17 +101,17 @@ builder.Services.AddScoped<IInsurancesService, InsurancesService>();
 builder.Services.AddScoped<IContractTypesService, ContractTypesService>();
 builder.Services.AddScoped<IContractSalarysService, ContractSalarysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-
+builder.Services.AddScoped<IJobsService, JobsService>();
+builder.Services.AddScoped<IQuestionsService, QuestionsService>();
+builder.Services.AddScoped<ITestsService, TestsService>();
+builder.Services.AddScoped<IWebsService, WebsService>();
 builder.Services.AddScoped<IDeductionsService, DeductionsService>();
 builder.Services.AddScoped<IBonusService, BonusService>();
 builder.Services.AddScoped<ITaxDeductionsService, TaxDeductionsService>();
 builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
 builder.Services.AddScoped<IFomulasService, FomulasService>();
-
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
-
-
+builder.Services.AddScoped<IContractsService, ContractsService>();
 
 #endregion
 
@@ -150,7 +156,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminRole", policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
+    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
 });
 
 //Logging
@@ -159,13 +165,13 @@ builder.Host.UseSerilog((context, configuration) =>
 );
 
 
-#region
+#region + Setting
 
 
 //Setting config
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<JwtSetting>(builder.Configuration.GetSection("Jwt"));
-
+builder.Services.Configure<CompanySetting>(builder.Configuration.GetSection("Company"));
 
 #endregion
 

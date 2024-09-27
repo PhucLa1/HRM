@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-
-namespace HRM.Repositories.Dtos.Results
+﻿namespace HRM.Repositories.Dtos.Results
 {
     public class ContractSalaryResult
     {
