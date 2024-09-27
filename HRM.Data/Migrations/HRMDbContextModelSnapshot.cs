@@ -181,6 +181,9 @@ namespace HRM.Data.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PositionId")
+                        .HasColumnType("int");
+
                     b.Property<double>("Rate")
                         .HasColumnType("float");
 
@@ -197,7 +200,7 @@ namespace HRM.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("PositionId");
 
                     b.HasIndex("TestId");
 
@@ -908,40 +911,6 @@ namespace HRM.Data.Migrations
                     b.ToTable("Insurances");
                 });
 
-            modelBuilder.Entity("HRM.Data.Entities.Job", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Jobs");
-                });
-
             modelBuilder.Entity("HRM.Data.Entities.JobPosting", b =>
                 {
                     b.Property<int>("Id")
@@ -977,6 +946,9 @@ namespace HRM.Data.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PositionId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("PostingDate")
                         .HasColumnType("datetime2");
 
@@ -1001,7 +973,7 @@ namespace HRM.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("PositionId");
 
                     b.ToTable("JobPostings");
                 });
@@ -1591,11 +1563,9 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.Applicants", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.Job", "Job")
+                    b.HasOne("HRM.Data.Entities.Position", "Position")
                         .WithMany()
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PositionId");
 
                     b.HasOne("HRM.Data.Entities.Test", "Test")
                         .WithMany()
@@ -1603,7 +1573,7 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Job");
+                    b.Navigation("Position");
 
                     b.Navigation("Test");
                 });
@@ -1739,11 +1709,9 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.Job", null)
-                        .WithMany("Postings")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("HRM.Data.Entities.Position", null)
+                        .WithMany("jobPostings")
+                        .HasForeignKey("PositionId");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.LeaveApplication", b =>
@@ -1924,11 +1892,6 @@ namespace HRM.Data.Migrations
                     b.Navigation("ContractInsurance");
                 });
 
-            modelBuilder.Entity("HRM.Data.Entities.Job", b =>
-                {
-                    b.Navigation("Postings");
-                });
-
             modelBuilder.Entity("HRM.Data.Entities.JobPosting", b =>
                 {
                     b.Navigation("recruitmentWebs");
@@ -1951,6 +1914,8 @@ namespace HRM.Data.Migrations
             modelBuilder.Entity("HRM.Data.Entities.Position", b =>
                 {
                     b.Navigation("Employees");
+
+                    b.Navigation("jobPostings");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Questions", b =>
