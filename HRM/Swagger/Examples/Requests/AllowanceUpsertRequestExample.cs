@@ -8,9 +8,9 @@ namespace HRM.Apis.Swagger.Examples.Requests
         public AllowanceUpsert GetExamples()
         {
            return new AllowanceUpsert { 
-               Name = "Fuel Allowance",
+               Name = "Phụ cấp nhiên liệu",
                Amount = 200000,
-               Terms = "Term for fuel",
+               Terms = "Nhân viên sẽ được hỗ trợ chi phí đi lại với mức phụ cấp nhiên liệu hoặc vé xe công cộng theo mức cố định hàng tháng",
                ParameterName = "???"
            };
         }

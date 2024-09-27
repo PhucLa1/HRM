@@ -3,21 +3,21 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Swagger.Examples.Responses
 {
-	public class TestResponseExample : IExamplesProvider<ApiResponse<IEnumerable<TestResult>>>
+	public class TestResponseExample : IExamplesProvider<ApiResponse<IEnumerable<TestResults>>>
 	{
-		public ApiResponse<IEnumerable<TestResult>> GetExamples()
+		public ApiResponse<IEnumerable<TestResults>> GetExamples()
 		{
-			return new ApiResponse<IEnumerable<TestResult>>
+			return new ApiResponse<IEnumerable<TestResults>>
 			{
-				Metadata = new List<TestResult>
+				Metadata = new List<TestResults>
 				{
-					new TestResult
+					new TestResults
 					{
 						Id = 1,
 						Name = "Programming Fundamentals",
 						Description = "A test to measure understanding of basic programming concepts."
 					},
-					new TestResult
+					new TestResults
 					{
 						Id = 2,
 						Name = "Logical Reasoning Test",

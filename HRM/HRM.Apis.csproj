@@ -39,7 +39,6 @@
   <ItemGroup>
     <Folder Include="wwwroot\Logo\" />
     <Folder Include="wwwroot\CV\" />
-    <Folder Include="wwwroot\Contract\" />
   </ItemGroup>
 
 </Project>

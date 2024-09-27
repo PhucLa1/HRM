@@ -1,13 +1,8 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Repositories.Dtos.Models
 {
-	public class WebUpsert
+    public class WebUpsert
 	{
 		public required string Name { get; set; }	
 		public required string webApi { get; set; }

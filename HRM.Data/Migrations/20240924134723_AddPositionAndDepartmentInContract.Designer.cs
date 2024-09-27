@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240924134723_AddPositionAndDepartmentInContract")]
+    partial class AddPositionAndDepartmentInContract
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -394,14 +397,14 @@ namespace HRM.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NationalAddress")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateOnly>("NationalAddress")
+                        .HasColumnType("date");
 
                     b.Property<string>("NationalID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("NationalStartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("NationalStartDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("PositionId")
                         .HasColumnType("int");

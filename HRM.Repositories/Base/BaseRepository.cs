@@ -9,6 +9,8 @@ namespace HRM.Repositories.Base
         protected readonly HRMDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
+        HRMDbContext IBaseRepository<T>.Context => _context;
+
         public BaseRepository(HRMDbContext context)
         {
             _context = context;

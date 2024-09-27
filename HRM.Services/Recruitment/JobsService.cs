@@ -5,11 +5,6 @@ using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Services.RecruitmentManager
 {

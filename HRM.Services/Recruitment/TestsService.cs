@@ -4,21 +4,15 @@ using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Briefcase;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TestResult = HRM.Repositories.Dtos.Results.TestResult;
+using TestResults = HRM.Repositories.Dtos.Results.TestResults;
 
 
 namespace HRM.Services.RecruitmentManager
 {
-	public interface ITestsService
+    public interface ITestsService
 	{
-		Task<ApiResponse<IEnumerable<TestResult>>> GetAllTest();
+		Task<ApiResponse<IEnumerable<TestResults>>> GetAllTest();
 		Task<ApiResponse<bool>> AddNewTest(TestUpsert testAdd);
 		Task<ApiResponse<bool>> UpdateTest(int id, TestUpsert testUpdate);
 		Task<ApiResponse<bool>> RemoveTest(int id);
@@ -37,13 +31,13 @@ namespace HRM.Services.RecruitmentManager
 			_testUpsertValidator = testUpsertValidator;
 			_mapper = mapper;
 		}
-		public async Task<ApiResponse<IEnumerable<TestResult>>> GetAllTest()
+		public async Task<ApiResponse<IEnumerable<TestResults>>> GetAllTest()
 		{
 			try
 			{
-				return new ApiResponse<IEnumerable<TestResult>>
+				return new ApiResponse<IEnumerable<TestResults>>
 				{
-					Metadata = _mapper.Map<IEnumerable<TestResult>>(await _baseRepository.GetAllQueryAble().ToListAsync()),
+					Metadata = _mapper.Map<IEnumerable<TestResults>>(await _baseRepository.GetAllQueryAble().ToListAsync()),
 					IsSuccess = true
 				};
 			}

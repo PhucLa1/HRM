@@ -12,7 +12,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/allowances")]
     [ApiController]
-    [Authorize(Policy = "AdminRole")]
+    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class AllowancesController : ControllerBase
     {
         private readonly IAllowancesService _allowanceService;

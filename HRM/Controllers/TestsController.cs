@@ -1,16 +1,18 @@
 ﻿using Asp.Versioning;
+using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.RecruitmentManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
 	[ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/tests")]
 	[ApiController]
-	[Authorize(Policy = RoleExtensions.HR_ROLE)]
+	[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
 	public class TestsController : ControllerBase
 	{
 		private readonly ITestsService _testService;
@@ -25,8 +27,8 @@ namespace HRM.Apis.Controllers
 		/// <response code="200">Return all the tests in the company in the metadata of api response</response>
 		[HttpGet]
 		[Route("")]
-		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<TestResult>>))]
-		//[SwaggerResponseExample(StatusCodes.Status200OK, typeof(TestResponseExample))]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<TestResults>>))]
+		[SwaggerResponseExample(StatusCodes.Status200OK, typeof(TestResponseExample))]
 		public async Task<IActionResult> GetAll()
 		{
 			return Ok(await _testService.GetAllTest());

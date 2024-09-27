@@ -1,13 +1,8 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Repositories.Dtos.Models
 {
-	public class QuestionUpsert
+    public class QuestionUpsert
 	{
 		public required int TestId { get; set; }
 		public required string QuestionText { get; set; }
