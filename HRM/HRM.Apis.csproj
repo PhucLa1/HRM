@@ -36,4 +36,10 @@
     <ProjectReference Include="..\HRM.Services\HRM.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Logo\" />
+    <Folder Include="wwwroot\CV\" />
+    <Folder Include="wwwroot\Contract\" />
+  </ItemGroup>
+
 </Project>

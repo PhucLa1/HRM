@@ -14,6 +14,11 @@ using System.Text;
 
 namespace HRM.Services.User
 {
+    public static class AuthError
+    {
+        public const string EMAIL_NOT_CORRECT = "Email đã nhập không tồn tại";
+        public const string PASS_NOT_CORRECT = "Mật khẩu đã nhập bị sai";
+    }
     public interface IAuthService
     {
         Task<ApiResponse<string>> AdminLogin(AdminLogin adminLogin); //Chỉ dùng riêng cho admin
@@ -48,12 +53,12 @@ namespace HRM.Services.User
                     .FirstOrDefaultAsync();
                 if (adminInDb == null)
                 {
-                    return new ApiResponse<string> { Message = ["Email không tồn tại"] };
+                    return new ApiResponse<string> { Message = [AuthError.EMAIL_NOT_CORRECT] };
                 }
                 bool isCorrectPass = BCrypt.Net.BCrypt.Verify(adminLogin.Password, adminInDb.Password);
                 if (!isCorrectPass)
                 {
-                    return new ApiResponse<string> { Message = ["Mật khẩu không đúng"] };
+                    return new ApiResponse<string> { Message = [AuthError.PASS_NOT_CORRECT] };
                 }
                 string encrypterToken = await JWTGenerator(new UserJwt
                     {
