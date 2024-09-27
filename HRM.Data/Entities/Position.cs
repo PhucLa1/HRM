@@ -6,5 +6,6 @@ namespace HRM.Data.Entities
     {
         public required string Name { get; set; }
         public ICollection<Employee>? Employees { get; set; }
+        public ICollection<JobPosting>? jobPostings { get; set; }
     }
 }
