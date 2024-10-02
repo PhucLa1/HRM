@@ -12,13 +12,27 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/departments")]
     [ApiController]
-    [Authorize(Policy = "AdminRole")]
+    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class DepartmentsController : ControllerBase
     {
         private readonly IDepartmentsService _departmentService;
         public DepartmentsController(IDepartmentsService departmentService)
         {
             _departmentService = departmentService;
+        }
+
+        /// <summary>
+        /// Get all user name, email in department by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <response code="200">Return all the user name, email in the department in the metadata of api response</response>
+        [HttpGet]
+        [Route("{id}/employee")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<DepartmentUserResult>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(DepartmentUserResponseExample))]
+        public async Task<IActionResult> GetAllUserInDepartment(int id)
+        {
+            return Ok(await _departmentService.GetAllEmployeeInDepartment(id));
         }
 
 

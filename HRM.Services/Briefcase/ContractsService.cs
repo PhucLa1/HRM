@@ -80,7 +80,7 @@ namespace HRM.Services.Briefcase
                             CompanySignStatus = CompanySignStatus.Signed,
                             TypeContract = contractAdd.TypeContract,
                             PositionId = contractAdd.PositionId,
-                            DepartmentId = contractAdd.DepartmentId,
+                            //DepartmentId = contractAdd.DepartmentId,
                         };
                         await _contractRepository.AddAsync(contract);
                         await _contractRepository.SaveChangeAsync();
@@ -161,7 +161,7 @@ namespace HRM.Services.Briefcase
                 var contract = await _contractRepository
                     .GetAllQueryAble()
                     .Include(e => e.ContractAllowances)
-                    .Include(e => e.Department)
+                    ///.Include(e => e.Department)
                     .Include(e => e.Position)
                     .Include(e => e.ContractSalary)
                     .Where(e => e.Id == id)
@@ -228,7 +228,7 @@ namespace HRM.Services.Briefcase
                                     { "{{CONTRACT_TIME}}", CalculateDifferenceInYearsOrMonths(contract.StartDate,contract.EndDate) },
                                     { "{{CONTRACT_START_DATE}}", contract.StartDate.ToString("dd/MM/yyyy") },
                                     { "{{CONTRACT_END_DATE}}", contract.EndDate.ToString("dd/MM/yyyy") },
-                                    { "{{EMPLOYEE_DEPARTMENT}}", contract.Department.Name },
+                                   // { "{{EMPLOYEE_DEPARTMENT}}", contract.Department.Name },
                                     { "{{EMPLOYEE_POSITION}}", contract.Position.Name },
                                     { "{{COMPANY_CEO}}", _serverCompanySetting.CEO },
                                     { "{{CONTRACT_WORK_TIME}}", contract.ContractSalary.RequiredHours.ToString() },

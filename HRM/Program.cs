@@ -13,6 +13,7 @@ using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
+using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -75,7 +76,7 @@ builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
 builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
-
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 #endregion
 
 
@@ -110,7 +111,7 @@ builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
 builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
-
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 #endregion
 
 

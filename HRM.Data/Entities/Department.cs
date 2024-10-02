@@ -5,8 +5,7 @@ namespace HRM.Data.Entities
     public class Department : BaseEntities
     {
         public required string Name { get; set; }
-        public int ManagerId { get; set; }
-        public ICollection<Employee>? Employees { get; set; }
-
+        public int? ManagerId { get; set; }
+        public ICollection<Position>? positions { get; set; }
     }
 }
