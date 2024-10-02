@@ -21,7 +21,6 @@ namespace HRM.Data.Entities
         public string? NationalAddress { get; set; }//2
         public string? Level { get; set; }//2
         public string? Major { get; set; }//2
-        public int DepartmentId { get; set; } //1
         public int PositionId { get; set; } //1
         public EmployeeSignStatus EmployeeSignStatus { get; set; }
         public CompanySignStatus CompanySignStatus { get; set; }
@@ -29,7 +28,6 @@ namespace HRM.Data.Entities
         public TypeContract TypeContract { get; set; }//1
         public ContractSalary? ContractSalary { get; set; }
         public ICollection<ContractAllowance>? ContractAllowances { get; set; }
-        public Department? Department { get; set; }
         public Position? Position { get; set; }
         public ICollection<ContractInsurance>? ContractInsurances { get; set; }        
 	}
