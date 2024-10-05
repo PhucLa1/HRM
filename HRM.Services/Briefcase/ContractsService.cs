@@ -64,6 +64,10 @@ namespace HRM.Services.Briefcase
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
+                var applicant = await _applicantsRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == applicantId)
+                    .FirstAsync();
 
                 //Thêm mới hợp đồng với 1 vài trường cơ bản, sau khi đã bàn bạc với ứng viên
 
@@ -79,9 +83,11 @@ namespace HRM.Services.Briefcase
                             EndDate = contractAdd.EndDate,
                             CompanySignStatus = CompanySignStatus.Signed,
                             TypeContract = contractAdd.TypeContract,
-                            PositionId = contractAdd.PositionId,
-                            //DepartmentId = contractAdd.DepartmentId,
                         };
+
+                        // Thêm trường position vào
+                        contract.PositionId = applicant.PositionId;
+
                         await _contractRepository.AddAsync(contract);
                         await _contractRepository.SaveChangeAsync();
 
@@ -118,10 +124,7 @@ namespace HRM.Services.Briefcase
                 /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
                  và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
                 */
-                var applicant = await _applicantsRepository
-                    .GetAllQueryAble()
-                    .Where(e => e.Id == applicantId)
-                    .FirstAsync();
+
 
                 var bodyContentEmail = HandleFile.READ_FILE(FOLER, CONTRACT_NOTIFICATION_FILE)
                     .Replace("{applicantName}", applicant.Name)

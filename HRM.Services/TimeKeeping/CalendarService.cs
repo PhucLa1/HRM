@@ -69,6 +69,15 @@ namespace HRM.Services.TimeKeeping
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
+                var calendar = _calendarRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Day == calendarAdd.Day && e.ShiftTime == calendarAdd.ShiftTime)
+                    .FirstOrDefault();
+                if (calendar != null)
+                {
+                    //Tồn tại ca làm này rồi
+                    return new ApiResponse<bool> { Message = [CalendarError.CALENDAR_EXIST] };
+                }
                 await _calendarRepository.AddAsync(new Calendar
                 {
                     Day = calendarAdd.Day,
@@ -93,6 +102,17 @@ namespace HRM.Services.TimeKeeping
                 if (!resultValidation.IsValid)
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+
+                //Kiểm tra ca làm việc đó đã tổn tại chưa
+                var calendar = await _calendarRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Day == calendarUpdate.Day && e.ShiftTime == calendarUpdate.ShiftTime && e.Id != id)
+                    .FirstOrDefaultAsync();
+                if (calendar != null)
+                {
+                    //Tồn tại ca làm này rồi
+                    return new ApiResponse<bool> { Message = [CalendarError.CALENDAR_EXIST] };
                 }
                 var calendarNeedUpdate = await _calendarRepository
                     .GetAllQueryAble()
