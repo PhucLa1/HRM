@@ -7,7 +7,12 @@ namespace HRM.Apis.Swagger.Examples.Requests
     {
         public PositionUpsert GetExamples()
         {
-           return new PositionUpsert { Name = "Software Engineer" };
+           return new PositionUpsert 
+           { 
+               Name = "Kĩ sư phần mềm",
+               TotalPositionsNeeded = 5,
+               DepartmentId = 1
+           };
         }
     }
 }

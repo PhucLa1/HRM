@@ -4,7 +4,7 @@ namespace HRM.Data.Entities
 {
     public class JobPosting : BaseEntities
     {
-        public int JobId { get; set; }
+        public int PositionId { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
         public int SalaryRangeMin { get; set; }
@@ -15,7 +15,5 @@ namespace HRM.Data.Entities
         public int EmployeeId { get; set; }
         public int WebId { get; set; }
         public ICollection<RecruitmentWeb>? recruitmentWebs { get; set; }
-
-
 	}
 }

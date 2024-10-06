@@ -90,7 +90,6 @@ namespace HRM.Data.Data
         public DbSet<Fomula> Fomulas { get; set; }
         public DbSet<History> Histories { get; set; }
         public DbSet<Insurance> Insurances { get; set; }
-        public DbSet<Job> Jobs { get; set; }
         public DbSet<JobPosting> JobPostings { get; set; }
         public DbSet<LeaveApplication> LeaveApplications { get; set; }
         public DbSet<PartimePlan> PartimePlans { get; set; }

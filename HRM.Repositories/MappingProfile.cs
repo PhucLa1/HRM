@@ -36,7 +36,6 @@ namespace HRM.Repositories
 			#region
 			//RecruitmentManager
 			CreateMap<Web, WebResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
-			CreateMap<Job, JobResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 			CreateMap<Test, TestResults>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 			CreateMap<Questions, QuestionResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 

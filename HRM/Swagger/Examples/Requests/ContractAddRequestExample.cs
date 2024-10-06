@@ -15,8 +15,6 @@ namespace HRM.Apis.Swagger.Examples.Requests
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddYears(5),
                 TypeContract = TypeContract.Partime,
-                DepartmentId = 2,
-                PositionId = 2,
                 AllowanceIds = new List<int> { 1, 2 },
             };
         }
