@@ -6,7 +6,7 @@ namespace HRM.Data.Data
 {
     public class SeedData
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public async static void Initialize(IServiceProvider serviceProvider)
         {
             using (var context = new HRMDbContext(
                 serviceProvider.GetRequiredService<
@@ -21,11 +21,11 @@ namespace HRM.Data.Data
                     */
                     return;   // DB has been seeded
                 }
-                context.Admins.AddRangeAsync(
+                await context.Admins.AddRangeAsync(
                     new Admin { Email = "phucminhbeos@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("Phucdeptrai") },
                     new Admin { Email = "nguyendinhlehoang2003@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("1234") }
                     );
-                context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
     }
