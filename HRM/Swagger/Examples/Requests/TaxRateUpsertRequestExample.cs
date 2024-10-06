@@ -11,7 +11,7 @@ namespace HRM.Apis.Swagger.Examples.Requests
                Name = "Tax Rate example",
                Percent = 0.05,
                Condition = "Thu nhập tính thuế > ?tr theo luật mới",
-               ParameterName = "PARAM_TAXDEDUCTION_EXAMPLE"
+               ParameterName = "PARAM_TAXRATE_EXAMPLE"
            };
         }
     }

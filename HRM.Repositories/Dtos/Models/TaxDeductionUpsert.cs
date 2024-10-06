@@ -15,7 +15,7 @@ namespace HRM.Repositories.Dtos.Models
         {
             RuleFor(p => p.Name.Trim()).NotEmpty().WithMessage("Amount name must not be null");
             RuleFor(p => p.FomulaType).Must(value => value == 1 || value == 2 || value == 3).WithMessage("FomulaType must be 1 or 2 or 3.");
-            RuleFor(p => p.ParameterName).NotEmpty().Must(x => x.StartsWith("PARAM_BONUS_")).WithMessage("Parameter Name must start with 'PARAM_BONUS_'");
+            RuleFor(p => p.ParameterName).NotEmpty().Must(x => x.StartsWith("PARAM_TAXDEDUCTION_")).WithMessage("Parameter Name must start with 'PARAM_TAXDEDUCTION_'");
         }
     }
 }
