@@ -12,7 +12,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/questions")]
 	[ApiController]
-	[Authorize(Policy = RoleExtensions.HR_ROLE)]
+	[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
 	public class QuestionsController : ControllerBase
 	{
 		private readonly IQuestionsService _questionService;
