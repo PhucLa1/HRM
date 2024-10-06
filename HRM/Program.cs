@@ -13,6 +13,7 @@ using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
+using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -70,13 +71,12 @@ builder.Services.AddScoped<IValidator<BonusUpsert>, BonusUpsertValidator>();
 builder.Services.AddScoped<IValidator<TaxDeductionUpsert>, TaxDeductionUpsertValidator>();
 builder.Services.AddScoped<IValidator<TaxRateUpsert>, TaxRateUpsertValidator>();
 builder.Services.AddScoped<IValidator<FomulaUpsert>, FomulaUpsertValidator>();
-builder.Services.AddScoped<IValidator<JobUpsert>, JobUpsertValidator>();
 builder.Services.AddScoped<IValidator<QuestionUpsert>, QuestionUpsertValidator>();
 builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
 builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
-
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 #endregion
 
 
@@ -101,7 +101,6 @@ builder.Services.AddScoped<IInsurancesService, InsurancesService>();
 builder.Services.AddScoped<IContractTypesService, ContractTypesService>();
 builder.Services.AddScoped<IContractSalarysService, ContractSalarysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IJobsService, JobsService>();
 builder.Services.AddScoped<IQuestionsService, QuestionsService>();
 builder.Services.AddScoped<ITestsService, TestsService>();
 builder.Services.AddScoped<IWebsService, WebsService>();
@@ -112,7 +111,7 @@ builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
 builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
-
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 #endregion
 
 

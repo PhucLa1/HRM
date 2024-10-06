@@ -15,19 +15,22 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     {
                         Id = 1,
                         Name = "Human Resources department",
-                        ManagerId = 101
+                        ManagerName = "Lã Hồng Phúc",
+                        ManagerId = 1,
                     },
                     new DepartmentResult
                     {
                         Id = 2,
                         Name = "Engineering department",
-                        ManagerId = 102
+                        ManagerName = "Nguyễn Thành Hưng",
+                        ManagerId = 2,
                     },
                     new DepartmentResult
                     {
                         Id = 3,
                         Name = "System a department",
-                        ManagerId = 103
+                        ManagerName = "Trịnh Gia Khánh",
+                        ManagerId = 3,
                     }
                 },
                 IsSuccess = true,
