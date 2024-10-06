@@ -9,10 +9,10 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-    [ApiVersion(2)]
+    [ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/webs")]
 	[ApiController]
-	[Authorize(Policy = RoleExtensions.HR_ROLE)]
+	[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
 	public class WebsController : ControllerBase
 	{
 		private readonly IWebsService _webService;
