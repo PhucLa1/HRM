@@ -9,8 +9,10 @@ using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
+using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
 using HRM.Services.User;
@@ -19,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
+using System.Configuration;
 using System.Reflection;
 using System.Text;
 
@@ -76,6 +79,8 @@ builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
 
+builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
+
 #endregion
 
 
@@ -111,8 +116,8 @@ builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 
+builder.Services.AddScoped<IGmailsService, GmailsService>();
 #endregion
-
 
 
 #region + Mapper

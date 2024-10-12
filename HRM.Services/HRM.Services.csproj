@@ -24,8 +24,4 @@
     <ProjectReference Include="..\HRM.Repositories\HRM.Repositories.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Recruitment\" />
-  </ItemGroup>
-
 </Project>
