@@ -14,12 +14,21 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     new PositionResult
                     {
                         Id = 1,
-                        Name = "Software Engineer"
+                        Name = "Fullstack Developer",
+                        TotalPositionsNeeded = 1,
+                        CurrentPositionsFilled = 1,
+                        DepartmentName = "Công nghệ thông tin",
+                        DepartmentId = 1,
                     },
                     new PositionResult
                     {
                         Id = 2,
-                        Name = "Product Manager"
+                        Name = "Kĩ sư công nghệ thông tin",
+                        TotalPositionsNeeded = 1,
+                        CurrentPositionsFilled = 1,
+                        DepartmentName = "Công nghệ thông tin",
+                        DepartmentId = 1,
+
                     }
                 },
                 IsSuccess = true,

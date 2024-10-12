@@ -15,6 +15,7 @@ using HRM.Services.Briefcase;
 using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
+using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -81,6 +82,7 @@ builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>(
 
 builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
 
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 #endregion
 
 
@@ -117,6 +119,7 @@ builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 
 builder.Services.AddScoped<IGmailsService, GmailsService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 #endregion
 
 
