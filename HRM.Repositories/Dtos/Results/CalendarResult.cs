@@ -1,7 +1,12 @@
 ﻿using HRM.Data.Entities;
 
 namespace HRM.Repositories.Dtos.Results
-{
+{ 
+    public class ShiftGroup
+    {
+        public ShiftTime ShiftTime { get; set; }
+        public List<CalendarResult>? CalendarResult { get; set; }
+    }
     public class CalendarResult
     {
         public int Id { get; set; }

@@ -29,7 +29,7 @@ namespace HRM.Apis.Controllers
         [HttpGet]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<CalendarResult>>))]
-        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(CalendarResultResponseExample))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ShiftGroupResultResponseExample))]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _calendarService.GetAllCalendar());

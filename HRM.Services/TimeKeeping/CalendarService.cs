@@ -14,7 +14,7 @@ namespace HRM.Services.TimeKeeping
     }
     public interface ICalendarService
     {
-        Task<ApiResponse<List<CalendarResult>>> GetAllCalendar();
+        Task<ApiResponse<List<ShiftGroup>>> GetAllCalendar();
         Task<ApiResponse<bool>> AddNew(CalendarUpsert calendarAdd);
         Task<ApiResponse<bool>> UpdateCalendar(int id, CalendarUpsert calendarUpdate);
         Task<ApiResponse<bool>> RemoveCalendar(int id);
@@ -34,15 +34,25 @@ namespace HRM.Services.TimeKeeping
             _calendarUpsertValidator = calendarUpsertValidator;
             _mapper = mapper;
         }
-        public async Task<ApiResponse<List<CalendarResult>>> GetAllCalendar()
+        public async Task<ApiResponse<List<ShiftGroup>>> GetAllCalendar()
         {
             try
             {
                 var calendar = await _calendarRepository
                     .GetAllQueryAble()
+                    .OrderBy(x => x.ShiftTime)
+                    .OrderBy(x => x.Day)
                     .ToListAsync();
+
                 var calendarResult = _mapper.Map<List<CalendarResult>>(calendar);
-                return new ApiResponse<List<CalendarResult>> { Metadata = calendarResult, IsSuccess = true };
+                var groupedCalendars = calendarResult.GroupBy(x => x.ShiftTime)
+                    .Select(e => new ShiftGroup
+                    {
+                        ShiftTime = e.Key,
+                        CalendarResult = e.ToList()
+                    })
+                    .ToList();
+                return new ApiResponse<List<ShiftGroup>> { Metadata = groupedCalendars, IsSuccess = true };
             }
             catch (Exception ex)
             {
@@ -59,7 +69,6 @@ namespace HRM.Services.TimeKeeping
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
-                //Kiểm tra ca làm việc đó đã tổn tại chưa
                 var calendar = _calendarRepository
                     .GetAllQueryAble()
                     .Where(e => e.Day == calendarAdd.Day && e.ShiftTime == calendarAdd.ShiftTime)
@@ -94,10 +103,11 @@ namespace HRM.Services.TimeKeeping
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
+
                 //Kiểm tra ca làm việc đó đã tổn tại chưa
                 var calendar = await _calendarRepository
                     .GetAllQueryAble()
-                    .Where(e => e.Day == calendarUpdate.Day && e.ShiftTime == calendarUpdate.ShiftTime)
+                    .Where(e => e.Day == calendarUpdate.Day && e.ShiftTime == calendarUpdate.ShiftTime && e.Id != id)
                     .FirstOrDefaultAsync();
                 if (calendar != null)
                 {

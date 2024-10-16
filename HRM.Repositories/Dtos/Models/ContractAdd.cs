@@ -10,8 +10,6 @@ namespace HRM.Repositories.Dtos.Models
         public DateTime StartDate { get; set; } //1
         public DateTime EndDate { get; set; } //1
         public TypeContract TypeContract { get; set; }//1
-        public int DepartmentId { get; set; } //1
-        public int PositionId { get; set; } //1
         public List<int>? AllowanceIds { get; set; } 
     }
     public class ContractAddValidator : AbstractValidator<ContractAdd>
@@ -37,13 +35,6 @@ namespace HRM.Repositories.Dtos.Models
                 .WithMessage("Hợp đồng cho loại nhân viên nào không được bỏ trống .")
                 .IsInEnum()
                 .WithMessage("Hợp đồng cho loại nhân viên nào không hợp lệ .");
-            RuleFor(x => x.PositionId)
-                .NotEmpty()
-                .WithMessage("Vị trí làm việc của nhân viên không được để trống");
-            RuleFor(x => x.DepartmentId)
-                .NotEmpty()
-                .WithMessage("Phòng ban làm việc của nhân viên không được để trống .");
-
         }
     }
 }
