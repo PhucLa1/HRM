@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016011255_AddNewTableWorkShift")]
+    partial class AddNewTableWorkShift
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1469,6 +1472,9 @@ namespace HRM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CalendarId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -1477,14 +1483,8 @@ namespace HRM.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("created_by");
 
-                    b.Property<int>("PartimePlanId")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly>("PresentShift")
                         .HasColumnType("date");
-
-                    b.Property<int>("ShiftTime")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
@@ -1494,12 +1494,9 @@ namespace HRM.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
 
-                    b.Property<int>("UserCalendarStatus")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("PartimePlanId");
+                    b.HasIndex("CalendarId");
 
                     b.ToTable("UserCalendars");
                 });
@@ -1538,6 +1535,46 @@ namespace HRM.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Webs");
+                });
+
+            modelBuilder.Entity("HRM.Data.Entities.WorkShift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("PartimePlanId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("UserCalendarId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartimePlanId");
+
+                    b.HasIndex("UserCalendarId");
+
+                    b.ToTable("WorkShift");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Advance", b =>
@@ -1804,9 +1841,24 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.UserCalendar", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.PartimePlan", null)
+                    b.HasOne("HRM.Data.Entities.Calendar", null)
                         .WithMany("UserCalendars")
+                        .HasForeignKey("CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HRM.Data.Entities.WorkShift", b =>
+                {
+                    b.HasOne("HRM.Data.Entities.PartimePlan", null)
+                        .WithMany("WorkShifts")
                         .HasForeignKey("PartimePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRM.Data.Entities.UserCalendar", null)
+                        .WithMany("WorkShifts")
+                        .HasForeignKey("UserCalendarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1824,6 +1876,11 @@ namespace HRM.Data.Migrations
             modelBuilder.Entity("HRM.Data.Entities.Bonus", b =>
                 {
                     b.Navigation("bonusDetails");
+                });
+
+            modelBuilder.Entity("HRM.Data.Entities.Calendar", b =>
+                {
+                    b.Navigation("UserCalendars");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Contract", b =>
@@ -1875,7 +1932,7 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.PartimePlan", b =>
                 {
-                    b.Navigation("UserCalendars");
+                    b.Navigation("WorkShifts");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Payroll", b =>
@@ -1907,6 +1964,11 @@ namespace HRM.Data.Migrations
             modelBuilder.Entity("HRM.Data.Entities.Test", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("HRM.Data.Entities.UserCalendar", b =>
+                {
+                    b.Navigation("WorkShifts");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Web", b =>
