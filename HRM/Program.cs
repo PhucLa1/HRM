@@ -64,7 +64,7 @@ builder.Services.AddScoped<IValidator<AllowanceUpsert>, AllowanceUpsertValidator
 builder.Services.AddScoped<IValidator<InsuranceUpsert>, InsuranceUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
-builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+builder.Services.AddScoped<IValidator<AccountLogin>, AccountLoginValidator>();
 builder.Services.AddScoped<IValidator<DepartmentUpsert>, DepartmentUpsertValidator>();
 builder.Services.AddScoped<IValidator<DeductionUpsert>, DeductionUpsertValidator>();
 builder.Services.AddScoped<IValidator<BonusUpsert>, BonusUpsertValidator>();
@@ -79,6 +79,9 @@ builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>(
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 
 builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
+builder.Services.AddScoped<IValidator<WorkPlanInsert>, WorkPlanInsertValidator>();
+builder.Services.AddScoped<IValidator<UserCalendarInsert>, UserCalendarInsertValidator>();
+
 #endregion
 
 
@@ -117,6 +120,8 @@ builder.Services.AddScoped<ICalendarService, CalendarService>();
 
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IAdvancesService, AdvancesService>();
+builder.Services.AddScoped<IWorkShiftService, WorkShiftService>();
+
 #endregion
 
 
@@ -158,9 +163,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+
+//Role
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
+    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.User.ToString())); 
 });
 
 //Logging
