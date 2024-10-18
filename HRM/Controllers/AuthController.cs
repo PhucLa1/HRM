@@ -27,11 +27,30 @@ namespace HRM.Apis.Controllers
         /// <returns>Return the api response , the message is the error of api return</returns>
         /// <response code="200">Return the api response</response>
         [HttpPost]
-        [Route("login")]
+        [Route("admin-login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
-        public async Task<IActionResult> Login([FromBody] AdminLogin adminLogin)
+        public async Task<IActionResult> Login([FromBody] AccountLogin adminLogin)
         {
             var result = await _authService.AdminLogin(adminLogin);
+            if (result.Metadata != null)
+            {
+                SetJWT(result.Metadata);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// This endpoint is login in page user 
+        /// </summary>
+        /// <param name="employeeLogin"></param>
+        /// <returns>Return the api response , the message is the error of api return</returns>
+        /// <response code="200">Return the api response</response>
+        [HttpPost]
+        [Route("employee-login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
+        public async Task<IActionResult> EmployeeLogin([FromBody] AccountLogin employeeLogin)
+        {
+            var result = await _authService.EmployeeLogin(employeeLogin);
             if (result.Metadata != null)
             {
                 SetJWT(result.Metadata);

@@ -4,19 +4,20 @@ namespace HRM.Data.Entities
 {
     public class PartimePlan : BaseEntities
     {
-        public int Month { get; set; }
-        public int UserId { get; set; }
-        public int Week { get; set; }
         public string? Reason { get; set; }
         public StatusCalendar StatusCalendar { get; set; }
+        public DateOnly TimeStart { get; set; }
+        public DateOnly TimeEnd { get; set; }
         public int EmployeeId { get; set; }
-        public ICollection<UserCalendar> userCalendars { get; set; }
+        public ICollection<UserCalendar>? UserCalendars { get; set; }
     }
     public enum StatusCalendar
     {
         Draft = 1,
-        Approved = 2,
-        Refuse = 3
+        Submit = 2,
+        Approved = 3,
+        Refuse = 4,
+        Cancel = 5
     }
 
 }
