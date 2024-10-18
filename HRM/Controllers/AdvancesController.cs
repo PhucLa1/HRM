@@ -14,10 +14,10 @@ namespace HRM.Apis.Controllers
     [Route("api/v{v:apiVersion}/advances")]
     [ApiController]
     //[Authorize(Policy = "AdminRole")]
-    public class AdvanceController : ControllerBase
+    public class AdvancesController : ControllerBase
     {
         private readonly IAdvancesService _advancesService;
-        public AdvanceController(IAdvancesService advancesService)
+        public AdvancesController(IAdvancesService advancesService)
         {
             _advancesService = advancesService;
         }

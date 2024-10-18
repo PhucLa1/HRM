@@ -115,6 +115,7 @@ builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IAdvancesService, AdvancesService>();
 #endregion
 
