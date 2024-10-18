@@ -99,9 +99,9 @@ namespace HRM.Data.Data
                     }
                     catch (Exception ex)
                     {
-                        await transaction.RollbackAsync();
-                        throw new Exception(ex.Message);
-                    }
+						await transaction.RollbackAsync();
+						throw new Exception(ex.Message);
+					}
                 }
                 if (context.Admins.Any())
                 {

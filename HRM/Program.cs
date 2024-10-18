@@ -82,6 +82,8 @@ builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>(
 
 builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
 
+builder.Services.AddScoped<IValidator<JobPostingUpsert>, JobPostingUpsertValidator>();
+
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 #endregion
 
@@ -120,6 +122,8 @@ builder.Services.AddScoped<IContractsService, ContractsService>();
 
 builder.Services.AddScoped<IGmailsService, GmailsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
+
+builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
 #endregion
 
 

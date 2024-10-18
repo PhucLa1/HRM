@@ -945,9 +945,6 @@ namespace HRM.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
 
-                    b.Property<int>("WebId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
