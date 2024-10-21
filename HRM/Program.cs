@@ -77,6 +77,8 @@ builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
 #endregion
 
 
@@ -112,6 +114,7 @@ builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
+builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
 #endregion
 
 
