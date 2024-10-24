@@ -26,16 +26,17 @@ namespace HRM.Repositories
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
             CreateMap<Insurance, InsuranceResult>()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            CreateMap<Contract, ContractResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
 
-              
             #endregion
 
 
 
-			#region
-			//RecruitmentManager
-			CreateMap<Web, WebResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+            #region
+            //RecruitmentManager
+            CreateMap<Web, WebResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 			CreateMap<Test, TestResults>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 			CreateMap<Questions, QuestionResult>().ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
