@@ -26,8 +26,8 @@ namespace HRM.Repositories
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
             CreateMap<Insurance, InsuranceResult>()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
-            
-
+            CreateMap<Contract, ContractResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
             #endregion
 
