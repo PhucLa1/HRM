@@ -76,6 +76,7 @@ builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
 builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
+builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 #endregion
 
