@@ -1,15 +1,10 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
-using FluentValidation;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Services.TimeKeeping
 {
@@ -20,6 +15,8 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<bool>> AddNewApplication(LeaveApplicationUpSert leaveAdd);
         Task<ApiResponse<bool>> UpdateApplication(int id, LeaveApplicationUpSert leaveUpdate);
         Task<ApiResponse<bool>> RemoveApplication(int id);
+        Task<ApiResponse<IEnumerable<EmployeeDataResult>>> GetAllEmployees();
+
     }
     public class LeaveApplicationsService : ILeaveApplicationsService
     {
@@ -42,6 +39,32 @@ namespace HRM.Services.TimeKeeping
             _leaveUpsertValidator = leaveUpsertValidator;
         }
 
+        public async Task<ApiResponse<IEnumerable<EmployeeDataResult>>> GetAllEmployees()
+        {
+            try
+            {
+                var employees = await _employeeRepository.GetAllQueryAble().ToListAsync();
+
+                var employeeResults = employees.Select(e => new EmployeeDataResult
+                {
+                    Id = e.Id,
+                    Name = e.UserName
+                }).ToList();
+
+                return new ApiResponse<IEnumerable<EmployeeDataResult>>
+                {
+                    Metadata = employeeResults,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
+
         public async Task<ApiResponse<bool>> AddNewApplication(LeaveApplicationUpSert leaveAdd)
         {
             try
@@ -51,6 +74,16 @@ namespace HRM.Services.TimeKeeping
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
+
+                var employeeExists = await _employeeRepository.GetAllQueryAble().AnyAsync(e => e.Id == leaveAdd.EmployeeId);
+                if (!employeeExists)
+                {
+                    return ApiResponse<bool>.FailtureValidation(new List<ValidationFailure>
+                {
+                    new ValidationFailure("EmployeeId", "Nhân viên không tồn tại.")
+                });
+                }
+
                 await _baseRepository.AddAsync(new LeaveApplication
                 {
                     EmployeeId = leaveAdd.EmployeeId,
@@ -118,6 +151,16 @@ namespace HRM.Services.TimeKeeping
                 {
                     return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
                 }
+
+                var employeeExists = await _employeeRepository.GetAllQueryAble().AnyAsync(e => e.Id == leaveUpdate.EmployeeId);
+                if (!employeeExists)
+                {
+                    return ApiResponse<bool>.FailtureValidation(new List<ValidationFailure>
+                {
+                    new ValidationFailure("EmployeeId", "Nhân viên không tồn tại.")
+                });
+                }
+
                 var leave = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
                 leave.EmployeeId = leaveUpdate.EmployeeId;
                 leave.RefuseReason = leaveUpdate.RefuseReason?.Trim();

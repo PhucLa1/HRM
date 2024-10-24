@@ -38,6 +38,18 @@ namespace HRM.Apis.Controllers
             return Ok(await _leaveApplicationsService.GetAllApplications());
         }
 
+        /// Get all user name, email in department by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <response code="200">Return all the user name, email in the department in the metadata of api response</response>
+        [HttpGet]
+        [Route("employee")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<EmployeeDataResult>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LeaveApplicationResponseExample))]
+        public async Task<IActionResult> GetAllEmployee()
+        {
+            return Ok(await _leaveApplicationsService.GetAllEmployees());
+        }
 
         /// <summary>
         /// Add new leave application in the company

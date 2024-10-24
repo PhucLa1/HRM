@@ -4,7 +4,8 @@ using HRM.Data.Entities;
 
 namespace HRM.Repositories.Dtos.Models
 {
-
+    //employee
+    #region
     public interface IEmployeeRepository
     {
         bool Exists(int employeeId);
@@ -21,6 +22,8 @@ namespace HRM.Repositories.Dtos.Models
             return _context.Employees.Any(e => e.Id == employeeId);
         }
     }
+    #endregion
+
     public class LeaveApplicationUpSert
     {
         public required int EmployeeId {  get; set; }

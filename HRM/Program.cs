@@ -4,6 +4,7 @@ using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
+using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
