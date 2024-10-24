@@ -75,5 +75,19 @@ namespace HRM.Apis.Controllers
         {
             return Ok(await _fomulaService.RemoveFomula(id));
         }
+
+
+        /// <summary>
+        /// Get all Salary Components
+        /// </summary>
+        /// <response code="200">Return all the  Salary Components defination in the metadata of api response</response>
+        [HttpGet]
+        [Route("salary-components")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<IEnumerable<SalaryComponentCategory>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<IEnumerable<SalaryComponentCategory>>))]
+        public async Task<IActionResult> GetAllSalaryComponents()
+        {
+            return Ok(await _fomulaService.GetAllSalaryComponents());
+        }
     }
 }
