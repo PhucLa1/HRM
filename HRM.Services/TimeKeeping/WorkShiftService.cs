@@ -3,7 +3,11 @@ using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
+using HRM.Repositories.Helper;
+using HRM.Repositories.Setting;
+using HRM.Services.User;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace HRM.Services.TimeKeeping
 {
@@ -12,6 +16,7 @@ namespace HRM.Services.TimeKeeping
         public const string STATUS_FAILED = "Trạng thái truyền vào không đúng. ";
         public const string FORBIDDEN_PLAN = "Không có quyền thay đổi trạng thái kế hoạch làm việc";
         public const string STATUS_NULL = "Trạng thái truyền vào không được trống. ";
+        public const string FORBIDDEN_OVERDUE = "Lịch làm việc quá hạn để duyệt. ";
     }
     public interface IWorkShiftService
     {
@@ -29,12 +34,20 @@ namespace HRM.Services.TimeKeeping
         private readonly IValidator<UserCalendarInsert> _userCalendarInserttValidator;
         private readonly IBaseRepository<Contract> _contractRepository;
         private readonly IBaseRepository<Employee> _employeeRepository;
+        private readonly IEmailService _emailService;
+        private readonly CompanySetting _serverCompanySetting;
+        private const string FOLER = "Email";
+        private const string PROCESS_PARTIMEPLAN_FILE = "ProcessPartimePlan.html";
+        private const string PROCESS_PARTIMEPLAN_NOTIFICATION = "Thông báo về kết quả đăng kí lịch làm .";
         public WorkShiftService(IBaseRepository<PartimePlan> partimePlanRepository,
             IBaseRepository<UserCalendar> userCalendarRepository,
             IValidator<WorkPlanInsert> workPlanInsertValidator,
             IValidator<UserCalendarInsert> userCalendarInserttValidator,
             IBaseRepository<Contract> contractRepository,
-            IBaseRepository<Employee> employeeRepository)
+            IBaseRepository<Employee> employeeRepository,
+            IEmailService emailService,
+            IOptions<CompanySetting> serverCompanySetting
+            )
         {
             _partimePlanRepository = partimePlanRepository;
             _userCalendarRepository = userCalendarRepository;
@@ -42,26 +55,39 @@ namespace HRM.Services.TimeKeeping
             _userCalendarInserttValidator = userCalendarInserttValidator;
             _contractRepository = contractRepository;
             _employeeRepository = employeeRepository;
+            _emailService = emailService;
+            _serverCompanySetting = serverCompanySetting.Value;
         }
 
         public async Task<ApiResponse<bool>> ProcessPartimePlanRequest(int partimePlanId, StatusCalendar statusCalendar)
         {
             try
             {
-                if(statusCalendar == StatusCalendar.Draft
+                //Nếu những trạng thái truyền vào không phải là Approved và Refuse 
+                if (statusCalendar == StatusCalendar.Draft
                      || statusCalendar == StatusCalendar.Submit
                      || statusCalendar == StatusCalendar.Cancel)
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.STATUS_FAILED] };
                 }
+                
+                //Nếu cái lịch làm việc đó mà đến ngày hôm nay chưa được duyệt
+
+
                 var partimePlan = await _partimePlanRepository
                     .GetAllQueryAble()
                     .Where(e => e.Id == partimePlanId)
                     .FirstAsync();
-                if(partimePlan.StatusCalendar != StatusCalendar.Submit)
+                if (partimePlan.StatusCalendar != StatusCalendar.Submit)
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_PLAN] };
                 }
+
+                if(partimePlan.TimeStart <= DateOnly.FromDateTime(DateTime.Now))
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_OVERDUE] };
+                }
+
 
                 partimePlan.StatusCalendar = statusCalendar;
                 _partimePlanRepository.Update(partimePlan);
@@ -71,8 +97,42 @@ namespace HRM.Services.TimeKeeping
                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.UserCalendarStatus, statusCalendar == StatusCalendar.Approved ? UserCalendarStatus.Approved : UserCalendarStatus.Inactive));
 
                 await _partimePlanRepository.SaveChangeAsync();
+
+                //Gửi mail cho nhân viên để thông báo
+
+
+                var employee = await (from pt in _partimePlanRepository.GetAllQueryAble()
+                                      join em in _employeeRepository.GetAllQueryAble() on pt.EmployeeId equals em.Id
+                                      join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                      where pt.Id == partimePlanId
+                                      select new EmployeeInfo
+                                      {
+                                          Name = c.Name,
+                                          Email = em.Email
+                                      })
+                                          .FirstAsync();
+
+                var bodyContentEmail = HandleFile.READ_FILE(FOLER, PROCESS_PARTIMEPLAN_FILE)
+                    .Replace("{employeeName}", employee.Name)
+                    .Replace("{process}", statusCalendar == StatusCalendar.Approved ? "đồng ý" : "không được chấp nhận")
+                    .Replace("{linkUrl}", "http://localhost:3000/time-keeping/register-shift/" + partimePlanId)
+                    .Replace("{companyName}", _serverCompanySetting.CompanyName);
+
+                var bodyEmail = _emailService.TemplateContent
+                    .Replace("{content}", bodyContentEmail);
+
+                var email = new Email()
+                {
+                    To = employee.Email!,
+                    Body = bodyEmail,
+                    Subject = PROCESS_PARTIMEPLAN_NOTIFICATION
+                };
+                //Gửi email
+                await _emailService.SendEmailToRecipient(email);
+
                 return new ApiResponse<bool> { IsSuccess = true };
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -233,11 +293,12 @@ namespace HRM.Services.TimeKeeping
                     {
                         ShiftTime = e.ShiftTime,
                         PresentShift = e.PresentShift,
-                        UserCalendarStatus = UserCalendarStatus.Submit, 
+                        UserCalendarStatus = UserCalendarStatus.Submit,
                     })
                     .ToListAsync();
                 return new ApiResponse<List<UserCalendarResult>> { Metadata = userCalendars, IsSuccess = true };
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
