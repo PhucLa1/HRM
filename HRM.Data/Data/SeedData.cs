@@ -68,6 +68,7 @@ namespace HRM.Data.Data
                         //Thêm contract
                         var contract = new Contract
                         {
+                            Name ="Nguyễn Văn Toàn",
                             ContractSalaryId = contractSalary.Id,
                             ContractTypeId = contractType.Id,
                             PositionId = 1,
