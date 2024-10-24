@@ -29,7 +29,6 @@ namespace HRM.Repositories
             CreateMap<Contract, ContractResult>()
                .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
 
-
             #endregion
 
 
@@ -46,9 +45,10 @@ namespace HRM.Repositories
 			//TimeKeeping
 			CreateMap<Calendar, CalendarResult>()
                 .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
-                
-                
-      #endregion
+            CreateMap<LeaveApplication, LeaveApplicationResult>()
+               .ForAllMembers(opt => opt.Condition((src, destination, srcMember) => srcMember != null));
+
+            #endregion
 
 
 
