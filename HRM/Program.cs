@@ -85,6 +85,10 @@ builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
 builder.Services.AddScoped<IValidator<JobPostingUpsert>, JobPostingUpsertValidator>();
 
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<RecruitmentWebUpsert>, RecruitmentWebUpsertValidator>();
 #endregion
 
 
@@ -124,6 +128,13 @@ builder.Services.AddScoped<IGmailsService, GmailsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 
 builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
+
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+builder.Services.AddScoped<IAdvancesService, AdvancesService>();
+
+builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
+
+builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();
 #endregion
 
 
