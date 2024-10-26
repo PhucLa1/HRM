@@ -82,6 +82,7 @@ builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>(
 builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
+builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
 #endregion
 
 
@@ -89,7 +90,7 @@ builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationV
 #region + Repositories
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 #endregion
 
@@ -117,8 +118,11 @@ builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+builder.Services.AddScoped<IAdvancesService, AdvancesService>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
+
+builder.Services.AddScoped<IPayrollsService, PayrollsService>();
 #endregion
 
 
