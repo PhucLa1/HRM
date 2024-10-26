@@ -23,10 +23,12 @@ namespace HRM.Services.RecruitmentManager
 		private readonly IMapper _mapper;
 		public QuestionsService(
 			IBaseRepository<Questions> baseRepository,
+			IBaseRepository<Test> baseTestRepository,
 			IValidator<QuestionUpsert> questionUpsertValidator,
 			IMapper mapper)
 		{
 			_baseRepository = baseRepository;
+			_baseTestRepository = baseTestRepository;
 			_questionUpsertValidator = questionUpsertValidator;
 			_mapper = mapper;
 		}
@@ -36,7 +38,17 @@ namespace HRM.Services.RecruitmentManager
 			{
 				return new ApiResponse<IEnumerable<QuestionResult>>
 				{
-					Metadata = _mapper.Map<IEnumerable<QuestionResult>>(await _baseRepository.GetAllQueryAble().ToListAsync()),
+					Metadata = await (from q in _baseRepository.GetAllQueryAble()
+									  join t in _baseTestRepository.GetAllQueryAble()
+									  on q.TestId equals t.Id
+									  select new QuestionResult
+									  {
+										  Id = q.Id,
+										  TestId = q.TestId,
+										  TestName = t.Name,
+										  QuestionText = q.QuestionText,
+										  Point = q.Point
+									  }).ToListAsync(),
 					IsSuccess = true
 				};
 			}
@@ -44,6 +56,7 @@ namespace HRM.Services.RecruitmentManager
 			{
 				throw new Exception(ex.Message);
 			}
+			throw new NotImplementedException();
 		}
 		public async Task<ApiResponse<bool>> AddNewQuestion(QuestionUpsert questionAdd)
 		{

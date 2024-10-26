@@ -13,7 +13,6 @@ namespace HRM.Data.Entities
         public DateTime ExpirationDate { get; set; }
         public string? ExperienceRequired { get; set; }
         public int EmployeeId { get; set; }
-        public int WebId { get; set; }
         public ICollection<RecruitmentWeb>? recruitmentWebs { get; set; }
 	}
 }
