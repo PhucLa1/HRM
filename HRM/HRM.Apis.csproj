@@ -13,6 +13,9 @@
 	<ItemGroup>
     <None Remove="HRM.http" />
   </ItemGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="wwwroot\Email\ProcessPartimePlan.html" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
@@ -22,6 +25,7 @@
     <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
     <PackageReference Include="Google.Apis.Core" Version="1.68.0" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3427" />
+    <PackageReference Include="Coravel" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />

@@ -1,9 +1,11 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Coravel;
 using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
+using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
@@ -15,6 +17,7 @@ using HRM.Services.Briefcase;
 using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
+using HRM.Services.Scheduler;
 using HRM.Services.TimeKeeping;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,7 +70,7 @@ builder.Services.AddScoped<IValidator<AllowanceUpsert>, AllowanceUpsertValidator
 builder.Services.AddScoped<IValidator<InsuranceUpsert>, InsuranceUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractTypeUpsert>, ContractTypeUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractSalaryUpsert>, ContractSalaryUpsertValidator>();
-builder.Services.AddScoped<IValidator<AdminLogin>, AdminLoginValidator>();
+builder.Services.AddScoped<IValidator<AccountLogin>, AccountLoginValidator>();
 builder.Services.AddScoped<IValidator<DepartmentUpsert>, DepartmentUpsertValidator>();
 builder.Services.AddScoped<IValidator<DeductionUpsert>, DeductionUpsertValidator>();
 builder.Services.AddScoped<IValidator<BonusUpsert>, BonusUpsertValidator>();
@@ -89,6 +92,11 @@ builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>(
 builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
 
 builder.Services.AddScoped<IValidator<RecruitmentWebUpsert>, RecruitmentWebUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
+builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
+
 #endregion
 
 
@@ -127,10 +135,16 @@ builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<IGmailsService, GmailsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 
+
 builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
 
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IAdvancesService, AdvancesService>();
+
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
+#endregion
+
 
 builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
 
@@ -164,7 +178,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
         options.Events = new JwtBearerEvents
         {
@@ -175,10 +189,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+
+#region Authorization
+
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); //1: User, 2: Admin
+    options.AddPolicy(RoleExtensions.ADMIN_ROLE, policy => policy.RequireClaim("Role", Role.Admin.ToString())); 
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.User.ToString())); 
+});
+
+
+#endregion
+
+
 
 //Logging
 builder.Host.UseSerilog((context, configuration) => 
@@ -186,7 +214,7 @@ builder.Host.UseSerilog((context, configuration) =>
 );
 
 
-#region + Setting
+#region  Setting
 
 
 //Setting config
@@ -197,6 +225,12 @@ builder.Services.Configure<CompanySetting>(builder.Configuration.GetSection("Com
 #endregion
 
 
+
+#region Scheduler
+builder.Services.AddScheduler();
+builder.Services.AddTransient<ChangePartimePlanStatus>();
+
+#endregion
 
 
 builder.Services.AddControllers();
@@ -210,6 +244,17 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 var app = builder.Build();
+
+
+#region Scheduler
+app.Services.UseScheduler(scheduler =>
+{
+    scheduler.Schedule<ChangePartimePlanStatus>()
+        .EveryMinute()
+        .PreventOverlapping(nameof(ChangePartimePlanStatus));
+});
+#endregion
+
 
 //Seeding data
 using (var scope = app.Services.CreateScope())

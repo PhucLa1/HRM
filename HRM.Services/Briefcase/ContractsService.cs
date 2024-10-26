@@ -1,4 +1,5 @@
 ﻿using Aspose.Words;
+using AutoMapper;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using FluentValidation;
@@ -13,11 +14,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using AsposeDocument = Aspose.Words.Document;
 using Body = DocumentFormat.OpenXml.Wordprocessing.Body;
+using Position = HRM.Data.Entities.Position;
 namespace HRM.Services.Briefcase
 {
     public interface IContractsService
     {
+        Task<ApiResponse<IEnumerable<ContractResult>>> GetAllContract();
+        Task<ApiResponse<bool>> AddNewContract(ContractUpsert contractAdd);
         Task<ApiResponse<bool>> CreateNewContract(int applicantId, ContractAdd contractAdd);
+        Task<ApiResponse<bool>> RemoveContract(int id);
         Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate);
         Task<ApiResponse<bool>> SignContract();
     }
@@ -25,11 +30,20 @@ namespace HRM.Services.Briefcase
     {
         private readonly IBaseRepository<Applicants> _applicantsRepository;
         private readonly IBaseRepository<Contract> _contractRepository;
+        private readonly IBaseRepository<Allowance> _allowanceRepository;
+        private readonly IBaseRepository<Insurance> _insuranceRepository;
         private readonly IBaseRepository<ContractAllowance> _contractAllowanceRepository;
+        private readonly IBaseRepository<ContractInsurance> _contractInsuranceRepository;
+        private readonly IBaseRepository<ContractType> _contractTypeRepository;
+        private readonly IBaseRepository<ContractSalary> _contractSalaryRepository;
+        private readonly IBaseRepository<Position> _positionRepository;
+        private readonly IBaseRepository<Department> _departmentRepository;
         private readonly IEmailService _emailService;
         private readonly IValidator<ContractAdd> _contractAddValidator;
         private readonly IValidator<ContractUpdate> _contractUpdateValidator;
+        private readonly IValidator<ContractUpsert> _contractUpsertValidator;
         private readonly CompanySetting _serverCompanySetting;
+        private readonly IMapper _mapper;
         private const string CONTRACT_NOTIFICATION = "Thông báo về việc tạo hợp đồng lao động .";
         private const string FOLER = "Email";
         private const string CONTRACT_NOTIFICATION_FILE = "ContractNotification.html";
@@ -38,21 +52,200 @@ namespace HRM.Services.Briefcase
         public ContractsService(
             IBaseRepository<Applicants> applicantsRepository,
             IBaseRepository<Contract> contractRepository,
+            IBaseRepository<Allowance> allowanceRepository,
+            IBaseRepository<Insurance> insuranceRepository,
             IBaseRepository<ContractAllowance> contractAllowanceRepository,
+            IBaseRepository<ContractInsurance> contractInsuranceRepository,
+            IBaseRepository<ContractType> contractTypeRepository,
+            IBaseRepository<ContractSalary> contractSalaryRepository,
+            IBaseRepository<Position> positionRepository,
+            IBaseRepository<Department> departmentRepository,
             IEmailService emailService,
             IValidator<ContractAdd> contractAddValidator,
             IValidator<ContractUpdate> contractUpdateValidator,
-            IOptions<CompanySetting> serverCompanySetting
+            IValidator<ContractUpsert> contractUpsertValidator,
+            IOptions<CompanySetting> serverCompanySetting,
+            IMapper mapper
             )
         {
             _contractRepository = contractRepository;
+            _allowanceRepository = allowanceRepository;
+            _insuranceRepository = insuranceRepository;
             _contractAllowanceRepository = contractAllowanceRepository;
+            _contractInsuranceRepository = contractInsuranceRepository;
+            _contractTypeRepository = contractTypeRepository;
+            _contractSalaryRepository = contractSalaryRepository;
+            _positionRepository = positionRepository;
+             _departmentRepository = departmentRepository;
             _emailService = emailService;
             _contractAddValidator = contractAddValidator;
             _contractUpdateValidator = contractUpdateValidator;
+            _contractUpsertValidator = contractUpsertValidator;
             _applicantsRepository = applicantsRepository;
             _serverCompanySetting = serverCompanySetting.Value;
+            _mapper = mapper;
         }
+        public async Task<ApiResponse<IEnumerable<ContractResult>>> GetAllContract()
+        {
+            try
+            {
+                var contracts = await (from c in _contractRepository.GetAllQueryAble()
+                                    join p in _positionRepository.GetAllQueryAble() on c.PositionId equals p.Id
+                                    join d in _departmentRepository.GetAllQueryAble() on p.DepartmentId equals d.Id
+                                    join ct in _contractTypeRepository.GetAllQueryAble() on c.ContractTypeId equals ct.Id
+                                    join cs in _contractSalaryRepository.GetAllQueryAble() on c.ContractSalaryId equals cs.Id
+                                    select new ContractResult
+                                    {
+                                        Id = c.Id,
+                                        ContractTypeId = c.ContractTypeId,
+                                        DepartmentId = d.Id,
+                                        PositionId = c.PositionId,
+                                        ContractSalaryId = c.ContractSalaryId,
+                                        BaseSalary = cs.BaseSalary,
+                                        BaseInsurance = cs.BaseInsurance,
+                                        RequiredDays = cs.RequiredDays,
+                                        WageDaily = cs.WageDaily,
+                                        RequiredHours = cs.RequiredHours,
+                                        WageHourly = cs.WageHourly,
+                                        Factor = cs.Factor,
+                                        ContractTypeName = ct.Name,
+                                        PositionName = p.Name,
+                                        DepartmentName = d.Name,
+                                        TypeContract = c.TypeContract,
+                                        ContractStatus = c.ContractStatus,
+                                        StartDate = c.StartDate,
+                                        EndDate = c.EndDate,
+                                        EmployeeSignStatus = c.EmployeeSignStatus,
+                                        CompanySignStatus = c.CompanySignStatus,
+                                        Name = c.Name,
+                                        DateOfBirth = c.DateOfBirth,
+                                        Gender = c.Gender,
+                                        Address = c.Address,
+                                        CountrySide = c.CountrySide,
+                                        NationalID = c.NationalID,
+                                        NationalStartDate = c.NationalStartDate,
+                                        NationalAddress = c.NationalAddress,
+                                        Level = c.Level,
+                                        Major = c.Major,
+                                        AllowanceResults = (from ca in _contractAllowanceRepository.GetAllQueryAble()
+                                                            join a in _allowanceRepository.GetAllQueryAble() on ca.AllowanceId equals a.Id
+                                                            where ca.ContractId == c.Id
+                                                            select new AllowanceResult
+                                                            {
+                                                                Id = a.Id,
+                                                                Name = a.Name,
+                                                                Terms = a.Terms,
+                                                                Amount = a.Amount,
+                                                                ParameterName = a.ParameterName
+                                                            }).ToList(),
+                                        InsuranceResults = (from ci in _contractInsuranceRepository.GetAllQueryAble()
+                                                            join insurance in _insuranceRepository.GetAllQueryAble() on ci.InsuranceId equals insurance.Id
+                                                            where ci.ContractId == c.Id
+                                                            select new InsuranceResult
+                                                            {
+                                                                Id = insurance.Id,
+                                                                Name = insurance.Name,
+                                                                PercentCompany = insurance.PercentCompany,
+                                                                PercentEmployee = insurance.PercentEmployee
+                                                            }).ToList()
+                                    }).ToListAsync();
+                return new ApiResponse<IEnumerable<ContractResult>>
+                {
+
+                    Metadata = contracts,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> AddNewContract(ContractUpsert contractAdd)
+        {
+            try
+            {
+                var resultValidation = _contractUpsertValidator.Validate(contractAdd);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+                var newContract = new Contract
+                {
+                    ContractSalaryId = contractAdd.ContractSalaryId,
+                    ContractTypeId = contractAdd.ContractTypeId,
+                    StartDate = contractAdd.StartDate,
+                    EndDate = contractAdd.EndDate,
+                    CompanySignStatus = CompanySignStatus.Signed,
+                    TypeContract = contractAdd.TypeContract,
+                    PositionId = contractAdd.PositionId,
+                    Name = contractAdd.Name,
+                    DateOfBirth = contractAdd.DateOfBirth,
+                    Gender = contractAdd.Gender,
+                    Address = contractAdd.Address,
+                    CountrySide = contractAdd.CountrySide,
+                    NationalID = contractAdd.NationalID,
+                    NationalStartDate = contractAdd.NationalStartDate,
+                    NationalAddress = contractAdd.NationalAddress,
+                    Level = contractAdd.Level,
+                    Major = contractAdd.Major,
+                };
+                using (var transaction = await _contractRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _contractRepository.AddAsync(newContract);
+                        await _contractRepository.SaveChangeAsync();
+
+                        //Lưu các allowance
+                        var contractAllowance = new List<ContractAllowance>();
+                        if (contractAdd.AllowanceIds != null)
+                        {
+                            foreach (var allowanceId in contractAdd.AllowanceIds)
+                            {
+                                contractAllowance.Add(new ContractAllowance
+                                {
+                                    ContractId = newContract.Id,
+                                    AllowanceId = allowanceId
+                                });
+                            }
+                            await _contractAllowanceRepository.AddRangeAsync(contractAllowance);
+                            await _contractAllowanceRepository.SaveChangeAsync();
+                        }
+                        //Lưu các insurance
+                        var contractInsurances = new List<ContractInsurance>();
+                        if (contractAdd.InsuranceIds != null)
+                        {
+                            foreach (var insuranceId in contractAdd.InsuranceIds)
+                            {
+                                contractInsurances.Add(new ContractInsurance
+                                {
+                                    ContractId = newContract.Id,
+                                    InsuranceId = insuranceId
+                                });
+                            }
+                            await _contractInsuranceRepository.AddRangeAsync(contractInsurances);
+                            await _contractInsuranceRepository.SaveChangeAsync();
+                        }
+                        //Commit dữ liệu
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        //Dữ liệu bị lỗi thì rollback
+                        await transaction.RollbackAsync();
+                        throw new Exception(ex.Message);
+                    }                    
+                }
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<ApiResponse<bool>> CreateNewContract(int applicantId, ContractAdd contractAdd)
         {
             //Tạo mới hợp đồng và gửi mail cho ứng cử viên
@@ -323,6 +516,20 @@ namespace HRM.Services.Briefcase
             else
             {
                 throw new ArgumentException("Invalid day of the week: " + dayOfWeek);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> RemoveContract(int id)
+        {
+            try
+            {
+                await _contractRepository.RemoveAsync(id);
+                await _contractRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 

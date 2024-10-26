@@ -21,29 +21,33 @@ namespace HRM.Services.User
     }
     public interface IAuthService
     {
-        Task<ApiResponse<string>> AdminLogin(AdminLogin adminLogin); //Chỉ dùng riêng cho admin
+        Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin); //Chỉ dùng riêng cho admin
+        Task<ApiResponse<string>> EmployeeLogin(AccountLogin employeeLogin); //Dùng cho nhân viên
     }
     public class AuthService : IAuthService
     {
         private readonly IBaseRepository<Admin> _adminRepository;
+        private readonly IBaseRepository<Employee> _employeeRepository;
         private readonly JwtSetting _jwtServerSetting;
-        private readonly IValidator<AdminLogin> _adminLoginValidator;
+        private readonly IValidator<AccountLogin> _accountLoginValidator;
         public AuthService(
             IBaseRepository<Admin> adminRepository,
             IOptions<JwtSetting> jwtServerSetting,
-            IValidator<AdminLogin> adminLoginValidator
+            IValidator<AccountLogin> accountLoginValidator,
+            IBaseRepository<Employee> employeeRepository
             )
         {
             _adminRepository = adminRepository;
             _jwtServerSetting = jwtServerSetting.Value;
-            _adminLoginValidator = adminLoginValidator;
+            _accountLoginValidator = accountLoginValidator;
+            _employeeRepository = employeeRepository;
         }
 
-        public async Task<ApiResponse<string>> AdminLogin(AdminLogin adminLogin)
+        public async Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin)
         {
             try
             {
-                var resultValidation = _adminLoginValidator.Validate(adminLogin);
+                var resultValidation = _accountLoginValidator.Validate(adminLogin);
                 if (!resultValidation.IsValid)
                 {
                     return ApiResponse<string>.FailtureValidation(resultValidation.Errors);
@@ -61,12 +65,12 @@ namespace HRM.Services.User
                     return new ApiResponse<string> { Message = [AuthError.PASS_NOT_CORRECT] };
                 }
                 string encrypterToken = await JWTGenerator(new UserJwt
-                    {
-                        Email = adminInDb.Email,
-                        Password = adminInDb.Password,
-                        Role = Role.Admin,
-                        Id = adminInDb.Id
-                    }
+                {
+                    Email = adminInDb.Email,
+                    Password = adminInDb.Password,
+                    Role = Role.Admin,
+                    Id = adminInDb.Id
+                }
                 );
                 return new ApiResponse<string> { Metadata = encrypterToken, IsSuccess = true };
             }
@@ -75,6 +79,46 @@ namespace HRM.Services.User
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ApiResponse<string>> EmployeeLogin(AccountLogin employeeLogin)
+        {
+            try
+            {
+                var resultValidation = _accountLoginValidator.Validate(employeeLogin);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<string>.FailtureValidation(resultValidation.Errors);
+                }
+                var employeeInDb = await _employeeRepository.GetAllQueryAble().
+                    Where(e => e.Email == employeeLogin.Email)
+                    .FirstOrDefaultAsync();
+                if (employeeInDb == null)
+                {
+                    return new ApiResponse<string> { Message = [AuthError.EMAIL_NOT_CORRECT] };
+                }
+                bool isCorrectPass = BCrypt.Net.BCrypt.Verify(employeeLogin.Password, employeeInDb.Password);
+                if (!isCorrectPass)
+                {
+                    return new ApiResponse<string> { Message = [AuthError.PASS_NOT_CORRECT] };
+                }
+                string encrypterToken = await JWTGenerator(new UserJwt
+                    {
+                        Email = employeeInDb.Email!,
+                        Password = employeeInDb.Password!,
+                        Role = Role.User,
+                        Id = employeeInDb.Id
+                    }
+                );
+                return new ApiResponse<string> { Metadata = encrypterToken, IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+
         private async Task<string> JWTGenerator(UserJwt userJwt)
         {
             try

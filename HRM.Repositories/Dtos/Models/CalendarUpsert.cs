@@ -45,13 +45,13 @@ namespace HRM.Repositories.Dtos.Models
             When(p => p.ShiftTime == ShiftTime.Afternoon, () =>
             {
                 RuleFor(p => p.TimeStart)
-                    .GreaterThanOrEqualTo(new TimeOnly(1, 0)) // 1:00 PM
-                    .LessThanOrEqualTo(new TimeOnly(5, 30))   // 5:30 PM
+                    .GreaterThanOrEqualTo(new TimeOnly(13, 0)) // 1:00 PM
+                    .LessThanOrEqualTo(new TimeOnly(17, 30))   // 5:30 PM
                     .WithMessage("Ca chiều chỉ được từ 13:00 đến 17:30.");
 
                 RuleFor(p => p.TimeEnd)
-                    .GreaterThan(new TimeOnly(1, 0))          // Sau 1:00 PM
-                    .LessThanOrEqualTo(new TimeOnly(5, 30))   // 5:30 PM
+                    .GreaterThan(new TimeOnly(13, 0))          // Sau 1:00 PM
+                    .LessThanOrEqualTo(new TimeOnly(17, 30))   // 5:30 PM
                     .WithMessage("Ca chiều chỉ được từ 13:00 đến 17:30.");
             });
 
