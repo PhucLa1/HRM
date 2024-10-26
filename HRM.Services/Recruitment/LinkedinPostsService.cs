@@ -1,4 +1,6 @@
-﻿using Google.Apis.Gmail.v1.Data;
+﻿using Azure.Core;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
+using Google.Apis.Gmail.v1.Data;
 using HRM.Repositories.Dtos.Models;
 using Newtonsoft.Json;
 using System;
@@ -14,6 +16,7 @@ namespace HRM.Services.Recruitment
 	{
 		Task<bool> PostToLinkedIn(string message, string token);
 		Task PostToLinkedIn2();
+		Task PostToLinkedIn3(string message);
 	}
 
 	public class LinkedinPostsService : ILinkedInPostService
@@ -103,6 +106,68 @@ namespace HRM.Services.Recruitment
 			response.EnsureSuccessStatusCode();
 			Console.WriteLine(await response.Content.ReadAsStringAsync());
 
+		}
+
+		public async Task PostToLinkedIn3(string message)
+		{
+			using var client = new HttpClient();
+			var request = new HttpRequestMessage(HttpMethod.Post, "https://api.linkedin.com/v2/ugcPosts");
+			request.Headers.Add("Authorization", $"Bearer AQXAVucAeaNHM_EyXnpUspdA9kHeKk2Fz_j2iJKtG0hN3d2sOKpEHe06S8Huwdk951wVo3EzRp98n-fYbvj4wzxpG0rGT76kw3fTunjpEjhHXyOleCzZeB3mLVm9Jnr6slrmNybMd7bX3fALkG7dcAlZ08aTRldB-XjEnAAXH_iKvscGg8jD3ItOPFWtE9UUc5hDRmNtJmu1bZdHc0kAEfnb0taDWWDkqX1T9ONNXiF6hbobf-2SPDRoL-zbY-uuyp-antCVdaSoonif0xVVv19hnC_-CIfZWEsS1-E2BiRr-icnFgzssiKNiT4LQzGUbTeID8qoipsNpUO8mCkZ_HMcK9OTjA");
+			request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
+
+			// Định dạng JSON với các biến động
+			var content = new StringContent(
+				$@"{{
+            ""author"": ""urn:li:person:nkP81-IERu"",
+            ""lifecycleState"": ""PUBLISHED"",
+            ""specificContent"": {{
+                ""com.linkedin.ugc.ShareContent"": {{
+                    ""shareCommentary"": {{
+                        ""text"": ""{message}""
+                    }},
+                    ""shareMediaCategory"": ""ARTICLE"",
+                    ""media"": [
+                        {{
+                            ""status"": ""READY"",
+                            ""description"": {{
+                                ""text"": ""Đường dẫn tới trang công ty""
+                            }},
+                            ""originalUrl"": ""linkedin.com/company/testapihrm"",
+                            ""title"": {{
+                                ""text"": ""Công ty chúng tôi""
+                            }}
+                        }}
+                    ]
+                }}
+            }},
+            ""visibility"": {{
+                ""com.linkedin.ugc.MemberNetworkVisibility"": ""PUBLIC""
+            }}
+        }}",
+				System.Text.Encoding.UTF8, "application/json"
+			);
+
+			request.Content = content;
+
+			try
+			{
+				var response = await client.SendAsync(request);
+
+				if (response.IsSuccessStatusCode)
+				{
+					Console.WriteLine("Post was successful!");
+					Console.WriteLine(await response.Content.ReadAsStringAsync());
+				}
+				else
+				{
+					Console.WriteLine($"Error: {response.StatusCode}");
+					Console.WriteLine(await response.Content.ReadAsStringAsync());
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Exception: {ex.Message}");
+			}
 		}
 	}
 }

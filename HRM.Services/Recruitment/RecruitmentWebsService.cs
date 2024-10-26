@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using FluentValidation;
 using HRM.Data.Entities;
 using HRM.Repositories.Base;
@@ -48,6 +49,9 @@ namespace HRM.Services.Recruitment
 		{
 			try
 			{
+				var decsription = await (from jp in _jobPostingRepository.GetAllQueryAble()
+										 where jp.Id == recruitmentWebAdd.JobPostingId
+										 select jp.Description).FirstOrDefaultAsync();
 				var resultValidation = _recruitmentWebUpsertValidator.Validate(recruitmentWebAdd);
 				if (!resultValidation.IsValid)
 				{
@@ -55,12 +59,15 @@ namespace HRM.Services.Recruitment
 				}
 				var message = $"New job posting";
 				//bool result = await _linkedInPostService.PostToLinkedIn(message, "AQUucvRfeLJHhB2D8jY-7e1S9f38J4P_ehFGzJ72N5A_fnj0BP1P6FhlC-aXMLTkHOR7bQ4u8axEvN-aUHp0HabEyDzFtb_0Hc_3yhKbvJYB_KhVjTb6loK0J7jN3wZOdxqtk7niHuFB-ZKf0wtDlHPi0yiRTiUCWeXBIcll5Hm7HbwKrOBrqJrjpY12salaYJRI_6eVO8uLDfP_KfT1fgk0nzt0XqBR-eAl11d7pcN17R8x9XdD9hKIAOVjx93DIAkXaunA1N5OfT5jWWBdsE-K1wZq70D_MXdO4PCCFgeZx1J-z4OgWsDYSKG8mal958J9avL3Ngprs_gCl2Ks1t6-BC9gAg");
-				_linkedInPostService.PostToLinkedIn2();
-				return new ApiResponse<bool> { IsSuccess = true };
+				if (decsription != null)
+				{
+					await _linkedInPostService.PostToLinkedIn3(decsription);
+				}
+				/*return new ApiResponse<bool> { IsSuccess = true };*/
 				/*if (!result)
 				{
-					return new ApiResponse<bool> { IsSuccess = false};
-				}
+					return new ApiResponse<bool> { IsSuccess = false };
+				}*/
 				await _baseRepository.AddAsync(
 					new RecruitmentWeb
 					{
@@ -69,7 +76,7 @@ namespace HRM.Services.Recruitment
 					}
 				);
 				await _baseRepository.SaveChangeAsync();
-				return new ApiResponse<bool> { IsSuccess = true };*/
+				return new ApiResponse<bool> { IsSuccess = true };
 			}
 			catch (Exception ex)
 			{
