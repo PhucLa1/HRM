@@ -118,32 +118,32 @@ namespace HRM.Services.Recruitment
 			// Định dạng JSON với các biến động
 			var content = new StringContent(
 				$@"{{
-            ""author"": ""urn:li:person:nkP81-IERu"",
-            ""lifecycleState"": ""PUBLISHED"",
-            ""specificContent"": {{
-                ""com.linkedin.ugc.ShareContent"": {{
-                    ""shareCommentary"": {{
-                        ""text"": ""{message}""
-                    }},
-                    ""shareMediaCategory"": ""ARTICLE"",
-                    ""media"": [
-                        {{
-                            ""status"": ""READY"",
-                            ""description"": {{
-                                ""text"": ""Đường dẫn tới trang công ty""
-                            }},
-                            ""originalUrl"": ""linkedin.com/company/testapihrm"",
-                            ""title"": {{
-                                ""text"": ""Công ty chúng tôi""
-                            }}
-                        }}
-                    ]
-                }}
-            }},
-            ""visibility"": {{
-                ""com.linkedin.ugc.MemberNetworkVisibility"": ""PUBLIC""
-            }}
-        }}",
+					""author"": ""urn:li:person:nkP81-IERu"",
+					""lifecycleState"": ""PUBLISHED"",
+					""specificContent"": {{
+						""com.linkedin.ugc.ShareContent"": {{
+							""shareCommentary"": {{
+								""text"": ""{message}""
+							}},
+							""shareMediaCategory"": ""ARTICLE"",
+							""media"": [
+								{{
+									""status"": ""READY"",
+									""description"": {{
+										""text"": ""Đường dẫn tới trang công ty""
+									}},
+									""originalUrl"": ""linkedin.com/company/testapihrm"",
+									""title"": {{
+										""text"": ""Công ty chúng tôi""
+									}}
+								}}
+							]
+						}}
+					}},
+					""visibility"": {{
+						""com.linkedin.ugc.MemberNetworkVisibility"": ""PUBLIC""
+					}}
+				}}",
 				System.Text.Encoding.UTF8, "application/json"
 			);
 
