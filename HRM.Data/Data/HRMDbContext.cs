@@ -49,7 +49,7 @@ namespace HRM.Data.Data
             }
         }
 
-        private int GetCurrentUserId()
+        public int GetCurrentUserId()
         {
             if (_httpContextAccessor == null || _httpContextAccessor.HttpContext == null)
             {
