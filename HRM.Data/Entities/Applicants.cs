@@ -1,4 +1,6 @@
 ﻿using HRM.Data.Entities.Base;
+using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HRM.Data.Entities
 {
@@ -15,7 +17,7 @@ namespace HRM.Data.Entities
         public Position? Position { get; set; }
         public Test? Test { get; set; }
         public ICollection<TestResult>? testResults { get; set; }
-
-
-    }
+        [NotMapped]
+		public IFormFile? file { get; set; }
+	}
 }

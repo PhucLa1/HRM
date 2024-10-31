@@ -93,16 +93,15 @@ namespace HRM.Data.Data
                         };
                         await context.Employees.AddAsync(employee);
                         await context.SaveChangesAsync();
-
-
-                        //Commit dữ liệu
-                        await transaction.CommitAsync();
+						
+						//Commit dữ liệu
+						await transaction.CommitAsync();
                     }
                     catch (Exception ex)
                     {
 						await transaction.RollbackAsync();
-						throw new Exception(ex.Message);
-					}
+                        throw new Exception(ex.Message);
+                    }
                 }
                 if (context.Admins.Any())
                 {
