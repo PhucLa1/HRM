@@ -16,4 +16,5 @@ public class SalaryComponent
 {
     public string Name { get; set; } = "";
     public string ParameterName { get; set; } = "";
+    public string Desc { get; set; } = "";
 }

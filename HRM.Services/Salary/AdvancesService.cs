@@ -53,7 +53,8 @@ namespace HRM.Services.Salary
                                 {
                                     Id = a.Id,
                                     Amount = a.Amount,
-                                    PayPeriod = a.PayPeriod,
+                                    Month = a.Month,
+                                    Year = a.Year,
                                     EmployeeId = a.EmployeeId,
                                     Reason = a.Reason,
                                     Note = a.Note,
@@ -82,7 +83,8 @@ namespace HRM.Services.Salary
                 }
                 await _advanceRepository.AddAsync(new Advance {
                     Amount = advanceAdd.Amount,
-                    PayPeriod = advanceAdd.PayPeriod,
+                    Month = advanceAdd.Month,
+                    Year = advanceAdd.Year,
                     EmployeeId = advanceAdd.EmployeeId,
                     Reason = advanceAdd.Reason.Trim(),
                     Note = advanceAdd.Note,
@@ -107,7 +109,8 @@ namespace HRM.Services.Salary
                 }
                 var advance = await _advanceRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
                 advance.Amount = advanceUpdate.Amount;
-                advance.PayPeriod = advanceUpdate.PayPeriod;
+                advance.Month = advanceUpdate.Month;
+                advance.Year = advanceUpdate.Year;
                 advance.EmployeeId = advanceUpdate.EmployeeId;
                 advance.Reason = advanceUpdate.Reason.Trim();
                 advance.Note = advanceUpdate.Note;
