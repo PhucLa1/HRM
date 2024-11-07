@@ -7,7 +7,7 @@ namespace HRM.Apis.Swagger.Examples.Requests
 	{
 		public QuestionUpsert GetExamples()
 		{
-			return new QuestionUpsert {TestId = 1 ,QuestionText = "Tại sao ?", Point = 2.0 };
+			return new QuestionUpsert {TestId = 1 ,QuestionText = "Tại sao ?"};
 		}
 	}
 }

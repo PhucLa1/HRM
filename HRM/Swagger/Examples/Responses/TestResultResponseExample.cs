@@ -15,10 +15,10 @@ namespace HRM.Apis.Swagger.Examples.Responses
 					{
 						Id = 1,
 						ApplicantId = 1,
-						ApplicantName = "John Doe",
 						QuestionsId = 1,
-						QuestionText = "What is the difference between a web designer and a web developer?",
-						Point = 4.5
+						ApplicantTestId = 1,
+						Point = 4.5,
+						Comment = "Good job"
 					}
 				},
 				IsSuccess = true,

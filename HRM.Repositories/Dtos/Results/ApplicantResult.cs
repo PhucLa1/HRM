@@ -15,8 +15,8 @@ namespace HRM.Repositories.Dtos.Results
 		public string? FileDataStore { get; set; }
 		public int PositionId { get; set; }
 		public string? PositionName { get; set; }
-		public double Rate { get; set; }
-		public int TestId { get; set; }
+		public double? Rate { get; set; }
+		public int? TestId { get; set; }
 		public string? TestName { get; set; }
 		public string? InterviewerName { get; set; }
 	}

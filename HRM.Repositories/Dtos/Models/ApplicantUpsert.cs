@@ -17,8 +17,8 @@ namespace HRM.Repositories.Dtos.Models
 		public string? FileDataStore { get; set; }
 		public IFormFile? file { get; set; }
 		public int PositionId { get; set; }
-		public double Rate { get; set; }
-		public int TestId { get; set; }
+		public double? Rate { get; set; }
+		public int? TestId { get; set; }
 		public string? InterviewerName { get; set; }
 	}
 	public class ApplicantUpsertValidator : AbstractValidator<ApplicantUpsert>

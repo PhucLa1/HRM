@@ -17,6 +17,7 @@ namespace HRM.Services.Recruitment
 		Task<bool> PostToLinkedIn(string message, string token);
 		Task PostToLinkedIn2();
 		Task PostToLinkedIn3(string message);
+		Task<bool> PostToLinkedIn4(string message);
 	}
 
 	public class LinkedinPostsService : ILinkedInPostService
@@ -112,8 +113,10 @@ namespace HRM.Services.Recruitment
 		{
 			using var client = new HttpClient();
 			var request = new HttpRequestMessage(HttpMethod.Post, "https://api.linkedin.com/v2/ugcPosts");
-			request.Headers.Add("Authorization", $"Bearer AQXAVucAeaNHM_EyXnpUspdA9kHeKk2Fz_j2iJKtG0hN3d2sOKpEHe06S8Huwdk951wVo3EzRp98n-fYbvj4wzxpG0rGT76kw3fTunjpEjhHXyOleCzZeB3mLVm9Jnr6slrmNybMd7bX3fALkG7dcAlZ08aTRldB-XjEnAAXH_iKvscGg8jD3ItOPFWtE9UUc5hDRmNtJmu1bZdHc0kAEfnb0taDWWDkqX1T9ONNXiF6hbobf-2SPDRoL-zbY-uuyp-antCVdaSoonif0xVVv19hnC_-CIfZWEsS1-E2BiRr-icnFgzssiKNiT4LQzGUbTeID8qoipsNpUO8mCkZ_HMcK9OTjA");
 			request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
+			request.Headers.Add("LinkedIn-Version", "202410");
+			request.Headers.Add("Authorization", "Bearer AQVwL4qVaXW2Hd5gwNT7bKrD7mjZnVaak0kkXafV6UiS1omXRl3uIfqJrvfFTXWn1ySiN5mjAhRH-u2XTlMZzzPA6rNEdzsSOlt4wdk52U1tAl23Hd85LIwMjiqR3_NWKesTIJ4_HNDQV7rbEMC77lGngJ41pR5OOwU7rUnJzK6YPK0rfvPdYnCeiL5fniezkbkOl6MtrZdTlRLQr-hUuqbiqMN7d9EDwbZhVCd0CsqS9StIFOZ_I94rsrw68Np1LQR7hXnn9ttNfEPeRzMtm8GtClN02dUV3cfdxbCgEsHmrN2R41xyjc8wsZ1-Wa5k9lO60IAfzRq6d5ceviWIhsOmt3sxLg");
+			request.Headers.Add("Cookie", "lidc=\"b=OB77:s=O:r=O:a=O:p=O:g=3282:u=6:x=1:i=1730994291:t=1731026178:v=2:sig=AQGpjavDX_dUKVeFRCPIKi29elJR8TsD\"; bcookie=\"v=2&529a09be-5c93-4dbe-8cbb-c454c0566956\"");
 
 			// Định dạng JSON với các biến động
 			var content = new StringContent(
@@ -168,6 +171,50 @@ namespace HRM.Services.Recruitment
 			{
 				Console.WriteLine($"Exception: {ex.Message}");
 			}
+		}
+
+		public async Task<bool> PostToLinkedIn4(string message)
+		{
+			using var client = new HttpClient();
+			var request = new HttpRequestMessage(HttpMethod.Post, "https://api.linkedin.com/rest/posts");
+			request.Headers.Add("Authorization", "Bearer AQVwL4qVaXW2Hd5gwNT7bKrD7mjZnVaak0kkXafV6UiS1omXRl3uIfqJrvfFTXWn1ySiN5mjAhRH-u2XTlMZzzPA6rNEdzsSOlt4wdk52U1tAl23Hd85LIwMjiqR3_NWKesTIJ4_HNDQV7rbEMC77lGngJ41pR5OOwU7rUnJzK6YPK0rfvPdYnCeiL5fniezkbkOl6MtrZdTlRLQr-hUuqbiqMN7d9EDwbZhVCd0CsqS9StIFOZ_I94rsrw68Np1LQR7hXnn9ttNfEPeRzMtm8GtClN02dUV3cfdxbCgEsHmrN2R41xyjc8wsZ1-Wa5k9lO60IAfzRq6d5ceviWIhsOmt3sxLg");
+			request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
+			request.Headers.Add("LinkedIn-Version", "202410");
+
+			var content = new StringContent(
+				$@"{{
+					""author"": ""urn:li:organization:104872800"",
+					""commentary"": ""{message}"",
+					""visibility"": ""PUBLIC"",
+					""distribution"": {{
+						""feedDistribution"": ""MAIN_FEED"",
+						""targetEntities"": [],
+						""thirdPartyDistributionChannels"": []
+					}},
+					""lifecycleState"": ""PUBLISHED"",
+					""isReshareDisabledByAuthor"": false
+				}}", System.Text.Encoding.UTF8, "application/json");
+			request.Content = content;
+			try
+			{
+				var response = await client.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					Console.WriteLine("Post successful!");
+					return true;
+				}
+				else
+				{
+					Console.WriteLine("Post failed. Response: " + await response.Content.ReadAsStringAsync());
+					return false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Exception: {ex.Message}");
+				return false;
+			}
+
 		}
 	}
 }

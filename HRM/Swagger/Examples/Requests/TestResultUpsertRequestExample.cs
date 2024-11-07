@@ -11,7 +11,8 @@ namespace HRM.Apis.Swagger.Examples.Requests
 			{
 				ApplicantId = 1,
 				QuestionsId = 1,
-				Point = 4.5
+				Point = 4.5,
+				Comment = "Good job"
 			};
 		}
 	}

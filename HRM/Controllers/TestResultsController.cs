@@ -36,6 +36,19 @@ namespace HRM.Apis.Controllers
 			return Ok(await _testResultService.GetAllTestResult());
 		}
 
+		/// <summary>
+		/// Get all testResults by testId
+		/// </summary>
+		/// <response code="200">Return all the testResults in the company by testId in the metadata of api response</response>
+		[HttpGet]
+		[Route("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<TestResultResult>>))]
+		[SwaggerResponseExample(StatusCodes.Status200OK, typeof(TestResultResponseExample))]
+		public async Task<IActionResult> GetAllTestResultByTestId(int id)
+		{
+			return Ok(await _testResultService.GetAllTestResultByTestId(id));
+		}
+
 
 		/// <summary>
 		/// Add new testResults
@@ -47,6 +60,18 @@ namespace HRM.Apis.Controllers
 		public async Task<IActionResult> AddNew([FromBody] TestResultUpsert testResultAdd)
 		{
 			return Ok(await _testResultService.AddNewTestResult(testResultAdd));
+		}
+
+		/// <summary>
+		/// Add new testResults
+		/// </summary>
+		/// <response code="200">Return the api response</response>
+		[HttpPost]
+		[Route("list")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+		public async Task<IActionResult> AddNewList([FromBody] List<TestResultUpsert> testResultAdd)
+		{
+			return Ok(await _testResultService.AddNewTestResultList(testResultAdd));
 		}
 
 

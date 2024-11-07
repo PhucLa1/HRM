@@ -16,7 +16,9 @@ namespace HRM.Services.Recruitment
 	public interface ITestResultsService
 	{
 		Task<ApiResponse<IEnumerable<TestResultResult>>> GetAllTestResult();
+		Task<ApiResponse<IEnumerable<TestResultResult>>> GetAllTestResultByTestId(int id);
 		Task<ApiResponse<bool>> AddNewTestResult(TestResultUpsert testResultAdd);
+		Task<ApiResponse<bool>> AddNewTestResultList(List<TestResultUpsert> testResults);
 		Task<ApiResponse<bool>> UpdateTestResult(int id, TestResultUpsert testResultUpdate);
 		Task<ApiResponse<bool>> RemoveTestResult(int id);
 	}
@@ -25,18 +27,21 @@ namespace HRM.Services.Recruitment
 		private readonly IBaseRepository<TestResult> _baseRepository;
 		private readonly IBaseRepository<Questions> _questionRepository;
 		private readonly IBaseRepository<Applicants> _applicantRepository;
+		private readonly IBaseRepository<Test> _testRepository;
 		private readonly IValidator<TestResultUpsert> _testResultUpsertValidator;
 		private readonly IMapper _mapper;
 		public TestResultsService(
 			IBaseRepository<TestResult> baseRepository,
 			IBaseRepository<Questions> questionRepository,
 			IBaseRepository<Applicants> applicantRepository,
-			IValidator<TestResultUpsert> testResultUpsertValidator,
+			IBaseRepository<Test> testRepository,
+		IValidator<TestResultUpsert> testResultUpsertValidator,
 			IMapper mapper)
 		{
 			_baseRepository = baseRepository;
 			_questionRepository = questionRepository;
 			_applicantRepository = applicantRepository;
+			_testRepository = testRepository;
 			_testResultUpsertValidator = testResultUpsertValidator;
 			_mapper = mapper;
 		}
@@ -53,7 +58,8 @@ namespace HRM.Services.Recruitment
 					new TestResult { 
 						ApplicantId = testResultAdd.ApplicantId,
 						QuestionsId = testResultAdd.QuestionsId,
-						Point = testResultAdd.Point
+						Point = testResultAdd.Point,
+						Comment = testResultAdd.Comment
 					}
 				);
 				await _baseRepository.SaveChangeAsync();
@@ -64,6 +70,59 @@ namespace HRM.Services.Recruitment
 				throw new Exception(ex.Message);
 			}
 		}
+
+		public async Task<ApiResponse<bool>> AddNewTestResultList(List<TestResultUpsert> testResults)
+		{
+			try
+			{
+				foreach (var testResultAdd in testResults)
+				{
+					// Kiểm tra hợp lệ cho từng đối tượng
+					var resultValidation = _testResultUpsertValidator.Validate(testResultAdd);
+					if (!resultValidation.IsValid)
+					{
+						return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+					}
+
+					// Kiểm tra xem TestResult đã tồn tại chưa
+					var existingResults = await (from tr in _baseRepository.GetAllQueryAble()
+												 where tr.ApplicantId == testResultAdd.ApplicantId && tr.QuestionsId == testResultAdd.QuestionsId
+												 select tr).FirstOrDefaultAsync();
+
+					if (existingResults != null)
+					{
+						// Nếu tồn tại, cập nhật điểm và nhận xét
+						existingResults.Point = testResultAdd.Point;
+						existingResults.Comment = testResultAdd.Comment;
+						_baseRepository.Update(existingResults); // Cập nhật đối tượng
+					}
+					else
+					{
+						// Nếu không tồn tại, thêm mới
+						await _baseRepository.AddAsync(
+							new TestResult
+							{
+								ApplicantId = testResultAdd.ApplicantId,
+								QuestionsId = testResultAdd.QuestionsId,
+								Point = testResultAdd.Point,
+								Comment = testResultAdd.Comment
+							}
+						);
+					}
+				}
+
+				await _baseRepository.SaveChangeAsync();
+				return new ApiResponse<bool> { IsSuccess = true };
+			}
+			catch (Exception ex)
+			{
+				// Xử lý ngoại lệ và trả về thông báo lỗi
+				throw new Exception(ex.Message);
+			}
+		}
+
+
+
 
 		public async Task<ApiResponse<IEnumerable<TestResultResult>>> GetAllTestResult()
 		{
@@ -76,16 +135,49 @@ namespace HRM.Services.Recruitment
 									  from q in questionJoin.DefaultIfEmpty()
 									  join a in _applicantRepository.GetAllQueryAble() on tr.ApplicantId equals a.Id into applicantJoin
 									  from a in applicantJoin.DefaultIfEmpty()
+									  join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
+									  from t in testJoin.DefaultIfEmpty()
 									  select new TestResultResult
 									  {
 										  Id = tr.Id,
 										  ApplicantId = tr.ApplicantId,
-										  ApplicantName = a.Name,
 										  QuestionsId = tr.QuestionsId,
-										  QuestionText = q.QuestionText,
-										  Point = tr.Point
-
+										  ApplicantTestId = a.TestId,
+										  Point = tr.Point,
+										  Comment = tr.Comment,
 									  }).ToListAsync(),
+					IsSuccess = true
+				};
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
+		}
+
+		public async Task<ApiResponse<IEnumerable<TestResultResult>>> GetAllTestResultByTestId(int testId)
+		{
+			try
+			{
+				return new ApiResponse<IEnumerable<TestResultResult>>
+				{
+					Metadata = await(from tr in _baseRepository.GetAllQueryAble()
+									 join q in _questionRepository.GetAllQueryAble() on tr.QuestionsId equals q.Id into questionJoin
+									 from q in questionJoin.DefaultIfEmpty()
+									 join a in _applicantRepository.GetAllQueryAble() on tr.ApplicantId equals a.Id into applicantJoin
+									 from a in applicantJoin.DefaultIfEmpty()
+									 join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
+									 from t in testJoin.DefaultIfEmpty()
+									 where q.TestId == testId && a.TestId == testId
+									 select new TestResultResult
+									 {
+										 Id = tr.Id,
+										 ApplicantId = tr.ApplicantId,
+										 QuestionsId = tr.QuestionsId,
+										 ApplicantTestId = a.TestId,
+										 Point = tr.Point,
+										 Comment = tr.Comment
+									 }).ToListAsync(),
 					IsSuccess = true
 				};
 			}
@@ -109,9 +201,30 @@ namespace HRM.Services.Recruitment
 			}
 		}
 
-		public Task<ApiResponse<bool>> UpdateTestResult(int id, TestResultUpsert testResultUpdate)
+		public async Task<ApiResponse<bool>> UpdateTestResult(int id, TestResultUpsert testResultUpdate)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var resultValidation = _testResultUpsertValidator.Validate(testResultUpdate);
+				if (!resultValidation.IsValid)
+				{
+					return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+				}
+				var testResult = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+
+				testResult.ApplicantId = testResultUpdate.ApplicantId;
+				testResult.QuestionsId = testResultUpdate.QuestionsId;
+				testResult.Point = testResultUpdate.Point;
+				testResult.Comment = testResultUpdate.Comment;
+
+				_baseRepository.Update(testResult);
+				await _baseRepository.SaveChangeAsync();
+				return new ApiResponse<bool> { IsSuccess = true };
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
 		}
 	}
 }

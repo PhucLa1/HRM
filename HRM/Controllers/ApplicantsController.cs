@@ -36,6 +36,19 @@ namespace HRM.Apis.Controllers
 			return Ok(await _applicantService.GetAllApplicant());
 		}
 
+		/// <summary>
+		/// Get all applicants
+		/// </summary>
+		/// <response code="200">Return all the applicants in the company in the metadata of api response</response>
+		[HttpGet]
+		[Route("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<ApplicantResult>>))]
+		[SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApplicantResponseExample))]
+		public async Task<IActionResult> GetById(int id)
+		{
+			return Ok(await _applicantService.GetApplicantById(id));
+		}
+
 
 		/// <summary>
 		/// Add new applicants
@@ -55,12 +68,37 @@ namespace HRM.Apis.Controllers
 		/// </summary>
 		/// <response code="200">Return the api response </response>
 		[HttpPut]
-		[Route("{id}")]
+		[Route("update/{id}")]
 		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
 		public async Task<IActionResult> UpdateApplicant(int id, [FromBody] ApplicantUpsert applicantUpdate)
 		{
 			return Ok(await _applicantService.UpdateApplicant(id, applicantUpdate));
 		}
+
+		/// <summary>
+		/// Update a applicant in the company by id
+		/// </summary>
+		/// <response code="200">Return the api response </response>
+		[HttpPut]
+		[Route("update-point/{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+		public async Task<IActionResult> UpdateApplicantPoint(int id, double point)
+		{
+			return Ok(await _applicantService.UpdateApplicantPoint(id, point));
+		}
+
+
+		/// <summary>
+		/// Update a applicantTest in the company by id
+		/// </summary>
+		/// <response code="200">Return the api response </response>
+		//[HttpPut]
+		//[Route("{id}")]
+		//[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+		//public async Task<IActionResult> UpdateApplicantTest(int id, [FromForm] ApplicantTestAdd applicantUpdate)
+		//{
+		//	return Ok(await _applicantService.UpdateApplicantTest(id, applicantUpdate));
+		//}
 
 
 		/// <summary>
@@ -74,5 +112,6 @@ namespace HRM.Apis.Controllers
 		{
 			return Ok(await _applicantService.RemoveApplicant(id));
 		}
+
 	}
 }

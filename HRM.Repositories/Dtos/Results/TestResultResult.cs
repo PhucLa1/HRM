@@ -11,8 +11,9 @@ namespace HRM.Repositories.Dtos.Results
 		public int Id { get; set; }
 		public int QuestionsId { get; set; }
 		public int ApplicantId { get; set; }
+		public int? ApplicantTestId { get; set; }
 		public double Point { get; set; }
-		public string? QuestionText { get; set; }
-		public string? ApplicantName { get; set; }
+		public string? Comment { get; set; }
+
 	}
 }

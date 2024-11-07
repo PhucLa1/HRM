@@ -11,8 +11,8 @@ namespace HRM.Data.Entities
         public string? PhoneNumber { get; set; }
         public string? FileDataUrl { get; set; }
         public int PositionId { get; set; }
-        public double Rate { get; set; }
-        public int TestId { get; set; }
+        public double? Rate { get; set; }
+        public int? TestId { get; set; }
         public string? InterviewerName { get; set; }
         public Position? Position { get; set; }
         public Test? Test { get; set; }

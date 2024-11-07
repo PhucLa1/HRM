@@ -1,4 +1,5 @@
 ﻿using FluentValidation.Results;
+using HRM.Data.Entities;
 
 namespace HRM.Repositories.Dtos.Results
 {
@@ -14,5 +15,10 @@ namespace HRM.Repositories.Dtos.Results
                 Message = failures.Select(f => f.ErrorMessage).ToList(),
             };
         }
-    }
+
+		public static ApiResponse<bool> FailtureValidation(Applicants? applicant)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
