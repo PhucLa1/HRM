@@ -8,6 +8,7 @@ namespace HRM.Repositories.Dtos.Results
         public double Amount { get; set; }
         public MonthPeriod Month { get; set; }
         public int Year { get; set; }
+        public string PayPeriod { get; set; } = "";
         public string EmployeeName { get; set; } = "";
         public string DepartmentName { get; set; } = "";
         public int EmployeeId { get; set; }

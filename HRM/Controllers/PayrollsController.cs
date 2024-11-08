@@ -24,6 +24,16 @@ namespace HRM.Apis.Controllers
             _payrollsService = payrollsService;
         }
 
+        /// <summary>
+        /// Get test
+        /// </summary>
+        /// <response code="200">Return test in the metadata of api response</response>
+        [HttpGet]
+        [Route("test")]
+        public async Task<IActionResult> GetTest()
+        {
+            return Ok(await _payrollsService.Test());
+        }
 
         /// <summary>
         /// Get company tree
@@ -45,6 +55,17 @@ namespace HRM.Apis.Controllers
         public async Task<IActionResult> UpdatePayrollList([FromBody] PayrollListUpsert payrollListUpsert)
         {
             return Ok(await _payrollsService.UpdatePayroll(payrollListUpsert.Period, payrollListUpsert.EmployeeIds));
+        }
+
+        /// <summary>
+        /// Update specific payroll of an employee in period
+        /// </summary>
+        /// <response code="200">Return status update true/false in the metadata of api response</response>
+        [HttpPut]
+        [Route("update-payroll/details")]
+        public async Task<IActionResult> UpdatePayrollDetails([FromBody] PayrollUpsert payrollUpsert)
+        {
+            return Ok(await _payrollsService.UpdatePayrollDetails(payrollUpsert));
         }
 
         /// <summary>

@@ -1,17 +1,19 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Spreadsheet;
-using HRM.Data.Entities;
+﻿using HRM.Data.Entities;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Data;
+using HRM.Services.User;
+using HRM.Repositories.Helper;
 
 namespace HRM.Services.Salary;
 
 public interface IPayrollsService
 {
+    Task<string> Test();
+
     Task<ApiResponse<IEnumerable<TreeNode>>> GetCompanyTree();
     Task<ApiResponse<IEnumerable<DynamicColumn>>> GetDynamicColumn(int SCtype);
     Task<ApiResponse<bool>> UpdatePayroll(PayrollPeriod period, List<int> employeeIds);
@@ -25,39 +27,54 @@ public interface IPayrollsService
     Task<ApiResponse<bool>> UpdatePayrollBonus(List<PayrollUpsert> lstPayrollUpsert);
     Task<ApiResponse<bool>> UpdatePayrollDeduction(List<PayrollUpsert> lstPayrollUpsert);
     Task<ApiResponse<bool>> UpdateFormula(List<PayrollUpsert> lstPayrollUpsert);
+    Task<ApiResponse<bool>> UpdatePayrollDetails(PayrollUpsert payrollUpsert);
 
     //Payroll data
     Task<ApiResponse<List<List<ColumnTableHeader>>>> GetPayrollTableHeader(PayrollPeriod period);
     Task<ApiResponse<IEnumerable<DynamicColumn>>> GetPayrollTableColumn(PayrollPeriod period);
-    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period);
+    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> employeeIds=null);
 }
 public class PayrollsService : IPayrollsService
 {
+    private string _param_pattern_ = @"\[(.*?)\]";
+
+    private readonly string ConstantPartWageCheckout = "_LUONG_THOI_GIAN";
+    private readonly string ConstantPartWageTotalIncome = "_TONG_THU_NHAP";
+
     private static string fieldNamePrefix = "dp.";
     private readonly string FieldBaseSalary = "PARAM_BASE_SALARY";
+    private readonly string FieldBaseHours = "PARAM_BASE_HOURS";
     private readonly string FieldRealHours = "PARAM_REAL_HOURS";
-    private readonly string FieldHourWageCheckout = "PARAM_WAGE_HOURS";
+    private readonly string FieldBaseDays = "PARAM_BASE_DAYS";
+    private readonly string FieldRealDays = "PARAM_REAL_DAYS";
+    private readonly string FieldBaseWageDays = "PARAM_BASE_WAGE_DAYS";
+    private readonly string FieldBaseWageHours = "PARAM_BASE_WAGE_HOURS";
+    private readonly string FieldBaseFactor = "PARAM_BASE_FACTOR";
+    private readonly string FieldHourWageCheckout = "FORMULA_LUONG_THOI_GIAN_HOURS";
 
     private readonly string FieldOtherBonus = "PARAM_OTHER_BONUS";
-    private readonly string FieldTotalIncome = "FORMULA_TONG_THU_NHAP";
+    private readonly string FieldTotalAllowance = "PARAM_TOTAL_ALLOWANCE";
+    private readonly string FieldTotalBonus = "PARAM_TOTAL_BONUS";
+    private readonly string FieldTotalIncome = "FORMULA_TONG_THU_NHAP"; //**FIX
 
-    private readonly string FieldBHXHCheckout = "PARAM_BHXH_CHECKOUT";
+    private readonly string FieldBHXHCheckout = "PARAM_TOTAL_INSURANCE";
+    private readonly string FieldTotalPersonalTaxDeduction = "PARAM_TOTAL_PESONAL_TAX_DEDUCTION";
     private readonly string FieldTotalTaxDeduction = "FORMULA_TONG_KHAU_TRU";
 
     private readonly string FieldNotInTax = "PARAM_MIEN_THUE";
     private readonly string FieldTaxableIncome = "PARAM_TAXALBE_INCOME";
     private readonly string FieldAssessableIncome = "PARAM_ASSESSABLE_INCOME";
     private readonly string FieldTaxRate = "PARAM_TAX_RATE";
-    private readonly string FieldTaxCheckout = "PARAM_TAX_CHECKOUT";
-    
+    private readonly string FieldTaxCheckout = "PARAM_TOTAL_TAX";
+
 
     private readonly string FieldTotalAdvance = "PARAM_TOTAL_ADVANCE";
     private readonly string FieldOtherDeduction = "PARAM_OTHER_DEDUCTION";
-    private readonly string FieldTotalDeductionNoTax = "PARAM_TOTAL_DEDUCTION_NO_TAX";
-    private readonly string FieldAllowanceLunch = "PARAM_ALLOWANCE_LUNCH_NO_TAX";
-    private readonly string FieldTotalBonusNoTax = "PARAM_TOTAL_BONUS_NO_TAX";
+    private readonly string FieldTotalDeductionNoTax = "PARAM_TOTAL_DEDUCTION_NOTAX";
+    private readonly string FieldAllowanceLunch = "PARAM_ALLOWANCE_LUNCH_NOTAX";
+    private readonly string FieldTotalBonusNoTax = "PARAM_TOTAL_BONUS_NOTAX";
 
-    
+
     private readonly string Fieldnet = "PARAM_NET";
 
     #region + Inject Repository
@@ -84,6 +101,10 @@ public class PayrollsService : IPayrollsService
 
     private readonly IBaseRepository<Advance> _advanceRepository;
     private readonly IBaseRepository<TaxRate> _taxRateRepository;
+
+    private readonly IBaseRepository<Fomula> _fomulaRepository;
+
+    private readonly IEmailService _emailService;
     public PayrollsService(IBaseRepository<Payroll> payrollRepository,
                            IBaseRepository<Department> departmentRepository,
                            IBaseRepository<Position> positionRepository,
@@ -101,7 +122,9 @@ public class PayrollsService : IPayrollsService
                            IBaseRepository<BonusDetails> bonusDetailsRepository,
                            IBaseRepository<DeductionDetails> deductionDetailsRepository,
                            IBaseRepository<Advance> advanceRepository,
-                           IBaseRepository<TaxRate> taxRateRepository
+                           IBaseRepository<TaxRate> taxRateRepository,
+                           IBaseRepository<Fomula> fomulaRepository,
+                           IEmailService emailService
                            )
     {
         _payrollRepository = payrollRepository;
@@ -122,12 +145,14 @@ public class PayrollsService : IPayrollsService
         _deductionDetailsRepository = deductionDetailsRepository;
         _advanceRepository = advanceRepository;
         _taxRateRepository = taxRateRepository;
+        _fomulaRepository = fomulaRepository;
+        _emailService = emailService;
 
     }
 
     #endregion
 
-    #region + Add employee to payroll
+    #region + Add employee to payroll | payslip
     public async Task<ApiResponse<IEnumerable<TreeNode>>> GetCompanyTree()
     {
         try
@@ -200,7 +225,7 @@ public class PayrollsService : IPayrollsService
 
     public async Task<ApiResponse<bool>> UpdatePayroll(PayrollPeriod period, List<int> employeeIds)
     {
-        var employeeIdsOld = _payrollRepository.GetAllQueryAble().Where(x => x.Month == period.Month&&x.Year==period.Year).Select(x => x.EmployeeId).ToList();
+        var employeeIdsOld = _payrollRepository.GetAllQueryAble().Where(x => x.Month == period.Month && x.Year == period.Year).Select(x => x.EmployeeId).ToList();
         var removedIds = employeeIdsOld.Except(employeeIds).ToList();
         var addedIds = employeeIds.Except(employeeIdsOld).ToList();
         using (var transaction = await _payrollRepository.Context.Database.BeginTransactionAsync())
@@ -265,6 +290,34 @@ public class PayrollsService : IPayrollsService
         };
     }
 
+    public async Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period, List<int> employeeIds)
+    {
+        try
+        {
+            var lstSelectedPayrollRes = await GetPayrollTableData(period, employeeIds);
+            if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0]??"Lỗi lấy dữ liệu");
+
+         
+
+            var lstPayroll = lstSelectedPayrollRes.Metadata;
+            foreach (var payroll in lstPayroll)
+            {
+
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+        
+        return new ApiResponse<bool>()
+        {
+            IsSuccess = true,
+            Metadata = true
+        };
+    }
+
     #endregion
 
     #region + CRUD SC Components
@@ -321,11 +374,16 @@ public class PayrollsService : IPayrollsService
             {
                 throw new Exception("Không tồn tại bảng lương");
             }
+            var bonusListIds = _bonusDetailsRepository.GetAllQueryAble().Where(x => x.PayrollId == selectedPayroll.Id).Select(x => x.BonusId).ToList();
+            var deductionListIds = _deductionDetailsRepository.GetAllQueryAble().Where(x => x.PayrollId == selectedPayroll.Id).Select(x => x.DeductionId).ToList();
+
             var selectedContract = _contractRepository.GetAllQueryAble().FirstOrDefault(x => x.Id == selectedPayroll.ContractId);
 
             var contractSalaryResult = new ContractSalaryResult();
             var allowanceResult = new List<AllowanceResult>();
             var insuranceResult = new List<InsuranceResult>();
+
+
 
             var selectedEmployee = _employeeRepository.GetAllQueryAble().FirstOrDefault(x => x.Id == selectedPayroll.EmployeeId);
             var taxDeduction = new List<TaxDeductionResult>();
@@ -352,38 +410,39 @@ public class PayrollsService : IPayrollsService
                     };
                 }
 
-                allowanceResult = (from a in _allowanceRepository.GetAllQueryAble()
-                                   join ca in _contractAllowanceRepository.GetAllQueryAble().Where(x => x.ContractId == selectedContract.Id) on a.Id equals ca.AllowanceId
-                                   select new AllowanceResult()
+                var listAllowanceIds = _contractAllowanceRepository.GetAllQueryAble().Where(x => x.ContractId == selectedContract.Id).Select(x => x.AllowanceId).ToList();
+                allowanceResult = _allowanceRepository.GetAllQueryAble().Where(x => listAllowanceIds.Contains(x.Id))
+                                   .Select(a => new AllowanceResult()
                                    {
                                        Id = a.Id,
                                        Name = a.Name,
                                        Amount = a.Amount
                                    }).ToList();
 
-                insuranceResult = (from i in _insuranceRepository.GetAllQueryAble()
-                                   join ci in _contractInsuranceRepository.GetAllQueryAble().Where(x => x.ContractId == selectedContract.Id) on i.Id equals ci.InsuranceId
-                                   select new InsuranceResult()
-                                   {
-                                       Id = i.Id,
-                                       PercentEmployee = i.PercentEmployee,
-                                       PercentCompany = i.PercentCompany
-                                   }).ToList();
+                var listInsuranceIds = _contractInsuranceRepository.GetAllQueryAble().Where(x => x.ContractId == selectedContract.Id).Select(x => x.InsuranceId).ToList();
+                insuranceResult = _insuranceRepository.GetAllQueryAble().Where(x => listInsuranceIds.Contains(x.Id)).Select(i => new InsuranceResult()
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    PercentEmployee = i.PercentEmployee,
+                    PercentCompany = i.PercentCompany
+                }).ToList();
+
+
 
             }
             if (selectedEmployee != null)
             {
-                if (selectedEmployee.taxDeductionDetails != null)
-                {
-                    taxDeduction = (from td in _taxDeductionRepository.GetAllQueryAble()
-                                    join etd in selectedEmployee.taxDeductionDetails on td.Id equals etd.TaxDeductionId
-                                    select new TaxDeductionResult()
-                                    {
-                                        Id = td.Id,
-                                        Name = td.Name,
-                                        Amount = td.Amount
-                                    }).ToList();
-                }
+                var listTaxDeductionIds = _taxDeductionDetailsRepository.GetAllQueryAble().Where(x => x.EmployeeId == selectedEmployee.Id).Select(x => x.TaxDeductionId).ToList();
+                taxDeduction = _taxDeductionRepository.GetAllQueryAble()
+                                        .Where(x => listTaxDeductionIds.Contains(x.Id))
+                                        .Select(a => new TaxDeductionResult()
+                                        {
+                                            Id = a.Id,
+                                            Name = a.Name,
+                                            Amount = a.Amount
+                                        }).ToList();
+
             }
             var payrollResult = new PayrollResult()
             {
@@ -398,12 +457,12 @@ public class PayrollsService : IPayrollsService
                 OtherDeduction = selectedPayroll.OtherDeduction,
                 OtherBonus = selectedPayroll.OtherBonus,
                 FomulaId = selectedPayroll.FomulaId,
-                ListBonusIds = (selectedPayroll.bonusDetails != null) ? selectedPayroll.bonusDetails.Select(x => x.BonusId).ToList() : new List<int>(),
-                ListDeductionIds = (selectedPayroll.DeductionDetails != null) ? selectedPayroll.DeductionDetails.Select(x => x.DeductionId).ToList() : new List<int>(),
+                ListBonusIds = bonusListIds ?? new List<int>(),
+                ListDeductionIds = deductionListIds ?? new List<int>(),
                 ContractSalary = contractSalaryResult,
                 ListAllowance = allowanceResult,
                 ListInsurance = insuranceResult,
-                ListTaxDeduction = taxDeduction
+                ListTaxDeduction = taxDeduction ?? new List<TaxDeductionResult>()
             };
 
             return new ApiResponse<PayrollResult>()
@@ -429,7 +488,7 @@ public class PayrollsService : IPayrollsService
         try
         {
             var lstPayrollIds = lstPayrollUpsert.Select(x => x.Id).ToList();
-            var selectedListPayrollOld = _payrollRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.Id)).ToList();
+            var selectedListPayrollOld = await _payrollRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.Id)).ToListAsync();
             for (int i = 0; i < selectedListPayrollOld.Count; i++)
             {
                 var seletedUpdatePayroll = lstPayrollUpsert.FirstOrDefault(x => x.Id == selectedListPayrollOld[i].Id);
@@ -440,7 +499,7 @@ public class PayrollsService : IPayrollsService
                 }
 
             }
-             _payrollRepository.UpdateMany(selectedListPayrollOld);
+            _payrollRepository.UpdateMany(selectedListPayrollOld);
             await _payrollRepository.SaveChangeAsync();
             return new ApiResponse<bool>()
             {
@@ -454,14 +513,14 @@ public class PayrollsService : IPayrollsService
             {
                 IsSuccess = false,
                 Metadata = false,
-                Message = new List<string>() { e.Message}
+                Message = new List<string>() { e.Message }
             };
         }
 
     }
 
     public async Task<ApiResponse<bool>> UpdatePayrollBonus(List<PayrollUpsert> lstPayrollUpsert)
-    {       
+    {
         using (var transaction = await _bonusDetailsRepository.Context.Database.BeginTransactionAsync())
         {
             try
@@ -469,7 +528,7 @@ public class PayrollsService : IPayrollsService
                 var lstPayrollIds = lstPayrollUpsert.Select(x => x.Id).ToList();
                 if (lstPayrollIds == null) throw new Exception("lst payrol undefined");
                 //Bonus
-                var listOldDetails = _bonusDetailsRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.PayrollId)).ToList();
+                var listOldDetails = await _bonusDetailsRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.PayrollId)).ToListAsync();
                 var listAllAdd = new List<BonusDetails>();
                 var listAllRemove = new List<BonusDetails>();
                 foreach (var payrolUpdate in lstPayrollUpsert)
@@ -529,29 +588,29 @@ public class PayrollsService : IPayrollsService
                     Message = new List<string>() { e.Message }
                 };
             }
-                   
+
         }
-            
-           
+
+
         return new ApiResponse<bool>()
         {
             IsSuccess = true,
             Metadata = true
         };
-       
-        
+
+
     }
 
     public async Task<ApiResponse<bool>> UpdatePayrollDeduction(List<PayrollUpsert> lstPayrollUpsert)
     {
-      
+
         using (var transaction = await _deductionDetailsRepository.Context.Database.BeginTransactionAsync())
         {
             try
             {
                 var lstPayrollIds = lstPayrollUpsert.Select(x => x.Id).ToList();
                 if (lstPayrollIds == null) throw new Exception("lst payrol undefined");
-                var listOldDetails = _deductionDetailsRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.PayrollId)).ToList();
+                var listOldDetails = await _deductionDetailsRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.PayrollId)).ToListAsync();
                 var listAllAdd = new List<DeductionDetails>();
                 var listAllRemove = new List<DeductionDetails>();
                 foreach (var payrolUpdate in lstPayrollUpsert)
@@ -584,7 +643,7 @@ public class PayrollsService : IPayrollsService
                             listAllAdd.Add(details);
                         }
                     }
-                    
+
                 }
                 if (listAllRemove.Count > 0)
                 {
@@ -595,7 +654,7 @@ public class PayrollsService : IPayrollsService
 
                     await _deductionDetailsRepository.AddRangeAsync(listAllAdd);
                 }
-                
+
                 if (listAllRemove.Count() > 0 || listAllAdd.Count() > 0)
                 {
                     await _deductionDetailsRepository.SaveChangeAsync();
@@ -614,7 +673,7 @@ public class PayrollsService : IPayrollsService
             }
 
         }
-            
+
         return new ApiResponse<bool>()
         {
             IsSuccess = true,
@@ -623,13 +682,13 @@ public class PayrollsService : IPayrollsService
 
 
     }
-    
+
     public async Task<ApiResponse<bool>> UpdateFormula(List<PayrollUpsert> lstPayrollUpsert)
     {
         try
         {
             var lstPayrollIds = lstPayrollUpsert.Select(x => x.Id).ToList();
-            var selectedListPayrollOld = _payrollRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.Id)).ToList();
+            var selectedListPayrollOld = await _payrollRepository.GetAllQueryAble().Where(x => lstPayrollIds.Contains(x.Id)).ToListAsync();
             for (int i = 0; i < selectedListPayrollOld.Count; i++)
             {
                 var seletedUpdatePayroll = lstPayrollUpsert.FirstOrDefault(x => x.Id == selectedListPayrollOld[i].Id);
@@ -658,6 +717,133 @@ public class PayrollsService : IPayrollsService
         }
 
     }
+
+    public async Task<ApiResponse<bool>> UpdatePayrollDetails(PayrollUpsert payrollUpsert)
+    {
+        using (var transaction = await _bonusDetailsRepository.Context.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                //Bonus
+                var listOldBonusDetails = await _bonusDetailsRepository.GetAllQueryAble().Where(x => payrollUpsert.Id == x.PayrollId).ToListAsync();
+                var listAllBonusAdd = new List<BonusDetails>();
+                var listAllBonusRemove = new List<BonusDetails>();
+
+                var payrollOldBonusList = listOldBonusDetails.Where(x => x.PayrollId == payrollUpsert.Id);
+
+                var payrollNewListBonusIds = payrollUpsert.ListBonusIds;
+                var payrollOldListBonusIds = payrollOldBonusList.Select(x => x.BonusId).ToList();
+
+                var removedBonusIds = payrollOldListBonusIds.Except(payrollNewListBonusIds).ToList();
+                var addedBonusIds = payrollNewListBonusIds.Except(payrollOldListBonusIds).ToList();
+                if (removedBonusIds.Count > 0)
+                {
+                    var selectedDetails = payrollOldBonusList.Where(x => removedBonusIds.Contains(x.BonusId)).ToList();
+                    if (selectedDetails != null && selectedDetails.Count() > 0)
+                    {
+                        listAllBonusRemove.AddRange(selectedDetails);
+                    }
+                }
+                if (addedBonusIds.Count > 0)
+                {
+                    foreach (var id in addedBonusIds)
+                    {
+                        var details = new BonusDetails()
+                        {
+                            BonusId = id,
+                            PayrollId = payrollUpsert.Id
+                        };
+                        listAllBonusAdd.Add(details);
+                    }
+                }
+
+                if (listAllBonusRemove.Count > 0)
+                {
+                    _bonusDetailsRepository.RemoveRange(listAllBonusRemove);
+                }
+                if (listAllBonusAdd.Count > 0)
+                {
+
+                    await _bonusDetailsRepository.AddRangeAsync(listAllBonusAdd);
+                }
+
+                //Deduction
+                var listOldDeductionDetails = await _deductionDetailsRepository.GetAllQueryAble().Where(x => payrollUpsert.Id == x.PayrollId).ToListAsync();
+                var listAllDeductionAdd = new List<DeductionDetails>();
+                var listAllDeductionRemove = new List<DeductionDetails>();
+
+                var payrollOldList = listOldDeductionDetails.Where(x => x.PayrollId == payrollUpsert.Id);
+
+                var payrollNewListDeductionIds = payrollUpsert.ListDeductionIds;
+                var payrollOldListDeductionIds = payrollOldList.Select(x => x.DeductionId).ToList();
+
+                var removedDeductionIds = payrollOldListDeductionIds.Except(payrollNewListDeductionIds).ToList();
+                var addedDeductionIds = payrollNewListDeductionIds.Except(payrollOldListDeductionIds).ToList();
+                if (removedDeductionIds.Count > 0)
+                {
+                    var selectedDetails = payrollOldList.Where(x => removedDeductionIds.Contains(x.DeductionId)).ToList();
+                    if (selectedDetails != null && selectedDetails.Count() > 0)
+                    {
+                        listAllDeductionRemove.AddRange(selectedDetails);
+                    }
+                }
+                if (addedDeductionIds.Count > 0)
+                {
+                    foreach (var id in addedDeductionIds)
+                    {
+                        var details = new DeductionDetails()
+                        {
+                            DeductionId = id,
+                            PayrollId = payrollUpsert.Id
+                        };
+                        listAllDeductionAdd.Add(details);
+                    }
+                }
+
+                if (listAllDeductionRemove.Count > 0)
+                {
+                    _deductionDetailsRepository.RemoveRange(listAllDeductionRemove);
+                }
+                if (listAllDeductionAdd.Count > 0)
+                {
+
+                    await _deductionDetailsRepository.AddRangeAsync(listAllDeductionAdd);
+                }
+
+                if (listAllBonusRemove.Count() > 0 || listAllBonusAdd.Count() > 0)
+                {
+                    await _bonusDetailsRepository.SaveChangeAsync();
+                }
+
+                if (listAllDeductionRemove.Count() > 0 || listAllDeductionAdd.Count() > 0)
+                {
+                    await _deductionDetailsRepository.SaveChangeAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                return new ApiResponse<bool>()
+                {
+                    IsSuccess = false,
+                    Metadata = false,
+                    Message = new List<string>() { e.Message }
+                };
+            }
+
+        }
+
+
+        return new ApiResponse<bool>()
+        {
+            IsSuccess = true,
+            Metadata = true
+        };
+
+
+    }
     #endregion
 
     #region + Update payroll of employee: bonus, deductions, fomula, other bonus, deductions
@@ -669,19 +855,19 @@ public class PayrollsService : IPayrollsService
             //Bonus
             if (SCtype == 0)
             {
-                res = _bonusRepository.GetAllQueryAble().Select(x => new DynamicColumn()
+                res = await _bonusRepository.GetAllQueryAble().Select(x => new DynamicColumn()
                 {
                     Field = x.Id.ToString(),
                     Header = $"{x.Name} ({x.Amount})",
-                }).ToList();
+                }).ToListAsync();
             }
             else if (SCtype == 1) // Deduction
             {
-                res = _deductionRepository.GetAllQueryAble().Select(x => new DynamicColumn()
+                res = await _deductionRepository.GetAllQueryAble().Select(x => new DynamicColumn()
                 {
                     Field = x.Id.ToString(),
                     Header = $"{x.Name} ({x.Amount})",
-                }).ToList();
+                }).ToListAsync();
             }
             res.Insert(0, new DynamicColumn()
             {
@@ -719,7 +905,7 @@ public class PayrollsService : IPayrollsService
         var lstEmployeeIds = payrollByPeriod.Select(x => x.EmployeeId).ToList(); ;
         var lstPayrollIds = payrollByPeriod.Select(x => x.Id).ToList(); ;
 
-       
+
         var taskAllowance = getListAllowanceInPeriod(lstContractIds);
         var taskInsurance = getListInsuranceInPeriod(lstContractIds);
         var taskTaxDeduction = getListTaxDeductionInPeriod(lstEmployeeIds);
@@ -795,7 +981,7 @@ public class PayrollsService : IPayrollsService
         secColumn.Add(new ColumnTableHeader()
         {
             Id = (int)ColId.ColIdHourWage,
-            ListParentIds = new List<int>() { (int)ColId.ColIdSCIncome},
+            ListParentIds = new List<int>() { (int)ColId.ColIdSCIncome },
             Header = "Lương thời gian",
             ColSpan = 2
         });
@@ -810,15 +996,15 @@ public class PayrollsService : IPayrollsService
                 ColSpan = allowanceColumn.Count
             });
         }
-        
+
         secColumn.AddRange(new List<ColumnTableHeader>()
-        { 
+        {
             new ColumnTableHeader()
             {
                 Id = (int)ColId.ColIdAllBonus,
                 ListParentIds = new List<int>() {(int)ColId.ColIdSCIncome },
                 Header = "Các khoản thưởng",
-                ColSpan = bonusColumn.Count + 1  
+                ColSpan = bonusColumn.Count + 1
             },
             new ColumnTableHeader()
             {
@@ -837,10 +1023,10 @@ public class PayrollsService : IPayrollsService
             ListParentIds = new List<int>() { (int)ColId.ColIdSCDeduction },
             Header = "Bảo hiểm",
             ColSpan = insuranceColumn.Count + 1,
-            RowSpan = insuranceColumn.Count==0?2:1
+            RowSpan = insuranceColumn.Count == 0 ? 2 : 1
         });
 
-        if (taxDeductionColumn.Count >0)
+        if (taxDeductionColumn.Count > 0)
         {
             secColumn.Add(new ColumnTableHeader()
             {
@@ -930,7 +1116,7 @@ public class PayrollsService : IPayrollsService
             }
 
         });
-        
+
 
         res.Add(secColumn);
 
@@ -963,7 +1149,7 @@ public class PayrollsService : IPayrollsService
         {
             bottomColumn.AddRange(bonusColumn.Select(x => new ColumnTableHeader() { Header = x.Header, Field = x.Field, ListParentIds = new List<int>() { (int)ColId.ColIdSCIncome, (int)ColId.ColIdAllBonus }, }));
         }
-        bottomColumn.Add(new ColumnTableHeader() { Header = "Thưởng khác",Field = FieldOtherBonus, ListParentIds = new List<int>() { (int)ColId.ColIdSCIncome, (int)ColId.ColIdAllBonus }, });
+        bottomColumn.Add(new ColumnTableHeader() { Header = "Thưởng khác", Field = FieldOtherBonus, ListParentIds = new List<int>() { (int)ColId.ColIdSCIncome, (int)ColId.ColIdAllBonus }, });
 
         //BHXH
         if (insuranceColumn.Count > 0)
@@ -988,11 +1174,11 @@ public class PayrollsService : IPayrollsService
         {
             bottomColumn.AddRange(deductionColumn.Select(x => new ColumnTableHeader() { Header = x.Header, Field = x.Field, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllDeductionNoTax } }));
         }
-        bottomColumn.Add(new ColumnTableHeader() { Header = "Trừ khác", Field = FieldOtherDeduction,ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllDeductionNoTax }});
-        bottomColumn.Add(new ColumnTableHeader() { Header = "Thành tiền", Field = FieldTotalDeductionNoTax, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllDeductionNoTax }  });
+        bottomColumn.Add(new ColumnTableHeader() { Header = "Trừ khác", Field = FieldOtherDeduction, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllDeductionNoTax } });
+        bottomColumn.Add(new ColumnTableHeader() { Header = "Thành tiền", Field = FieldTotalDeductionNoTax, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllDeductionNoTax } });
 
         // Bonus No tax
-        bottomColumn.Add(new ColumnTableHeader(){Header = "Ăn ca",Field = FieldAllowanceLunch, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllBonusNoTax } });
+        bottomColumn.Add(new ColumnTableHeader() { Header = "Ăn ca", Field = FieldAllowanceLunch, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllBonusNoTax } });
         bottomColumn.Add(new ColumnTableHeader() { Header = "Thành tiền", Field = FieldTotalBonusNoTax, ListParentIds = new List<int>() { (int)ColId.ColIdSCNotax, (int)ColId.ColIdAllBonusNoTax } });
         res.Add(bottomColumn);
 
@@ -1001,7 +1187,7 @@ public class PayrollsService : IPayrollsService
 
             for (int j = 0; j < res[i].Count; j++)
             {
-                if (i == res.Count-1)
+                if (i == res.Count - 1)
                 {
                     res[i][j].Id = 1000 + j;
                 }
@@ -1010,7 +1196,7 @@ public class PayrollsService : IPayrollsService
                     res[i][j].Field = fieldNamePrefix + res[i][j].Field;
                 }
             }
-            
+
         }
 
 
@@ -1194,7 +1380,7 @@ public class PayrollsService : IPayrollsService
 
             for (int i = 0; i < res.Count; i++)
             {
-                if (res[i].Field.Contains("PARAM_") || res[i].Field.Contains("PARAMS_") || res[i].Field.Contains("FORMULA_") )
+                if (res[i].Field.Contains("PARAM_") || res[i].Field.Contains("PARAMS_") || res[i].Field.Contains("FORMULA_"))
                 {
                     res[i].Field = fieldNamePrefix + res[i].Field;
                 }
@@ -1219,11 +1405,287 @@ public class PayrollsService : IPayrollsService
         };
     }
 
-    public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period)
+    public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> listEmployeeIds = null)
     {
         try
         {
-            var payrollByPeriod = _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month);
+            var payrollByPeriod = new List<Payroll>();
+            if (listEmployeeIds != null)
+            {
+                payrollByPeriod = await _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month && listEmployeeIds.Contains(x.EmployeeId)).ToListAsync();
+            }
+            else
+            {
+                payrollByPeriod = await _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month).ToListAsync();
+            }
+           
+            var lstContractIds = payrollByPeriod.Select(x => x.ContractId).ToList(); ;
+            var lstEmployeeIds = payrollByPeriod.Select(x => x.EmployeeId).ToList(); ;
+            var lstPayrollIds = payrollByPeriod.Select(x => x.Id).ToList();
+
+            var taskAllowance = getListAllowanceInPeriod(lstContractIds);
+            var taskInsurance = getListInsuranceInPeriod(lstContractIds);
+            var taskTaxDeduction = getListTaxDeductionInPeriod(lstEmployeeIds);
+            var taskBonus = getListBonusInPeriod(lstPayrollIds);
+            var taskDeduction = getListDeductionInPeriod(lstPayrollIds);
+
+            Task.WaitAll(taskAllowance, taskInsurance, taskTaxDeduction, taskBonus, taskDeduction);
+            var allowanceColumn = taskAllowance.Result;
+            var insuranceColumn = taskInsurance.Result;
+            var taxDeductionColumn = taskTaxDeduction.Result;
+            var bonusColumn = taskBonus.Result;
+            var deductionColumn = taskDeduction.Result;
+
+            #region + employee info
+            var employeeInfo = (from e in _employeeRepository.GetAllQueryAble().Where(x => lstEmployeeIds.Contains(x.Id))
+                                join c in _contractRepository.GetAllQueryAble().Where(x => lstContractIds.Contains(x.Id)) on e.ContractId equals c.Id into empGroup
+                                from c in empGroup.DefaultIfEmpty()
+                                join p in _positionRepository.GetAllQueryAble() on c.PositionId equals p.Id into contractGroup
+                                from p in contractGroup.DefaultIfEmpty()
+                                join d in _departmentRepository.GetAllQueryAble() on p.DepartmentId equals d.Id into positonGroup
+                                from d in positonGroup.DefaultIfEmpty()
+                                select new
+                                {
+                                    ContractId = c.Id,
+                                    EmployeeName = c.Name,
+                                    DepartmentName = d.Name,
+                                    PositionName = p.Name,
+                                    Email = e.Email,
+                                    PhoneNumber = e.PhoneNumber,
+
+                                    BaseSalary = c.ContractSalary != null ? c.ContractSalary.BaseSalary : 0,
+                                    BaseInsurance = c.ContractSalary != null ? c.ContractSalary.BaseInsurance : 0,
+                                    RequiredDays = c.ContractSalary != null ? c.ContractSalary.RequiredDays : 0,
+                                    RequiredHours = c.ContractSalary != null ? c.ContractSalary.RequiredHours : 0,
+                                    WageDaily = c.ContractSalary != null ? c.ContractSalary.WageDaily : 0,
+                                    WageHourly = c.ContractSalary != null ? c.ContractSalary.WageHourly : 0,
+                                    Factor = c.ContractSalary != null ? c.ContractSalary.Factor : 0,
+                                }).ToList();
+            #endregion
+            //list advance approved
+            var lstAllowedAdvance = await _advanceRepository.GetAllQueryAble().Where(x => x.Month == period.Month && x.Year == period.Year && x.Status == AdvanceStatus.Approved).ToListAsync();
+
+            //list tax rate
+            var lstTaxRate = await _taxRateRepository.GetAllQueryAble().ToListAsync();
+
+            //list formula
+            var lstAllFormula = await _fomulaRepository.GetAllQueryAble().ToListAsync();
+
+            var res = new List<PayrollTableData>();
+
+            //Áp dụng công thức - ý tưởng: tính hết các parameter cố định, từ công thức truy về các parameter cố định và thực hiện phép tính
+
+            foreach (var payroll in payrollByPeriod)
+            {
+                var tableRow = new PayrollTableData();
+                var selectedEmployee = employeeInfo.FirstOrDefault(x => x.ContractId == payroll.ContractId);
+                var selectedFormula = lstAllFormula.FirstOrDefault(x => x.Id == payroll.FomulaId);
+                tableRow.PayrollId = payroll.Id;
+                tableRow.EmployeeId = payroll.EmployeeId;
+                tableRow.ContractId = payroll.ContractId;
+                tableRow.EmployeeName = selectedEmployee?.EmployeeName ?? "Not found";
+                tableRow.DepartmentName = selectedEmployee?.DepartmentName ?? "Not found";
+                tableRow.PositionName = selectedEmployee?.PositionName ?? "Not found";
+                tableRow.Email = selectedEmployee?.Email ?? "undefined";
+                tableRow.PhoneNumber = selectedEmployee?.PhoneNumber ?? "undefined";
+
+                double totalTax = 0;
+                var stringFormulaAll = extractAllFormula(selectedFormula.Id, lstAllFormula);
+
+                #region + Tổng thu nhập
+                //lương thười gian
+                tableRow.DynamicProperties[FieldBaseSalary] = selectedEmployee?.BaseSalary ?? 0;
+                tableRow.DynamicProperties[FieldBaseHours] = selectedEmployee?.RequiredHours ?? 0;
+                tableRow.DynamicProperties[FieldRealHours] = 130;
+                tableRow.DynamicProperties[FieldBaseDays] = selectedEmployee?.RequiredDays ?? 0;
+                tableRow.DynamicProperties[FieldRealDays] = 20;
+                tableRow.DynamicProperties[FieldBaseWageDays] = selectedEmployee?.WageDaily ?? 0;
+                tableRow.DynamicProperties[FieldBaseWageHours] = selectedEmployee?.WageHourly ?? 0;
+                tableRow.DynamicProperties[FieldBaseFactor] = selectedEmployee?.Factor ?? 1;
+
+                //Total allowance
+                double totalAllowance = 0;
+                foreach (var sc in allowanceColumn)
+                {
+                    //check if employee has sc
+                    if (sc.ListIdBelongTo.Contains(payroll.ContractId)) tableRow.DynamicProperties[sc.Field] = sc.Amount;
+                    else tableRow.DynamicProperties[sc.Field] = 0;
+                    totalAllowance += tableRow.DynamicProperties[sc.Field];
+                }
+                tableRow.DynamicProperties[FieldTotalAllowance] = totalAllowance;
+
+
+                //Bonus
+                double totalBonus = 0;
+                foreach (var sc in bonusColumn)
+                {
+                    //check if employee has sc
+                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount;
+                    else tableRow.DynamicProperties[sc.Field] = 0;
+                    totalBonus += tableRow.DynamicProperties[sc.Field];
+                }
+
+                tableRow.DynamicProperties[FieldOtherBonus] = payroll.OtherBonus;
+                totalBonus += tableRow.DynamicProperties[FieldOtherBonus];
+                tableRow.DynamicProperties[FieldTotalBonus] = totalBonus;
+
+                //TThành tiền lương thời gian
+                var stringFormulaLCB = extractFormulaPartial(selectedFormula.Id, ConstantPartWageCheckout, lstAllFormula);
+                if (stringFormulaLCB != null)
+                {
+                    tableRow.DynamicProperties[FieldHourWageCheckout] = calculateFormulaString(stringFormulaLCB, tableRow.DynamicProperties);
+                    tableRow.DynamicProperties[FieldRealHours] = stringFormulaLCB.Contains(FieldRealDays) ?
+                                                                tableRow.DynamicProperties[FieldRealDays] : tableRow.DynamicProperties[FieldRealHours];
+                }
+                else
+                {
+                    tableRow.DynamicProperties[FieldHourWageCheckout] =
+                            tableRow.DynamicProperties[FieldBaseSalary] * tableRow.DynamicProperties[FieldRealHours] / (selectedEmployee?.RequiredHours ?? 0);
+
+                }
+
+                var stringFormulaTotalIncome = extractFormulaPartial(selectedFormula.Id, ConstantPartWageTotalIncome, lstAllFormula);
+                if (stringFormulaTotalIncome != null)
+                {
+                    tableRow.DynamicProperties[FieldTotalIncome] = calculateFormulaString(stringFormulaTotalIncome, tableRow.DynamicProperties);
+                }
+                else
+                {
+                    tableRow.DynamicProperties[FieldTotalIncome] = tableRow.DynamicProperties[FieldTotalAllowance]
+                                                                 + tableRow.DynamicProperties[FieldTotalBonus]
+                                                                 + tableRow.DynamicProperties[FieldHourWageCheckout];
+                }
+
+
+                #endregion
+
+                #region + Khấu trừ
+                //Insurance
+                double totalInsurance = 0;
+
+                foreach (var sc in insuranceColumn)
+                {
+                    //check if employee has sc
+                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount * (selectedEmployee?.BaseInsurance ?? 0);
+                    else tableRow.DynamicProperties[sc.Field] = 0;
+                    totalInsurance += tableRow.DynamicProperties[sc.Field];
+                }
+                tableRow.DynamicProperties[FieldBHXHCheckout] = totalInsurance;
+                if (!stringFormulaAll.Contains(FieldBHXHCheckout)) tableRow.DynamicProperties[FieldBHXHCheckout] = 0;
+
+                //Tax Deduction
+                double totalTaxDeduction = 0;
+                foreach (var sc in taxDeductionColumn)
+                {
+                    //check if employee has sc
+                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount;
+                    else tableRow.DynamicProperties[sc.Field] = 0;
+                    totalTaxDeduction += tableRow.DynamicProperties[sc.Field];
+                }
+                tableRow.DynamicProperties[FieldTotalPersonalTaxDeduction] = totalTaxDeduction;
+
+
+                //Thành tiền tổng khấu trừ
+                tableRow.DynamicProperties[FieldTotalTaxDeduction] = tableRow.DynamicProperties[FieldBHXHCheckout] + tableRow.DynamicProperties[FieldTotalPersonalTaxDeduction];
+
+                #endregion
+
+                #region + Thuế TNCN
+                //Các khoản miễn thuế
+                tableRow.DynamicProperties[FieldNotInTax] = 0; //FIX
+
+                //Thu nhập chịu thuế
+                tableRow.DynamicProperties[FieldTaxableIncome] = tableRow.DynamicProperties[FieldTotalIncome] - tableRow.DynamicProperties[FieldNotInTax];
+
+                //Thu nhập tính thuế
+                tableRow.DynamicProperties[FieldAssessableIncome] = tableRow.DynamicProperties[FieldTaxableIncome] - tableRow.DynamicProperties[FieldTotalTaxDeduction];
+
+                //Thuế suất
+                var selectedBLT = lstTaxRate.FirstOrDefault(x => tableRow.DynamicProperties[FieldAssessableIncome] > x.MinTaxIncome
+                                                                && tableRow.DynamicProperties[FieldAssessableIncome] < x.MaxTaxIncome);
+                tableRow.DynamicProperties[FieldTaxRate] = selectedBLT?.Percent ?? 0;
+                totalTax = tableRow.DynamicProperties[FieldAssessableIncome] * tableRow.DynamicProperties[FieldTaxRate] - selectedBLT?.MinusAmount ?? 0;
+                tableRow.DynamicProperties[FieldTaxCheckout] = totalTax < 0 ? 0 : totalTax;
+
+                #endregion
+
+                #region + Các khoản không tính thuế
+
+                //Advance
+                var selectedAdvances = lstAllowedAdvance.Where(x => x.EmployeeId == payroll.EmployeeId).ToList();
+                tableRow.DynamicProperties[FieldTotalAdvance] = selectedAdvances != null ? selectedAdvances.Select(x => x.Amount).Sum() : 0;
+
+                //Deduction
+                double totalDeductionNoTax = 0;
+                foreach (var sc in deductionColumn)
+                {
+                    //check if employee has sc
+                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount;
+                    else tableRow.DynamicProperties[sc.Field] = 0;
+                    totalDeductionNoTax += tableRow.DynamicProperties[sc.Field];
+                }
+
+                tableRow.DynamicProperties[FieldOtherDeduction] = payroll.OtherDeduction;
+                totalDeductionNoTax += tableRow.DynamicProperties[FieldOtherDeduction];
+                tableRow.DynamicProperties[FieldTotalDeductionNoTax] = totalDeductionNoTax;
+
+                //Phụ cấp ko thuế
+                double totalBonusNoTax = 0;
+                totalBonusNoTax += tableRow.DynamicProperties[FieldAllowanceLunch] = 730000; //FIX
+                tableRow.DynamicProperties[FieldTotalBonusNoTax] = totalBonusNoTax;
+
+                #endregion
+
+
+                //Thực lĩnh : app công thức
+
+                if (stringFormulaAll != null)
+                {
+                    tableRow.DynamicProperties[Fieldnet] = calculateFormulaString(stringFormulaAll, tableRow.DynamicProperties);
+                }
+                else
+                {
+                    tableRow.DynamicProperties[Fieldnet] = tableRow.DynamicProperties[FieldTotalIncome] -
+                                                       tableRow.DynamicProperties[FieldTaxCheckout] -
+                                                       totalInsurance -
+                                                       tableRow.DynamicProperties[FieldTotalAdvance] -
+                                                       tableRow.DynamicProperties[FieldTotalDeductionNoTax] +
+                                                       tableRow.DynamicProperties[FieldTotalBonusNoTax];
+                }
+
+                res.Add(tableRow);
+            }
+
+
+            return new ApiResponse<IEnumerable<PayrollTableData>>()
+            {
+                IsSuccess = true,
+                Metadata = res.OrderBy(x => x.DepartmentName)
+            };
+        }
+        catch (AggregateException ex)
+        {
+            return new ApiResponse<IEnumerable<PayrollTableData>>()
+            {
+                IsSuccess = false,
+                Message = ex.InnerExceptions.Select(x => x.Message).ToList()
+            };
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<IEnumerable<PayrollTableData>>()
+            {
+                IsSuccess = false,
+                Message = new List<string>() { e.Message }
+            };
+        }
+    }
+
+    public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData_OLD(PayrollPeriod period)
+    {
+        try
+        {
+            var payrollByPeriod = await _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month).ToListAsync();
             var lstContractIds = payrollByPeriod.Select(x => x.ContractId).ToList(); ;
             var lstEmployeeIds = payrollByPeriod.Select(x => x.EmployeeId).ToList(); ;
             var lstPayrollIds = payrollByPeriod.Select(x => x.Id).ToList();
@@ -1264,13 +1726,14 @@ public class PayrollsService : IPayrollsService
                                 }).ToList();
             #endregion
             //list advance approved
-            var lstAllowedAdvance = _advanceRepository.GetAllQueryAble().Where(x => x.Month == period.Month && x.Year == period.Year && x.Status == AdvanceStatus.Approved).ToList();
+            var lstAllowedAdvance = await _advanceRepository.GetAllQueryAble().Where(x => x.Month == period.Month && x.Year == period.Year && x.Status == AdvanceStatus.Approved).ToListAsync();
 
             //list tax rate
             var lstTaxRate = _taxRateRepository.GetAllQueryAble().ToList();
 
             var res = new List<PayrollTableData>();
 
+            //Áp dụng công thức - ý tưởng: tính hết các parameter cố định, từ công thức truy về các parameter cố định và thực hiện phép tính
 
             foreach (var payroll in payrollByPeriod)
             {
@@ -1295,7 +1758,7 @@ public class PayrollsService : IPayrollsService
                 tableRow.DynamicProperties[FieldHourWageCheckout] =
                     tableRow.DynamicProperties[FieldBaseSalary] * tableRow.DynamicProperties[FieldRealHours] / (selectedEmployee?.RequiredHours ?? 0);
 
-                
+
                 foreach (var sc in allowanceColumn)
                 {
                     //check if employee has sc
@@ -1325,7 +1788,7 @@ public class PayrollsService : IPayrollsService
                 foreach (var sc in insuranceColumn)
                 {
                     //check if employee has sc
-                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount* (selectedEmployee?.BaseInsurance ?? 0);
+                    if (sc.ListIdBelongTo.Contains(payroll.Id)) tableRow.DynamicProperties[sc.Field] = sc.Amount * (selectedEmployee?.BaseInsurance ?? 0);
                     else tableRow.DynamicProperties[sc.Field] = 0;
                     totalInsurance += tableRow.DynamicProperties[sc.Field];
                 }
@@ -1351,7 +1814,7 @@ public class PayrollsService : IPayrollsService
 
                 //Thu nhập chịu thuế
                 tableRow.DynamicProperties[FieldTaxableIncome] = tableRow.DynamicProperties[FieldTotalIncome] - tableRow.DynamicProperties[FieldNotInTax];
-                
+
                 //Thu nhập tính thuế
                 tableRow.DynamicProperties[FieldAssessableIncome] = tableRow.DynamicProperties[FieldTaxableIncome] - tableRow.DynamicProperties[FieldTotalTaxDeduction];
 
@@ -1360,15 +1823,15 @@ public class PayrollsService : IPayrollsService
                                                                 && tableRow.DynamicProperties[FieldAssessableIncome] < x.MaxTaxIncome);
                 tableRow.DynamicProperties[FieldTaxRate] = selectedBLT?.Percent ?? 0;
                 totalTax = tableRow.DynamicProperties[FieldAssessableIncome] * tableRow.DynamicProperties[FieldTaxRate] - selectedBLT?.MinusAmount ?? 0;
-                tableRow.DynamicProperties[FieldTaxCheckout] = totalTax<0?0:totalTax;
+                tableRow.DynamicProperties[FieldTaxCheckout] = totalTax < 0 ? 0 : totalTax;
                 #endregion
 
                 #region + Các khoản không tính thuế
-                
+
                 //Advance
                 var selectedAdvances = lstAllowedAdvance.Where(x => x.EmployeeId == payroll.EmployeeId).ToList();
                 tableRow.DynamicProperties[FieldTotalAdvance] = selectedAdvances != null ? selectedAdvances.Select(x => x.Amount).Sum() : 0;
-             
+
                 //Deduction
                 double totalDeductionNoTax = 0;
                 foreach (var sc in deductionColumn)
@@ -1424,6 +1887,176 @@ public class PayrollsService : IPayrollsService
             };
         }
     }
+
+    public double GetEmployeeSalary(int employeeId, PayrollPeriod period)
+    {
+        var selectedPayroll = _payrollRepository.GetAllQueryAble()
+                                        .Where(x => x.EmployeeId == employeeId
+                                               && x.Month == period.Month
+                                               && x.Year == period.Year).FirstOrDefault();
+        var selectedEmployee = _employeeRepository.GetAllQueryAble()
+                                        .Where(x => x.Id == employeeId).FirstOrDefault();
+        var selectedContract = _contractRepository.GetAllQueryAble().Where(x => x.Id == selectedEmployee.ContractId).FirstOrDefault();
+        var selectedContractSalary = _contractSalaryRepository.GetAllQueryAble().Where(x => x.Id == selectedContract.ContractSalaryId).FirstOrDefault();
+
+        double totalWageCheckout = 0;
+
+        double totalBonus = 0;
+        double totalDeduction = 0;
+
+        double totalTaxDeduction = 0;
+        double totalTax = 0;
+
+        double totalAdvance = 0;
+
+        double totalAllowance = 0;
+        double totalInsurance = 0;
+
+        //Income
+        double realWageTime = 120;
+        totalWageCheckout = selectedContractSalary.BaseSalary * realWageTime / selectedContractSalary.RequiredHours;
+
+        var allBonusIds = _bonusDetailsRepository.GetAllQueryAble().Where(x => x.PayrollId == selectedPayroll.Id)?.Select(x => x.BonusId).ToList() ?? new List<int>();
+        totalBonus = _bonusRepository.GetAllQueryAble().Where(x => allBonusIds.Contains(x.Id)).Sum(x => x.Amount);
+
+        var allAllowanceIds = _contractAllowanceRepository.GetAllQueryAble().Where(x => x.ContractId == selectedContract.Id)?.Select(x => x.AllowanceId).ToList() ?? new List<int>();
+        totalAdvance = _allowanceRepository.GetAllQueryAble().Where(x => allAllowanceIds.Contains(x.Id)).Sum(x => x.Amount);
+
+        //Tax deduction
+
+
+        // PIX
+
+        //Other no tax
+        var allDeductionIds = _deductionDetailsRepository.GetAllQueryAble().Where(x => x.PayrollId == selectedPayroll.Id)?.Select(x => x.DeductionId).ToList() ?? new List<int>();
+        totalDeduction = _deductionRepository.GetAllQueryAble().Where(x => allDeductionIds.Contains(x.Id)).Sum(x => x.Amount);
+
+
+        return 0;
+
+    }
+    //Quy công thức về các paramerter base, fix
+    // VD: fomula: ([PARAM_1]+[PARAM_2]-[FORMULA_4])*3-[FORMULA_5]
+    private string extractAllFormula(int formulaId, List<Fomula> lstAllFotmulas)
+    {
+        var currFormula = lstAllFotmulas.FirstOrDefault(x => x.Id == formulaId);
+        if (currFormula == null) return "";
+        var fomulaDetails = currFormula.FomulaDetail;
+        var lstParams = new List<string>();
+        foreach (Match match in Regex.Matches(currFormula.FomulaDetail, _param_pattern_))
+        {
+            var param_partial = match.Groups[1].Value;
+            if (param_partial.StartsWith("FORMULA_"))
+            {
+                var selectedFomula = lstAllFotmulas.FirstOrDefault(x => x.ParameterName == param_partial);
+                if (selectedFomula != null)
+                {
+                    var fomula_extract = extractAllFormula(selectedFomula.Id, lstAllFotmulas);
+                    fomulaDetails = fomulaDetails.Replace("[" + param_partial + "]", "(" + fomula_extract + ")");
+                }
+
+            }
+
+        }
+        return fomulaDetails;
+    }
+
+    private string extractFormulaPartial(int formulaId, string formulaFindPartString, List<Fomula> lstAllFotmulas, bool beginMerge = false)
+    {
+        var currFormula = lstAllFotmulas.FirstOrDefault(x => x.Id == formulaId);
+        if (currFormula == null) return "";
+        var fomulaDetails = "";
+        if (beginMerge) fomulaDetails = currFormula.FomulaDetail;
+        var lstParams = new List<string>();
+        foreach (Match match in Regex.Matches(currFormula.FomulaDetail, _param_pattern_))
+        {
+            var param_partial = match.Groups[1].Value;
+            if (param_partial.StartsWith("FORMULA_"))
+            {
+                var selectedFomula = lstAllFotmulas.FirstOrDefault(x => x.ParameterName == param_partial);
+
+                if (selectedFomula != null)
+                {
+                    if (selectedFomula.ParameterName.Contains(formulaFindPartString))
+                    {
+                        return extractFormulaPartial(selectedFomula.Id, formulaFindPartString, lstAllFotmulas, true);
+
+                    }
+                    else if (beginMerge == true)
+                    {
+                        var fomula_extract = extractFormulaPartial(selectedFomula.Id, formulaFindPartString, lstAllFotmulas, true);
+                        fomulaDetails = fomulaDetails.Replace("[" + param_partial + "]", "(" + fomula_extract + ")");
+                    }
+                    else if (fomulaDetails == "") fomulaDetails = extractFormulaPartial(selectedFomula.Id, formulaFindPartString, lstAllFotmulas, false);
+                }
+            }
+
+        }
+
+        return fomulaDetails;
+
+
+    }
+
+    private double calculateFormulaString(string fomulaString, Dictionary<string, double> map)
+    {
+        var formulasStringNumber = fomulaString;
+        foreach (Match match in Regex.Matches(fomulaString, _param_pattern_))
+        {
+            var param_partial = match.Groups[1].Value;
+            formulasStringNumber = formulasStringNumber.Replace("[" + param_partial + "]", map[param_partial].ToString());
+        }
+        var result = new DataTable().Compute(formulasStringNumber, null).ToString();
+        return double.Parse(result);
+    }
+
+    public async Task<string> Test()
+    {
+        try
+        {
+            var bodyContentEmail = HandleFile.READ_FILE("Email", "Payslip.html")
+                 .Replace("{sentDate}", DateTime.Now.ToString("dd/MM/yyyy"))
+                 .Replace("{payPeriod}", "Tháng 11 năm 2024")
+                 .Replace("{employeeName}", "Nguyễn Thành Hưng")
+                 .Replace("{dateHired}", "10/10/2020")
+                 .Replace("{positionName}", "Kĩ sư phần mềm")
+                 .Replace("{departmentName}", "Phòng IT")
+                 .Replace("{taxCode}", "102-231-322-123")
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", "10000000")
+                 .Replace("{" + $"{FieldBaseSalary}" + "}", "12000000")
+                 .Replace("{" + $"{FieldBaseWageHours}" + "}", "100000")
+                 .Replace("{" + $"{FieldBaseHours}" + "}", "600")
+                 .Replace("{" + $"{FieldRealHours}" + "}", "400")
+                 .Replace("{" + $"{FieldHourWageCheckout}" + "}", "24000000")
+                 .Replace("{" + $"{FieldOtherBonus}" + "}", "400000")
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", "16000000")
+                 .Replace("{" + $"{FieldTotalTaxDeduction}" + "}", "400000")
+                 .Replace("{" + $"{FieldTaxCheckout}" + "}", "200000")
+                 .Replace("{" + $"{FieldTotalAdvance}" + "}", "490000")
+                 .Replace("{" + $"{FieldOtherDeduction}" + "}", "400")
+                 .Replace("{" + $"{Fieldnet}" + "}", "40000000000");
+            var bodyEmail = _emailService.TemplateContent
+                        .Replace("<main>","")
+                         .Replace("/<main>", "")
+                       .Replace("{content}", bodyContentEmail);
+
+            var email = new Email()
+            {
+                To = "thanh.hung.st302@gmail.com",
+                Body = bodyEmail,
+                Subject = "[HRM TEST] - PHIẾU LƯƠNG THÁNG 11 NĂM 2024"
+            };
+            await _emailService.SendEmailToRecipient(email);
+            return "Ok";
+        }
+        catch (Exception e)
+        {
+            return e.Message;
+        }
+        
+
+    }
+
     #endregion
 
 
@@ -1436,13 +2069,13 @@ public class PayrollsService : IPayrollsService
         if (listAllSC == null || listAllSC.Count == 0) return new List<DynamicColumn>();
         var listUnionIds = new HashSet<int>(listAllSC.Select(x => x.AllowanceId).ToList());
         var allMapList = _allowanceRepository.GetAllQueryAble().Where(x => listUnionIds.Contains(x.Id)).ToList();
-        return allMapList.Select(x=>new DynamicColumn()
+        return allMapList.Select(x => new DynamicColumn()
         {
             Id = x.Id,
             Header = x.Name,
             Field = x.ParameterName,
             Amount = x.Amount,
-            ListIdBelongTo = listAllSC.Where(y=>y.AllowanceId == x.Id).Select(x=>x.ContractId).ToList()
+            ListIdBelongTo = listAllSC.Where(y => y.AllowanceId == x.Id).Select(x => x.ContractId).ToList()
         }).ToList();
     }
 
@@ -1456,7 +2089,7 @@ public class PayrollsService : IPayrollsService
         return allMapList.Select(x => new DynamicColumn()
         {
             Id = x.Id,
-            Header = x.Name+ " (" +x.PercentEmployee*100+"%)",
+            Header = x.Name + " (" + x.PercentEmployee * 100 + "%)",
             Field = x.ParameterName,
             Amount = x.PercentEmployee,
             ListIdBelongTo = listAllSC.Where(y => y.InsuranceId == x.Id).Select(x => x.ContractId).ToList()
@@ -1491,7 +2124,7 @@ public class PayrollsService : IPayrollsService
         {
             Id = x.Id,
             Header = x.Name,
-            Field =  x.ParameterName,
+            Field = x.ParameterName,
             Amount = x.Amount,
             ListIdBelongTo = listAllSC.Where(y => y.BonusId == x.Id).Select(x => x.PayrollId).ToList()
         }).ToList();

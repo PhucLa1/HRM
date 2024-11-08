@@ -45,6 +45,8 @@ namespace HRM.Repositories.Dtos.Results
         public string EmployeeName { get; set; } = "";
         public string PositionName { get; set; } = "";
         public string DepartmentName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string PhoneNumber { get; set; } = "";
 
         [JsonPropertyName("dp")]
         public Dictionary<string, double> DynamicProperties { get; set; } = new Dictionary<string, double>();

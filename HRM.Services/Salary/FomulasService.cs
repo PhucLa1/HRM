@@ -136,12 +136,14 @@ namespace HRM.Services.Salary
             {
                 new SalaryComponent{ Name="Lương cơ bản", ParameterName ="PARAM_BASE_SALARY"},
                 new SalaryComponent{ Name="Lương đóng bảo hiểm", ParameterName ="PARAM_BASE_INSURANCE"},
-                new SalaryComponent{ Name="Số ngày quy định", ParameterName ="PARAM_BASE_DAYS"},
-                new SalaryComponent{ Name="Số giờ quy định", ParameterName ="PARAM_BASE_HOURS"},
-                new SalaryComponent{ Name="Ngày công", ParameterName ="PARAM_BASE_WAGE_DAYS"},
-                new SalaryComponent{ Name="Giờ công", ParameterName ="PARAM_BASE_WAGE_HOURS"},
+                new SalaryComponent{ Name="Số ngày công quy định", ParameterName ="PARAM_BASE_DAYS"},
+                new SalaryComponent{ Name="Số giờ công quy định", ParameterName ="PARAM_BASE_HOURS"},
+                new SalaryComponent{ Name="Tiền ngày công", ParameterName ="PARAM_BASE_WAGE_DAYS"},
+                new SalaryComponent{ Name="Tiền giờ công", ParameterName ="PARAM_BASE_WAGE_HOURS"},
                 new SalaryComponent{ Name="Hệ số lương", ParameterName ="PARAM_BASE_FACTOR"},
-                new SalaryComponent{ Name="Phụ cấp trách nhiệm", ParameterName ="PARAM_BASE_TOTAL_ALLOWANCE", Desc="Được tính bằng tổng phụ cấp quy định trong HĐ"},
+                new SalaryComponent{ Name="Phụ cấp ăn trưa", ParameterName ="PARAM_ALLOWANCE_LUNCH_NOTAX"},
+                new SalaryComponent{ Name="Tổng phụ cấp", ParameterName ="PARAM_TOTAL_ALLOWANCE", Desc="Được tính bằng tổng phụ cấp quy định trong HĐ"},
+                new SalaryComponent{ Name="Tổng bảo hiểm", ParameterName ="PARAM_TOTAL_INSURANCE", Desc="Được tính bằng (tổng %bảo hiểm*mức đóng bảo hiểm) quy định trong HĐ"},
             };
 
             //Time keeping Salary
@@ -155,22 +157,23 @@ namespace HRM.Services.Salary
 
             //Bonus, Deduction
             var autoCollectSC = new SalaryComponentCategory();
-            autoCollectSC.Name = "Thành phần tự thu thập";
+            autoCollectSC.Name = "Thành phần thu thập tự động";
             autoCollectSC.ListSalaryComponents = new List<SalaryComponent>()
             {
                 new SalaryComponent{ Name="Tổng khoản thưởng", ParameterName ="PARAM_TOTAL_BONUS"},
-                new SalaryComponent{ Name="Tổng khoản trừ", ParameterName ="PARAM_TOTAL_DEDUCTION"},
+                new SalaryComponent{ Name="Tổng khoản cộng (không thuế)", ParameterName ="PARAM_TOTAL_BONUS_NOTAX"},
+                new SalaryComponent{ Name="Tổng khoản trừ (không tính thuế)", ParameterName ="PARAM_TOTAL_DEDUCTION_NOTAX"},
                 new SalaryComponent{ Name="Tổng tiền ứng lương", ParameterName ="PARAM_TOTAL_ADVANCE"},
             };
 
             //BHXH, TAX
-            var ruleSC = new SalaryComponentCategory();
-            ruleSC.Name = "Thành phần được tính theo luật của nước";
-            ruleSC.ListSalaryComponents = new List<SalaryComponent>()
-            {
-                new SalaryComponent{ Name="Tiền BHXH", ParameterName ="PARAM_RULE_BHXH", Desc="Được tính bằng tổng % NLĐ phải đóng cho các bảo hiểm đã quy định trong HĐ"},
-                new SalaryComponent{ Name="Thuế TNCN", ParameterName ="PARAM_RULE_TAX"}
-            };
+            //var ruleSC = new SalaryComponentCategory();
+            //ruleSC.Name = "Thành phần được tính theo luật của nước";
+            //ruleSC.ListSalaryComponents = new List<SalaryComponent>()
+            //{
+            //    //new SalaryComponent{ Name="Tiền BHXH", ParameterName ="PARAM_RULE_BHXH", Desc="Được tính bằng tổng % NLĐ phải đóng cho các bảo hiểm đã quy định trong HĐ"},
+            //    new SalaryComponent{ Name="Thuế TNCN", ParameterName ="PARAM_RULE_TAX"}
+            //};
 
             //FORMULA
             var formulaSC = new SalaryComponentCategory();
@@ -185,7 +188,7 @@ namespace HRM.Services.Salary
             res.Add(contractSalarySC);
             res.Add(timeKeepingSalarySC);
             res.Add(autoCollectSC);
-            res.Add(ruleSC);
+            //res.Add(ruleSC);
             res.Add(formulaSC);
             return new ApiResponse<IEnumerable<SalaryComponentCategory>>()
             {
