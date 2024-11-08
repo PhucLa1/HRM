@@ -23,24 +23,84 @@ namespace HRM.Services.User
     {
         Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin); //Chỉ dùng riêng cho admin
         Task<ApiResponse<string>> EmployeeLogin(AccountLogin employeeLogin); //Dùng cho nhân viên
+        Task<ApiResponse<AccountInfo>> GetCurrentAccount();
     }
     public class AuthService : IAuthService
     {
         private readonly IBaseRepository<Admin> _adminRepository;
         private readonly IBaseRepository<Employee> _employeeRepository;
+        private readonly IBaseRepository<Contract> _contractRepository;
         private readonly JwtSetting _jwtServerSetting;
         private readonly IValidator<AccountLogin> _accountLoginValidator;
         public AuthService(
             IBaseRepository<Admin> adminRepository,
             IOptions<JwtSetting> jwtServerSetting,
             IValidator<AccountLogin> accountLoginValidator,
-            IBaseRepository<Employee> employeeRepository
+            IBaseRepository<Employee> employeeRepository,
+            IBaseRepository<Contract> contractRepository
             )
         {
             _adminRepository = adminRepository;
             _jwtServerSetting = jwtServerSetting.Value;
             _accountLoginValidator = accountLoginValidator;
             _employeeRepository = employeeRepository;
+            _contractRepository = contractRepository;
+        }
+
+        public async Task<ApiResponse<AccountInfo>> GetCurrentAccount()
+        {
+            try
+            {
+                var currentRole = _employeeRepository.Context
+                    .GetCurrentUserRole();
+
+                var currentId = _employeeRepository.Context
+                    .GetCurrentUserId();
+                string email = "";
+                string name = "";
+                TypeContract? type = null;
+                if (currentRole == Role.Admin)
+                {
+                    var currentUser = await _adminRepository.GetAllQueryAble()
+                        .Where(e => e.Id == currentId)
+                        .FirstAsync();
+                    email = currentUser.Email;
+                    name = currentUser.Email.Split('@')[0];
+
+                }
+                else //Role là user
+                {
+                    var currentUser = await (from em in _employeeRepository.GetAllQueryAble()
+                                             join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                             where em.Id == currentId
+                                             select new
+                                             {
+                                                 Name = c.Name,
+                                                 Email = em.Email,
+                                                 TypeContract = c.TypeContract
+                                             }).FirstAsync();
+                    email = currentUser.Email;
+                    name = currentUser.Name;
+                    type = currentUser.TypeContract;
+                }
+                var accountInfo = new AccountInfo
+                {
+                    Id = currentId,
+                    Role = currentRole,
+                    Name = name,
+                    Email = email,
+                    TypeContract = type == null ? 0 : type,
+                };
+                return new ApiResponse<AccountInfo>
+                {
+                    Metadata = accountInfo,
+                    IsSuccess = true,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin)
@@ -101,13 +161,18 @@ namespace HRM.Services.User
                 {
                     return new ApiResponse<string> { Message = [AuthError.PASS_NOT_CORRECT] };
                 }
+                var typeContract = await _contractRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == employeeInDb.ContractId)
+                    .Select(e => e.TypeContract)
+                    .FirstAsync();
                 string encrypterToken = await JWTGenerator(new UserJwt
-                    {
-                        Email = employeeInDb.Email!,
-                        Password = employeeInDb.Password!,
-                        Role = Role.User,
-                        Id = employeeInDb.Id
-                    }
+                {
+                    Email = employeeInDb.Email!,
+                    Password = employeeInDb.Password!,
+                    Role = typeContract == TypeContract.Partime ? Role.Partime : Role.FullTime,
+                    Id = employeeInDb.Id
+                }
                 );
                 return new ApiResponse<string> { Metadata = encrypterToken, IsSuccess = true };
             }

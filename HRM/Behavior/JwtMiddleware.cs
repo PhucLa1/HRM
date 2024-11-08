@@ -26,8 +26,12 @@ namespace HRM.Data.Jwt
                     // Lấy ra id của người dùng từ claim
                     var userId = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "Id")?.Value;
 
-                    // Lưu thông tin id của người dùng vào context để các middleware khác có thể sử dụng
+                    //Lấy ra role của người dùng từ claim
+                    var userRole = jsonToken?.Claims.FirstOrDefault(claim => claim.Type == "Role")?.Value;
+
+                    // Lưu thông tin id, role của người dùng vào context để các middleware khác có thể sử dụng
                     context.Items["UserId"] = userId;
+                    context.Items["UserRole"] = userRole;
                 }
 
             }

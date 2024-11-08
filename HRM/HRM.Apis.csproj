@@ -45,9 +45,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="APIHelper\" />
+    <Folder Include="wwwroot\Excel\" />
     <Folder Include="wwwroot\Logo\" />
     <Folder Include="wwwroot\CV\" />
+    <Folder Include="wwwroot\Employee\" />
+    <Folder Include="APIHelper\" />
   </ItemGroup>
 
 </Project>
