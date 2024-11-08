@@ -28,6 +28,7 @@ namespace HRM.Services.Recruitment
 		private readonly IBaseRepository<RecruitmentWeb> _recruitmentWebRepository;
 		private readonly IBaseRepository<Employee> _employeeRepository;
 		private readonly IBaseRepository<Position> _positionRepository;
+		private readonly IBaseRepository<Contract> _contractRepository;
 		private readonly IValidator<JobPostingUpsert> _jobPostingUpsertValidator;
 		private readonly IMapper _mapper;
 		public JobPostingsService(
@@ -35,6 +36,7 @@ namespace HRM.Services.Recruitment
 			IBaseRepository<RecruitmentWeb> recruitmentWebRepository,
 			IBaseRepository<Employee> employeeRepository,
 			IBaseRepository<Position> positionRepository,
+			IBaseRepository<Contract> contractRepository,
 		IValidator<JobPostingUpsert> jobPostingUpsertValidator,
 			IMapper mapper)
 		{
@@ -42,6 +44,7 @@ namespace HRM.Services.Recruitment
 			_recruitmentWebRepository = recruitmentWebRepository;
 			_employeeRepository = employeeRepository;
 			_positionRepository = positionRepository;
+			_contractRepository = contractRepository;
 			_jobPostingUpsertValidator = jobPostingUpsertValidator;
 			_mapper = mapper;
 		}
@@ -88,6 +91,8 @@ namespace HRM.Services.Recruitment
 									  from p in positionJoin.DefaultIfEmpty() // Left join on positions
 									  join e in _employeeRepository.GetAllQueryAble() on jp.EmployeeId equals e.Id into employeeJoin
 									  from e in employeeJoin.DefaultIfEmpty()
+									  join c in _contractRepository.GetAllQueryAble() on e.ContractId equals c.Id into contractJoin
+									  from c in contractJoin.DefaultIfEmpty()
 									  select new JobPostingResult
 									  {
 										  Id = jp.Id,
@@ -100,7 +105,7 @@ namespace HRM.Services.Recruitment
 										  PostingDate = jp.PostingDate,
 										  ExpirationDate = jp.ExpirationDate,
 										  ExperienceRequired = jp.ExperienceRequired,
-										  EmployeeName = e.UserName,
+										  EmployeeName = c.Name,
 										  EmployeeId = jp.EmployeeId
 									  }).ToListAsync(),
 					IsSuccess = true
@@ -138,6 +143,7 @@ namespace HRM.Services.Recruitment
 				}
 				var job = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
 				//Nhập lại dữ liệu
+				job.PositionId = jobPostingUpdate.PositionId;
 				job.Description = jobPostingUpdate.Description;
 				job.Location = jobPostingUpdate.Location;
 				job.SalaryRangeMin = jobPostingUpdate.SalaryRangeMin;

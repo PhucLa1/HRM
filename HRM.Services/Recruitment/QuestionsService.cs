@@ -11,6 +11,7 @@ namespace HRM.Services.RecruitmentManager
     public interface IQuestionsService
 	{
 		Task<ApiResponse<IEnumerable<QuestionResult>>> GetAllQuestion();
+		Task<ApiResponse<IEnumerable<QuestionResult>>> GetAllQuestionId(int id);
 		Task<ApiResponse<bool>> AddNewQuestion(QuestionUpsert questionAdd);
 		Task<ApiResponse<bool>> UpdateQuestion(int id, QuestionUpsert questionUpdate);
 		Task<ApiResponse<bool>> RemoveQuestion(int id);
@@ -46,8 +47,7 @@ namespace HRM.Services.RecruitmentManager
 										  Id = q.Id,
 										  TestId = q.TestId,
 										  TestName = t.Name,
-										  QuestionText = q.QuestionText,
-										  Point = q.Point
+										  QuestionText = q.QuestionText
 									  }).ToListAsync(),
 					IsSuccess = true
 				};
@@ -62,7 +62,6 @@ namespace HRM.Services.RecruitmentManager
 		{
 			try
 			{
-				var testName = await _baseTestRepository.GetAllQueryAble().Where(e => e.Id == questionAdd.TestId).FirstAsync();
 				var resultValidation = _questionUpsertValidator.Validate(questionAdd);
 				if (!resultValidation.IsValid)
 				{
@@ -70,8 +69,7 @@ namespace HRM.Services.RecruitmentManager
 				}
 				await _baseRepository.AddAsync(new Questions { 
 					TestId = questionAdd.TestId ,
-					QuestionText = questionAdd.QuestionText.Trim(), 
-					Point = questionAdd.Point 
+					QuestionText = questionAdd.QuestionText
 				});
 				await _baseRepository.SaveChangeAsync();
 				return new ApiResponse<bool> { IsSuccess = true };
@@ -93,7 +91,6 @@ namespace HRM.Services.RecruitmentManager
 				var postion = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
 				postion.TestId = questionUpdate.TestId;
 				postion.QuestionText = questionUpdate.QuestionText.Trim();
-				postion.Point = questionUpdate.Point;
 				_baseRepository.Update(postion);
 				await _baseRepository.SaveChangeAsync();
 				return new ApiResponse<bool> { IsSuccess = true };
@@ -115,6 +112,33 @@ namespace HRM.Services.RecruitmentManager
 			{
 				throw new Exception(ex.Message);
 			}
+		}
+
+		public async Task<ApiResponse<IEnumerable<QuestionResult>>> GetAllQuestionId(int id)
+		{
+			try
+			{
+				return new ApiResponse<IEnumerable<QuestionResult>>
+				{
+					Metadata = await (from q in _baseRepository.GetAllQueryAble()
+									  join t in _baseTestRepository.GetAllQueryAble()
+									  on q.TestId equals t.Id
+									  where q.TestId == id
+									  select new QuestionResult
+									  {
+										  Id = q.Id,
+										  TestId = q.TestId,
+										  TestName = t.Name,
+										  QuestionText = q.QuestionText
+									  }).ToListAsync(),
+					IsSuccess = true
+				};
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -47,7 +47,6 @@
   <ItemGroup>
     <Folder Include="APIHelper\" />
     <Folder Include="wwwroot\Logo\" />
-    <Folder Include="wwwroot\CV\" />
   </ItemGroup>
 
 </Project>

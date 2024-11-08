@@ -96,7 +96,8 @@ builder.Services.AddScoped<IValidator<RecruitmentWebUpsert>, RecruitmentWebUpser
 builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
-
+builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
+builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
 #endregion
 
 
@@ -143,12 +144,14 @@ builder.Services.AddScoped<IAdvancesService, AdvancesService>();
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
-#endregion
-
 
 builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
 
 builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();
+
+builder.Services.AddScoped<IApplicantsService, ApplicantsService>();
+
+builder.Services.AddScoped<ITestResultsService, TestResultsService>();
 #endregion
 
 
@@ -280,6 +283,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseSerilogRequestLogging();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseJwtMiddleware();
 app.UseCors("AllowOrigin");

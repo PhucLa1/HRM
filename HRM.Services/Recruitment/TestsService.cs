@@ -89,6 +89,7 @@ namespace HRM.Services.RecruitmentManager
 		{
 			try
 			{
+
 				await _baseRepository.RemoveAsync(id);
 				await _baseRepository.SaveChangeAsync();
 				return new ApiResponse<bool> { IsSuccess = true };
