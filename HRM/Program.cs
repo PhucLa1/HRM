@@ -139,6 +139,7 @@ builder.Services.AddScoped<IAdvancesService, AdvancesService>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
 builder.Services.AddScoped<IPayrollsService, PayrollsService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
 builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
 builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();

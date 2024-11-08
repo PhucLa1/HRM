@@ -7,6 +7,8 @@ namespace HRM.Repositories.Dtos.Results
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public DateTime DateOfBirth { get; set; }
+        public int Age { get; set; }
+        public int Tenure { get; set; }
         public bool Gender { get; set; }
         public string Address { get; set; } = "";
         public string CountrySide { get; set; } = "";

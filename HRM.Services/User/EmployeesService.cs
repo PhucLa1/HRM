@@ -170,7 +170,11 @@ namespace HRM.Services.User
                         Id = e.Id,
                         Name = e.Contract.Name,
                         DateOfBirth = e.Contract.DateOfBirth,
+                        Age = DateTime.Now.Year - e.Contract.DateOfBirth.Year
+                                 - (DateTime.Now.DayOfYear < e.Contract.DateOfBirth.DayOfYear ? 1 : 0), // Tính tuổi
                         Gender = e.Contract.Gender,
+                        Tenure = DateTime.Now.Year - e.Contract.StartDate.Year
+                         - (DateTime.Now.DayOfYear < e.Contract.StartDate.DayOfYear ? 1 : 0), // Tính thâm niên
                         Address = e.Contract.Address,
                         CountrySide = e.Contract.CountrySide,
                         NationalID = e.Contract.NationalID,
