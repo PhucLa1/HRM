@@ -15,6 +15,7 @@ namespace HRM.Repositories.Base
         HRMDbContext Context { get; }
         Task AddRangeAsync(IEnumerable<T> entities);
         void UpdateMany(IEnumerable<T> entities);
+        void RemoveRange(IEnumerable<T> entities);
         Task<List<T>> CallStoredProcedureAsync(string storedProcedure, params object[] parameters);
         Task<T> CallStoredProcedureAsyncDetail(string storedProcedure, params object[] parameters);
         Task<int> ExecuteStoredProcedureAsync(string storedProcedure, params object[] parameters);

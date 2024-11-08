@@ -60,6 +60,10 @@ namespace HRM.Repositories.Base
                 _dbSet.Remove(res);
             }
         }
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+             _dbSet.RemoveRange(entities);
+        }
 
         public void RemoveRangeByEntitiesAsync(List<T> entities)
         {
@@ -68,7 +72,6 @@ namespace HRM.Repositories.Base
                 _dbSet.RemoveRange(entities);
             }
         }
-
 
         public async Task<int> SaveChangeAsync()
         {

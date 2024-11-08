@@ -83,10 +83,10 @@ namespace HRM.Data.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PayPeriod")
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Reason")
@@ -102,6 +102,9 @@ namespace HRM.Data.Migrations
                     b.Property<int>("UpdatedBy")
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1138,17 +1141,14 @@ namespace HRM.Data.Migrations
                     b.Property<int>("FomulaId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
                     b.Property<double>("OtherBonus")
                         .HasColumnType("float");
 
                     b.Property<double>("OtherDeduction")
                         .HasColumnType("float");
-
-                    b.Property<string>("PayPeriod")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TaxRateId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
@@ -1158,6 +1158,9 @@ namespace HRM.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
 
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ContractId");
@@ -1165,8 +1168,6 @@ namespace HRM.Data.Migrations
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("FomulaId");
-
-                    b.HasIndex("TaxRateId");
 
                     b.ToTable("Payrolls");
                 });
@@ -1303,6 +1304,9 @@ namespace HRM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -1310,9 +1314,6 @@ namespace HRM.Data.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int")
                         .HasColumnName("created_by");
-
-                    b.Property<int>("FomulaType")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1346,12 +1347,6 @@ namespace HRM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("ApplyAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -1363,11 +1358,8 @@ namespace HRM.Data.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InUsed")
-                        .HasColumnType("int");
+                    b.Property<double>("Factor")
+                        .HasColumnType("float");
 
                     b.Property<int>("TaxDeductionId")
                         .HasColumnType("int");
@@ -1399,6 +1391,7 @@ namespace HRM.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Condition")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1408,6 +1401,15 @@ namespace HRM.Data.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int")
                         .HasColumnName("created_by");
+
+                    b.Property<double>("MaxTaxIncome")
+                        .HasColumnType("float");
+
+                    b.Property<double>("MinTaxIncome")
+                        .HasColumnType("float");
+
+                    b.Property<double>("MinusAmount")
+                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1801,17 +1803,9 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.TaxRate", "TaxRate")
-                        .WithMany()
-                        .HasForeignKey("TaxRateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Contract");
 
                     b.Navigation("Fomula");
-
-                    b.Navigation("TaxRate");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Position", b =>
