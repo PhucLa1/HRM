@@ -8,15 +8,46 @@ using HRM.Repositories.Setting;
 using HRM.Services.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml;
 
 namespace HRM.Services.TimeKeeping
 {
+
+    /* Đối với nhân viên partime
+     * Ca sáng từ 8h - 12h
+     * Ca chiều từ 1h - 5h
+     * Ca tối từ 6h - 9h - Công ca tối chỉ tính 3 tiếng 
+     * Nếu là ca sáng - Chỉ được chấm công muộn 30p - Chấm công đầu vào chỉ được từ trước 8h
+                                                    - Chấm công đầu ra chỉ được từ 12h - 12r 
+
+     * Nếu là ca chiều - Chỉ được chấm công muộn nhất 30p - Chấm công đầu vào từ 12h31 - 13h30
+                       - Chỉ được chấm công muộn nhất 30p - Chấm công đầu ra từ 17h - 17h30
+
+     * Nếu là ca tối - Chỉ được chấm công muộn nhất 30p - Chấm công đầu vào từ 17h31 - 6r
+                     - Chấm công đầu ra từ 9h - 12h  
+     * Lưu ý về việc tính giờ công : Sẽ tính theo mức lương theo giờ của nhân viên partime * số giờ làm . 
+     * Nếu làm trên 75% giờ làm (Trên 3 tiếng ) => Tính đủ giờ công
+     * Dưới 2 tiếng thì coi như vắng
+     * Trên 2h < Giờ làm < 3h => Tính là 2h công
+     * Đối với việc quên chấm công (Có thể là chỉ chấm công 1 lần ) => Tính là vắng
+     */
+
+
+    /* Đối với nhân viên fulltime
+     * Làm từ 4h - 8h thì tính theo giờ ( Làm tròn )
+     * Làm dưới 4h coi như vắng
+     * Quy định cho nhân viên fulltime: 1 tuần làm 48 tiếng (Giờ khác tính vào OT) (OT sẽ được phát triền sau )
+     */
     public class WorkShiftError
     {
         public const string STATUS_FAILED = "Trạng thái truyền vào không đúng. ";
         public const string FORBIDDEN_PLAN = "Không có quyền thay đổi trạng thái kế hoạch làm việc";
         public const string STATUS_NULL = "Trạng thái truyền vào không được trống. ";
         public const string FORBIDDEN_OVERDUE = "Lịch làm việc quá hạn để duyệt. ";
+        public const string FAILED_REGULAR = "Sai định dạng ngày tháng. ";
+        public const string NOT_PARTIME_EMPLOYEE = "Nhân viên đang xét không phải nhân viên partime. ";
+        public const string NOT_FULLTIME_EMPLOYEE = "Nhân viên đang xét không phải là nhân viên fulltime. ";
+        public const string FAILED_TYPE_CONTRACT = "Không phải nhân viên partime. ";
     }
     public interface IWorkShiftService
     {
@@ -25,6 +56,16 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<PartimePlanResult>> GetDetailPartimePlan(int partimePlanId);
         Task<ApiResponse<List<UserCalendarResult>>> GetAllWorkShiftByPartimePlanId(int partimePlanId);
         Task<ApiResponse<bool>> ProcessPartimePlanRequest(int partimePlanId, StatusCalendar statusCalendar);
+        Task<ApiResponse<List<List<CalendarEntry>>>> GetAllWorkShiftByPartimeEmployee(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
+        Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công 
+
+        // Tính số giờ làm cho nhân viên 
+        //Task<ApiResponse<Dictionary<int, double>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds);
+
     }
     public class WorkShiftService : IWorkShiftService
     {
@@ -39,6 +80,8 @@ namespace HRM.Services.TimeKeeping
         private const string FOLER = "Email";
         private const string PROCESS_PARTIMEPLAN_FILE = "ProcessPartimePlan.html";
         private const string PROCESS_PARTIMEPLAN_NOTIFICATION = "Thông báo về kết quả đăng kí lịch làm .";
+        private readonly IBaseRepository<History> _historyRepository;
+        private readonly IValidator<HistoryUpsert> _historyUpsertValidator;
         public WorkShiftService(IBaseRepository<PartimePlan> partimePlanRepository,
             IBaseRepository<UserCalendar> userCalendarRepository,
             IValidator<WorkPlanInsert> workPlanInsertValidator,
@@ -46,7 +89,9 @@ namespace HRM.Services.TimeKeeping
             IBaseRepository<Contract> contractRepository,
             IBaseRepository<Employee> employeeRepository,
             IEmailService emailService,
-            IOptions<CompanySetting> serverCompanySetting
+            IOptions<CompanySetting> serverCompanySetting,
+            IBaseRepository<History> historyRepository,
+            IValidator<HistoryUpsert> historyUpsertValidator
             )
         {
             _partimePlanRepository = partimePlanRepository;
@@ -57,6 +102,595 @@ namespace HRM.Services.TimeKeeping
             _employeeRepository = employeeRepository;
             _emailService = emailService;
             _serverCompanySetting = serverCompanySetting.Value;
+            _historyRepository = historyRepository;
+            _emailService = emailService;
+            _historyUpsertValidator = historyUpsertValidator;
+        }
+        /*
+        public async Task<ApiResponse<Dictionary<int, double>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate)
+        {
+            try
+            {
+                //Kiểm tra xem có đúng định dạng DateOnly không ? 
+                string dateFormat = "yyyy-MM-dd";
+                bool isValidStartDate = DateOnly.TryParseExact(startDate, dateFormat, out DateOnly parsedStartDate);
+
+                // Kiểm tra endDate
+                bool isValidEndDate = DateOnly.TryParseExact(endDate, dateFormat, out DateOnly parsedEndDate);
+
+                if (!isValidStartDate || !isValidEndDate)
+                {
+                    return new ApiResponse<Dictionary<int, double>> { Message = [WorkShiftError.FAILED_REGULAR] };
+                }
+
+                //Chuyển sang dạng DateOnly
+                DateOnly.TryParse(startDate, out DateOnly dateOnlyStartDate);
+                DateOnly.TryParse(endDate, out DateOnly dateOnlyEndDate);
+
+                var employeeIdRoles = await (from em in _employeeRepository.GetAllQueryAble()
+                                             join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                             where employeeIds.Contains(em.Id)
+                                             select new { em.Id, c.TypeContract }
+                                            ).ToListAsync();
+
+                // Tách kết quả thành hai mảng dựa trên loại hợp đồng (Partime và Fulltime)
+                var partimeEmployees = employeeIdRoles.Where(x => x.TypeContract == TypeContract.Partime).Select(x => x.Id).ToList();
+                var fulltimeEmployees = employeeIdRoles.Where(x => x.TypeContract == TypeContract.Fulltime).Select(x => x.Id).ToList();
+
+                //Tính giờ làm cho partime 
+                var calendarEntries = await GetAllWorkShiftAttendanceTracking(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+
+
+
+                //Tính giờ làm cho fulltime
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        */
+
+        public async Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate)
+        {
+            try
+            {
+                //Kiểm tra xem có đúng định dạng DateOnly không ? 
+                string dateFormat = "yyyy-MM-dd";
+                bool isValidStartDate = DateOnly.TryParseExact(startDate, dateFormat, out DateOnly parsedStartDate);
+
+                // Kiểm tra endDate
+                bool isValidEndDate = DateOnly.TryParseExact(endDate, dateFormat, out DateOnly parsedEndDate);
+
+                if (!isValidStartDate || !isValidEndDate)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_REGULAR] };
+                }
+
+                //Chuyển sang dạng DateOnly
+                DateOnly.TryParse(startDate, out DateOnly dateOnlyStartDate);
+                DateOnly.TryParse(endDate, out DateOnly dateOnlyEndDate);
+
+                //Kiểm tra xem nhân viên đang xét có phải là nhân viên fulltime không ?
+                var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          select c.TypeContract).FirstAsync();
+
+                if (employeeType == TypeContract.Partime)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_FULLTIME_EMPLOYEE] };
+                }
+                var employeeAttendanceRecords = await GetAllHistoryAttendanceFullTimeEmployee(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                try
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    int length = employeeAttendanceRecords.Count;
+                    //Tao file name 
+                    string fileName = DateTime.Now.Ticks.ToString() + "_FullTime.xlsx";
+
+                    // Đường dẫn đến thư mục wwwroot
+                    var exactPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Excel", fileName);
+
+                    // Tạo một file Excel mới
+                    var package = new ExcelPackage();
+
+                    // Tạo một sheet mới
+                    var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                    worksheet.Cells[2, 1].Value = "Time Work";
+                    for (int index = 1; index <= length; index++) //Trả về sẽ là 1 chuỗi ngày tháng
+                    {
+                        var entry = employeeAttendanceRecords[index - 1];
+                        worksheet.Cells[1, index + 1].Value = entry.Date.ToString("dd-MM");
+
+                        worksheet.Cells[2, index + 1].Value = "X";
+
+                        if (entry.HistoryResults != null && entry.HistoryResults.Count >= 2) //Phải chấm công đầu vào và cả đầu ra
+                        {
+                            var historiesLength = entry.HistoryResults.Count;
+                            var firstSweep = TimeOnly.FromDateTime(entry.HistoryResults[0].TimeSweep);
+                            var lastSweep = TimeOnly.FromDateTime(entry.HistoryResults[historiesLength - 1].TimeSweep);
+                            var difference = lastSweep.ToTimeSpan() - firstSweep.ToTimeSpan();
+
+                            // Chuyển đổi thành số giờ thập phân
+                            var decimalHours = Math.Round(difference.TotalHours, 2).ToString();
+                            worksheet.Cells[2, index + 1].Value = decimalHours + "h";
+                        }
+                    }
+
+
+                    // Lưu file Excel
+                    package.SaveAs(new FileInfo(exactPath));
+                    HandleFile.DownloadFile("Excel", fileName);
+
+                }
+                catch (Exception ex)
+                {
+                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "Không có thông tin chi tiết";
+                    throw new Exception($"Lỗi: {ex.Message}. Chi tiết nội bộ: {innerMessage}", ex);
+                }
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate)
+        {
+            try
+            {
+                //Kiểm tra xem có đúng định dạng DateOnly không ? 
+                string dateFormat = "yyyy-MM-dd";
+                bool isValidStartDate = DateOnly.TryParseExact(startDate, dateFormat, out DateOnly parsedStartDate);
+
+                // Kiểm tra endDate
+                bool isValidEndDate = DateOnly.TryParseExact(endDate, dateFormat, out DateOnly parsedEndDate);
+
+                if (!isValidStartDate || !isValidEndDate)
+                {
+                    return new ApiResponse<List<EmployeeAttendanceRecord>> { Message = [WorkShiftError.FAILED_REGULAR] };
+                }
+
+                //Chuyển sang dạng DateOnly
+                DateOnly.TryParse(startDate, out DateOnly dateOnlyStartDate);
+                DateOnly.TryParse(endDate, out DateOnly dateOnlyEndDate);
+
+                //Kiểm tra xem nhân viên đang xét có phải là nhân viên fulltime không ?
+                var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          select c.TypeContract).FirstAsync();
+
+                if (employeeType == TypeContract.Fulltime)
+                {
+                    return new ApiResponse<List<EmployeeAttendanceRecord>> { Message = [WorkShiftError.NOT_FULLTIME_EMPLOYEE] };
+                }
+                var employeeAttendanceRecords = await GetAllHistoryAttendanceFullTimeEmployee(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                return new ApiResponse<List<EmployeeAttendanceRecord>> { Metadata = employeeAttendanceRecords, IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        private async Task<List<EmployeeAttendanceRecord>> GetAllHistoryAttendanceFullTimeEmployee(int employeeId, DateOnly dateOnlyStartDate, DateOnly dateOnlyEndDate)
+        {
+            //Lấy ra những lần chấm công
+            var histories = await _historyRepository
+            .GetAllQueryAble()
+            .Where(e => DateOnly.FromDateTime(e.TimeSweep) >= dateOnlyStartDate
+            && DateOnly.FromDateTime(e.TimeSweep) <= dateOnlyEndDate
+            && e.EmployeeId == employeeId)
+            .OrderBy(e => e.TimeSweep)
+            .Select(e => new HistoryResult
+            {
+                Id = e.Id,
+                TimeSweep = e.TimeSweep,
+                EmployeeId = e.EmployeeId,
+                StatusHistory = e.StatusHistory,
+            })
+            .ToListAsync();
+
+            //Lấy ra tất cả những ngày trong khoảng thời gian cho trước
+            var daysInRange = Enumerable.Range(0, (dateOnlyEndDate.ToDateTime(TimeOnly.MinValue) - dateOnlyStartDate.ToDateTime(TimeOnly.MinValue)).Days + 1)
+                .Select(offset => new
+                {
+                    Date = dateOnlyStartDate.AddDays(offset),
+                    DayOfWeek = dateOnlyStartDate.AddDays(offset).DayOfWeek.ToString()
+                })
+                .ToList();
+
+            var employeeAttendanceRecords = new List<EmployeeAttendanceRecord>();
+            foreach (var date in daysInRange)
+            {
+                //Lấy những ca làm việc có tháng năm bằng date
+                var historiesForDay = histories
+                    .Where(e => DateOnly.FromDateTime(e.TimeSweep) == date.Date)
+                    .ToList();
+                employeeAttendanceRecords.Add(new EmployeeAttendanceRecord
+                {
+                    DayOfWeek = date.DayOfWeek,
+                    Date = date.Date,
+                    HistoryResults = historiesForDay
+                });
+            }
+            return employeeAttendanceRecords;
+        }
+
+
+        public async Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate)
+        {
+            try
+            {
+
+                //Check validate
+                var resultValidation = _historyUpsertValidator.Validate(historyUpdate);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+                var history = await _historyRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == historyId)
+                    .FirstAsync();
+                history.StatusHistory = historyUpdate.StatusHistory;
+                history.TimeSweep = historyUpdate.TimeSweep;
+                _historyRepository.Update(history);
+                await _historyRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        //Chấm công đầu vào không được trước quá 30p - kể từ thời điểm bắt đầu giờ làm
+        //Chấm công đầu ra không được sau quá 30p - kể từ thời điểm bắt đầu tan
+        public async Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd)
+        {
+            try
+            {
+                var resultValidation = _historyUpsertValidator.Validate(historyAdd);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+                /*
+                //Lấy ra kiểu nhân viên đang chấm công - Kiểm tra xem nhân viên đó có phải là nhân viên partime không
+                var typeContract = await (from em in _employeeRepository.GetAllQueryAble()
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          where em.Id == employeeId
+                                          select c.TypeContract).FirstAsync();
+
+                if (typeContract == TypeContract.Fulltime)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_TYPE_CONTRACT] };
+                }
+                */
+                var history = new History()
+                {
+                    StatusHistory = historyAdd.StatusHistory,
+                    EmployeeId = employeeId,
+                    TimeSweep = historyAdd.TimeSweep,
+                };
+                await _historyRepository.AddAsync(history);
+                await _historyRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        private ShiftTime GetShiftTime(TimeSpan time)
+        {
+            if (time >= new TimeSpan(5, 0, 0) && time < new TimeSpan(13, 0, 0))
+            {
+                return ShiftTime.Morning; // Hoặc ca tương ứng
+            }
+            else if (time >= new TimeSpan(13, 0, 0) && time < new TimeSpan(17, 0, 0))
+            {
+                return ShiftTime.Afternoon; // Hoặc ca tương ứng
+            }
+            else
+            {
+                return ShiftTime.Evening; // Hoặc ca tương ứng
+            }
+        }
+        public async Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate)
+        {
+            try
+            {
+                //Kiểm tra xem có đúng định dạng DateOnly không ? 
+                string dateFormat = "yyyy-MM-dd";
+                bool isValidStartDate = DateOnly.TryParseExact(startDate, dateFormat, out DateOnly parsedStartDate);
+
+                // Kiểm tra endDate
+                bool isValidEndDate = DateOnly.TryParseExact(endDate, dateFormat, out DateOnly parsedEndDate);
+
+                if (!isValidStartDate || !isValidEndDate)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_REGULAR] };
+                }
+
+                //Chuyển sang dạng DateOnly
+                DateOnly.TryParse(startDate, out DateOnly dateOnlyStartDate);
+                DateOnly.TryParse(endDate, out DateOnly dateOnlyEndDate);
+
+
+                //Kiểm tra xem nhân viên đang xét có phải là nhân viên partime không ?
+                var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          select c.TypeContract).FirstAsync();
+
+                if (employeeType == TypeContract.Fulltime)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                }
+
+                var calendarEntries = await GetAllWorkShiftAttendanceTracking(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                try
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    int length = calendarEntries.Count;
+                    //Tao file name 
+                    string fileName = DateTime.Now.Ticks.ToString() + "_Partime.xlsx";
+
+                    // Đường dẫn đến thư mục wwwroot
+                    var exactPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Excel", fileName);
+
+                    // Tạo một file Excel mới
+                    var package = new ExcelPackage();
+
+                    // Tạo một sheet mới
+                    var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                    worksheet.Cells[2, 1].Value = "Morning";
+                    worksheet.Cells[3, 1].Value = "Afternoon";
+                    worksheet.Cells[4, 1].Value = "Evening";
+                    for (int index = 1; index <= length; index++) //Trả về sẽ là 1 chuỗi ngày tháng
+                    {
+                        var entry = calendarEntries[index - 1];
+                        worksheet.Cells[1, index + 1].Value = entry.Date.ToString("dd-MM");  //Hàng 1, bắt đầu từ cột 2
+                                                                                             //Morning = 0, Afternoon = 1, Evening = 2
+                                                                                             //Ca nào mà làm thì sẽ đánh dấu X trước
+                        if (entry.UserCalendarResult != null)
+                        {
+                            //Ca nào đã đăng kí rồi mà không đi làm hoặc là chỉ chấm công 1 trong 2 lần thì sẽ đánh dấu X, ngược lại thì là V
+                            if (entry.UserCalendarResult.Count > 0) //Nếu ca sáng đã đăng kí
+                            {
+                                worksheet.Cells[2, index + 1].Value = "X"; //Ca sáng có đăng kí làm
+                                                                           //Check xem là ca sáng có đi làm không - Ca sáng thì chấm công 2 lần 
+                                if (entry.HistoryEntryResults?.ContainsKey(ShiftTime.Morning) == true && entry.HistoryEntryResults[ShiftTime.Morning].Count >= 2)
+                                {
+                                    var firstCheckInsMorning = entry.HistoryEntryResults[ShiftTime.Morning]
+                                        .Where(e => e.StatusHistory == StatusHistory.In)
+                                        .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                        .FirstOrDefault();
+                                    var lastCheckOutsMorning = entry.HistoryEntryResults[ShiftTime.Morning]
+                                        .Where(e => e.StatusHistory == StatusHistory.Out)
+                                        .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                        .LastOrDefault();
+                                    if (firstCheckInsMorning == TimeOnly.MinValue || lastCheckOutsMorning == TimeOnly.MinValue) //Không chấm công đầu vào hoặc đầu ra
+                                    {
+                                        worksheet.Cells[2, index + 1].Value = "X";
+                                    }
+                                    else
+                                    {
+                                        var difference = lastCheckOutsMorning.ToTimeSpan() - firstCheckInsMorning.ToTimeSpan();
+
+                                        // Chuyển đổi thành số giờ thập phân
+                                        var decimalHours = Math.Round(difference.TotalHours, 2).ToString();
+                                        worksheet.Cells[2, index + 1].Value = decimalHours + "h";
+                                    }
+                                }
+                            }
+                            if (entry.UserCalendarResult.Count > 1) //Nếu ca chiều đã đăng kí, có lịch sử chấm công
+                            {
+                                worksheet.Cells[3, index + 1].Value = "X";
+                                //Check xem là ca chiều có đi làm không - Ca chiều thì chấm công 2 lần
+
+                                if (entry.HistoryEntryResults?.ContainsKey(ShiftTime.Afternoon) == true && entry.HistoryEntryResults[ShiftTime.Afternoon].Count >= 2)
+                                {
+                                    var firstCheckInAfternoon = entry.HistoryEntryResults[ShiftTime.Afternoon]
+                                        .Where(e => e.StatusHistory == StatusHistory.In)
+                                        .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                        .FirstOrDefault();
+                                    var lastCheckOutsAfternoon = entry.HistoryEntryResults[ShiftTime.Afternoon]
+                                            .Where(e => e.StatusHistory == StatusHistory.Out)
+                                            .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                            .FirstOrDefault();
+                                    if (firstCheckInAfternoon == TimeOnly.MinValue || lastCheckOutsAfternoon == TimeOnly.MinValue) //Không chấm công đầu vào hoặc đầu ra
+                                    {
+                                        worksheet.Cells[3, index + 1].Value = "M";
+                                    }
+                                    else
+                                    {
+                                        var difference = lastCheckOutsAfternoon.ToTimeSpan() - firstCheckInAfternoon.ToTimeSpan();
+
+                                        // Chuyển đổi thành số giờ thập phân
+                                        var decimalHours = Math.Round(difference.TotalHours, 2).ToString();
+                                        worksheet.Cells[3, index + 1].Value = decimalHours + "h";
+                                    }
+                                }
+                            }
+                            if (entry.UserCalendarResult.Count > 2) //Nếu ca sáng đã đăng kí
+                            {
+                                worksheet.Cells[4, index + 1].Value = "X";
+                                //Check xem là ca tối có đi làm không - Ca tối thì chấm công 2 lần 
+
+                                if (entry.HistoryEntryResults?.ContainsKey(ShiftTime.Evening) == true && entry.HistoryEntryResults[ShiftTime.Evening].Count >= 2)
+                                {
+                                    var firstCheckInEvening = entry.HistoryEntryResults[ShiftTime.Evening]
+                                        .Where(e => e.StatusHistory == StatusHistory.In)
+                                        .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                        .FirstOrDefault();
+                                    var lastCheckOutEvening = entry.HistoryEntryResults[ShiftTime.Evening]
+                                            .Where(e => e.StatusHistory == StatusHistory.Out)
+                                            .Select(e => TimeOnly.FromDateTime(e.TimeSweep))
+                                            .FirstOrDefault();
+                                    if (firstCheckInEvening == TimeOnly.MinValue || lastCheckOutEvening == TimeOnly.MinValue)
+                                    {
+                                        worksheet.Cells[4, index + 1].Value = "M";
+                                    }
+                                    else
+                                    {
+                                        var difference = lastCheckOutEvening.ToTimeSpan() - firstCheckInEvening.ToTimeSpan();
+
+                                        // Chuyển đổi thành số giờ thập phân
+                                        var decimalHours = Math.Round(difference.TotalHours, 2).ToString();
+                                        worksheet.Cells[4, index + 1].Value = decimalHours + "h";
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    // Lưu file Excel
+                    package.SaveAs(new FileInfo(exactPath));
+                    HandleFile.DownloadFile("Excel", fileName);
+
+                }
+                catch (Exception ex)
+                {
+                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "Không có thông tin chi tiết";
+                    throw new Exception($"Lỗi: {ex.Message}. Chi tiết nội bộ: {innerMessage}", ex);
+                }
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<ApiResponse<List<List<CalendarEntry>>>> GetAllWorkShiftByPartimeEmployee(int employeeId, string startDate, string endDate)
+        {
+            try
+            {
+                //Kiểm tra xem có đúng định dạng DateOnly không ? 
+                string dateFormat = "yyyy-MM-dd";
+                bool isValidStartDate = DateOnly.TryParseExact(startDate, dateFormat, out DateOnly parsedStartDate);
+
+                // Kiểm tra endDate
+                bool isValidEndDate = DateOnly.TryParseExact(endDate, dateFormat, out DateOnly parsedEndDate);
+
+                if (!isValidStartDate || !isValidEndDate)
+                {
+                    return new ApiResponse<List<List<CalendarEntry>>> { Message = [WorkShiftError.FAILED_REGULAR] };
+                }
+
+                //Chuyển sang dạng DateOnly
+                DateOnly.TryParse(startDate, out DateOnly dateOnlyStartDate);
+                DateOnly.TryParse(endDate, out DateOnly dateOnlyEndDate);
+
+                //Kiểm tra xem nhân viên đang xét có phải là nhân viên partime không ?
+                var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          select c.TypeContract).FirstAsync();
+
+                if (employeeType == TypeContract.Fulltime)
+                {
+                    return new ApiResponse<List<List<CalendarEntry>>> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                }
+
+
+                var calendarEntries = await GetAllWorkShiftAttendanceTracking(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                int groupSize = 7; // 1 tuần sẽ có 7 ngày
+                var groupedArrayCalendarEntriess = calendarEntries
+                    .Select((value, index) => new { value, index })
+                    .GroupBy(x => x.index / groupSize)
+                    .Select(g => g.Select(x => x.value).ToList())
+                    .ToList();
+
+                return new ApiResponse<List<List<CalendarEntry>>> { IsSuccess = true, Metadata = groupedArrayCalendarEntriess };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        private async Task<List<CalendarEntry>> GetAllWorkShiftAttendanceTracking(int employeeId, DateOnly startDate, DateOnly endDate)
+        {
+            //Chỉ lấy ra những cái user calendar mà nó trong trạng thái là approved
+            var userCalendars = await (from uc in _userCalendarRepository.GetAllQueryAble()
+                                       join pt in _partimePlanRepository.GetAllQueryAble() on uc.PartimePlanId equals pt.Id
+                                       where uc.PresentShift >= startDate && uc.PresentShift <= endDate //Thuộc khoảng đang xét
+                                       && pt.StatusCalendar == StatusCalendar.Approved //Những kế hoạch được chấp nhận
+                                       && uc.UserCalendarStatus == UserCalendarStatus.Approved //Những ngày được chấp nhận
+                                       && pt.EmployeeId == employeeId //Thuộc ông employee đang xét
+                                       orderby uc.PresentShift ascending //Lấy theo ngày tháng tăng dần
+                                       select new UserCalendarResult
+                                       {
+                                           ShiftTime = uc.ShiftTime,
+                                           PresentShift = uc.PresentShift,
+                                           UserCalendarStatus = uc.UserCalendarStatus,
+                                       }).ToListAsync();
+
+            //Lấy ra những lần chấm công
+            var histories = await _historyRepository
+            .GetAllQueryAble()
+            .Where(e => DateOnly.FromDateTime(e.TimeSweep) >= startDate
+            && DateOnly.FromDateTime(e.TimeSweep) <= endDate
+            && e.EmployeeId == employeeId)
+            .OrderBy(e => e.TimeSweep)
+            .Select(e => new HistoryResult
+            {
+                Id = e.Id,
+                TimeSweep = e.TimeSweep,
+                EmployeeId = e.EmployeeId,
+                StatusHistory = e.StatusHistory,
+            })
+            .ToListAsync();
+
+            //Lấy ra tất cả những ngày trong khoảng thời gian cho trước
+            var daysInRange = Enumerable.Range(0, (endDate.ToDateTime(TimeOnly.MinValue) - startDate.ToDateTime(TimeOnly.MinValue)).Days + 1)
+                .Select(offset => new
+                {
+                    Date = startDate.AddDays(offset),
+                    DayOfWeek = startDate.AddDays(offset).DayOfWeek.ToString()
+                })
+                .ToList();
+
+
+
+            // Tạo danh sách kết quả
+            var calendarEntries = new List<CalendarEntry>();
+
+            // Duyệt qua từng ngày và thêm dữ liệu hoặc null nếu không có
+            foreach (var date in daysInRange)
+            {
+                //Lấy những ngày mà có lịch làm
+                var shiftsForDay = userCalendars.Where(d => d.PresentShift == date.Date).ToList();
+
+                //Lấy những ca làm việc có tháng năm bằng date
+                var historiesForDay = histories
+                    .Where(e => DateOnly.FromDateTime(e.TimeSweep) == date.Date)
+                    .OrderBy(e => e.TimeSweep)
+                    .ToList();
+
+                // Nhóm lịch sử theo ca (ShiftTime)
+                var historyGroupedByShift = historiesForDay
+                    .GroupBy(e => GetShiftTime(e.TimeSweep.TimeOfDay)) // Hàm GetShiftTime sẽ xác định ca dựa trên thời gian
+                    .ToDictionary(g => g.Key, g => g.Select(h => new HistoryResult
+                    {
+                        Id = h.Id,
+                        TimeSweep = h.TimeSweep,
+                        EmployeeId = h.EmployeeId,
+                        StatusHistory = h.StatusHistory,
+                    }).ToList());
+
+                calendarEntries.Add(new CalendarEntry
+                {
+                    DayOfWeek = date.DayOfWeek,
+                    Date = date.Date,
+                    UserCalendarResult = shiftsForDay.Any() ? shiftsForDay : null,
+                    HistoryEntryResults = historyGroupedByShift.Any() ? historyGroupedByShift : null,
+                });
+            }
+            return calendarEntries;
         }
 
         public async Task<ApiResponse<bool>> ProcessPartimePlanRequest(int partimePlanId, StatusCalendar statusCalendar)
@@ -70,7 +704,7 @@ namespace HRM.Services.TimeKeeping
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.STATUS_FAILED] };
                 }
-                
+
                 //Nếu cái lịch làm việc đó mà đến ngày hôm nay chưa được duyệt
 
 
@@ -83,7 +717,7 @@ namespace HRM.Services.TimeKeeping
                     return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_PLAN] };
                 }
 
-                if(partimePlan.TimeStart <= DateOnly.FromDateTime(DateTime.Now))
+                if (partimePlan.TimeStart <= DateOnly.FromDateTime(DateTime.Now))
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_OVERDUE] };
                 }
@@ -210,11 +844,27 @@ namespace HRM.Services.TimeKeeping
                     return ApiResponse<bool>.FailtureValidation(workPlanInsertValidation.Errors);
                 }
 
-                /*Lấy ra id của nhân viên hiện tại 
-                 * Mặc định hàm này được sử dụng bởi nhân viên partime
-                 */
+                /*Lấy ra id của nhân viên hiện tại*/
                 int employeeId = _partimePlanRepository
                     .Context.GetCurrentUserId();
+
+                var role = _partimePlanRepository
+                    .Context.GetCurrentUserRole();
+
+                if (role == Role.Admin)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                }
+
+                var employeeTypeContract = await (from em in _employeeRepository.GetAllQueryAble()
+                                                  join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                                  where em.Id == employeeId
+                                                  select c.TypeContract).FirstAsync();
+
+                if (employeeTypeContract == TypeContract.Fulltime)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                }
 
 
                 //Những ngày đã được đăng kí trước sẽ bị đè vào
@@ -293,7 +943,7 @@ namespace HRM.Services.TimeKeeping
                     {
                         ShiftTime = e.ShiftTime,
                         PresentShift = e.PresentShift,
-                        UserCalendarStatus = UserCalendarStatus.Submit,
+                        UserCalendarStatus = e.UserCalendarStatus,
                     })
                     .ToListAsync();
                 return new ApiResponse<List<UserCalendarResult>> { Metadata = userCalendars, IsSuccess = true };

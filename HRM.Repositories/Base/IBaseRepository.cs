@@ -7,6 +7,7 @@ namespace HRM.Repositories.Base
     {
         Task AddAsync(T entity);
         Task RemoveAsync(int id);
+        void RemoveRangeByEntitiesAsync(List<T> entities);
         void Update(T entity);
         Task<IEnumerable<T>> GetPaginatedAsync(int pageNumber, int pageSize);
         Task<int> SaveChangeAsync();

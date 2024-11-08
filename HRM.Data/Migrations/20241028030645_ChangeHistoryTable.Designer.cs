@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241028030645_ChangeHistoryTable")]
+    partial class ChangeHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,17 +86,8 @@ namespace HRM.Data.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PayPeriod")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
@@ -190,10 +184,10 @@ namespace HRM.Data.Migrations
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("Rate")
+                    b.Property<double>("Rate")
                         .HasColumnType("float");
 
-                    b.Property<int?>("TestId")
+                    b.Property<int>("TestId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -778,50 +772,6 @@ namespace HRM.Data.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("HRM.Data.Entities.EmployeeImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Descriptor")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StatusFaceTurn")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("updated_by");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("EmployeeImages");
-                });
-
             modelBuilder.Entity("HRM.Data.Entities.Fomula", b =>
                 {
                     b.Property<int>("Id")
@@ -847,9 +797,6 @@ namespace HRM.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParameterName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -1005,6 +952,9 @@ namespace HRM.Data.Migrations
                     b.Property<int>("UpdatedBy")
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
+
+                    b.Property<int>("WebId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1232,6 +1182,9 @@ namespace HRM.Data.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int")
                         .HasColumnName("created_by");
+
+                    b.Property<double>("Point")
+                        .HasColumnType("float");
 
                     b.Property<string>("QuestionText")
                         .HasColumnType("nvarchar(max)");
@@ -1484,9 +1437,6 @@ namespace HRM.Data.Migrations
                     b.Property<int?>("ApplicantsId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -1617,7 +1567,9 @@ namespace HRM.Data.Migrations
 
                     b.HasOne("HRM.Data.Entities.Test", "Test")
                         .WithMany()
-                        .HasForeignKey("TestId");
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Position");
 
@@ -1647,7 +1599,7 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.ContractType", "ContractType")
+                    b.HasOne("HRM.Data.Entities.ContractType", null)
                         .WithMany("Contracts")
                         .HasForeignKey("ContractTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1661,15 +1613,13 @@ namespace HRM.Data.Migrations
 
                     b.Navigation("ContractSalary");
 
-                    b.Navigation("ContractType");
-
                     b.Navigation("Position");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.ContractAllowance", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.Allowance", "Allowance")
-                        .WithMany()
+                    b.HasOne("HRM.Data.Entities.Allowance", null)
+                        .WithMany("ContractAllowances")
                         .HasForeignKey("AllowanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1679,8 +1629,6 @@ namespace HRM.Data.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Allowance");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.ContractInsurance", b =>
@@ -1691,13 +1639,11 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.Insurance", "Insurance")
+                    b.HasOne("HRM.Data.Entities.Insurance", null)
                         .WithMany("ContractInsurance")
                         .HasForeignKey("InsuranceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Insurance");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.DeductionDetails", b =>
@@ -1724,15 +1670,6 @@ namespace HRM.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Contract");
-                });
-
-            modelBuilder.Entity("HRM.Data.Entities.EmployeeImage", b =>
-                {
-                    b.HasOne("HRM.Data.Entities.Employee", null)
-                        .WithMany("employeeImages")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.History", b =>
@@ -1884,6 +1821,11 @@ namespace HRM.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HRM.Data.Entities.Allowance", b =>
+                {
+                    b.Navigation("ContractAllowances");
+                });
+
             modelBuilder.Entity("HRM.Data.Entities.Applicants", b =>
                 {
                     b.Navigation("testResults");
@@ -1919,8 +1861,6 @@ namespace HRM.Data.Migrations
             modelBuilder.Entity("HRM.Data.Entities.Employee", b =>
                 {
                     b.Navigation("advances");
-
-                    b.Navigation("employeeImages");
 
                     b.Navigation("histories");
 

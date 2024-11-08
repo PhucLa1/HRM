@@ -71,6 +71,30 @@ namespace HRM.Data.Data
             return 0;
         }
 
+        public Role GetCurrentUserRole()
+        {
+            if (_httpContextAccessor == null || _httpContextAccessor.HttpContext == null)
+            {
+                return 0;
+            }
+            if (!_httpContextAccessor.HttpContext.Items.ContainsKey("UserRole"))
+            {
+                return 0;
+            }
+            var userRoleObj = _httpContextAccessor.HttpContext.Items["UserRole"];
+            if (userRoleObj == null)
+            {
+                return 0;
+            }
+            return ConvertStringToEnumRole(userRoleObj.ToString()!);
+        }
+        private Role ConvertStringToEnumRole(string role)
+        {
+            if (role == "Admin") return Role.Admin;
+            else if (role == "Partime") return Role.Partime;
+            else return Role.FullTime;
+        }
+
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Advance> Advances { get; set; }
         public DbSet<Allowance> Allowances { get; set; }
@@ -104,6 +128,8 @@ namespace HRM.Data.Data
         public DbSet<TestResult> TestResults { get; set; }
         public DbSet<UserCalendar> UserCalendars { get; set; }
         public DbSet<Web> Webs { get; set; }
+        public DbSet<EmployeeImage> EmployeeImages { get; set; }
 
     }
 }
+
