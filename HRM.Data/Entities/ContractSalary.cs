@@ -11,5 +11,6 @@ namespace HRM.Data.Entities
         public double WageDaily { get; set; }
         public double WageHourly { get; set; }
         public double Factor { get; set; }
+
     }
 }

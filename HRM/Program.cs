@@ -13,6 +13,7 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.Dashboard;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
 using HRM.Services.Scheduler;
@@ -90,7 +91,6 @@ builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationV
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
-
 #endregion
 
 
@@ -119,6 +119,7 @@ builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
+builder.Services.AddScoped<IDashboardsService, DashboardsService>();
 #endregion
 
 
