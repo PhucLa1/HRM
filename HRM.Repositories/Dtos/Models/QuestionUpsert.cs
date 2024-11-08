@@ -6,7 +6,6 @@ namespace HRM.Repositories.Dtos.Models
 	{
 		public required int TestId { get; set; }
 		public required string QuestionText { get; set; }
-		public required double Point { get; set; }
 	}
 	public class QuestionUpsertValidator : AbstractValidator<QuestionUpsert>
 	{

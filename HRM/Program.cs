@@ -11,8 +11,10 @@ using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
+using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
 using HRM.Services.Scheduler;
@@ -23,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
+using System.Configuration;
 using System.Reflection;
 using System.Text;
 
@@ -79,9 +82,22 @@ builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
 builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
+
+builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<JobPostingUpsert>, JobPostingUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
+
+builder.Services.AddScoped<IValidator<RecruitmentWebUpsert>, RecruitmentWebUpsertValidator>();
+
 builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
+builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
+builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
 #endregion
 
 
@@ -116,12 +132,28 @@ builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
 builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
+
+builder.Services.AddScoped<IGmailsService, GmailsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
+
+
+builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
+
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+builder.Services.AddScoped<IAdvancesService, AdvancesService>();
+
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
-#endregion
 
+builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
+
+builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();
+
+builder.Services.AddScoped<IApplicantsService, ApplicantsService>();
+
+builder.Services.AddScoped<ITestResultsService, TestResultsService>();
+#endregion
 
 
 #region + Mapper
@@ -252,6 +284,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseSerilogRequestLogging();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseJwtMiddleware();
 app.UseCors("AllowOrigin");
