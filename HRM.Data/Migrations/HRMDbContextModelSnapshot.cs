@@ -83,8 +83,17 @@ namespace HRM.Data.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PayPeriod")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
@@ -181,10 +190,10 @@ namespace HRM.Data.Migrations
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<double>("Rate")
+                    b.Property<double?>("Rate")
                         .HasColumnType("float");
 
-                    b.Property<int>("TestId")
+                    b.Property<int?>("TestId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -840,6 +849,9 @@ namespace HRM.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ParameterName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_at");
@@ -993,9 +1005,6 @@ namespace HRM.Data.Migrations
                     b.Property<int>("UpdatedBy")
                         .HasColumnType("int")
                         .HasColumnName("updated_by");
-
-                    b.Property<int>("WebId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1223,9 +1232,6 @@ namespace HRM.Data.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int")
                         .HasColumnName("created_by");
-
-                    b.Property<double>("Point")
-                        .HasColumnType("float");
 
                     b.Property<string>("QuestionText")
                         .HasColumnType("nvarchar(max)");
@@ -1478,6 +1484,9 @@ namespace HRM.Data.Migrations
                     b.Property<int?>("ApplicantsId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -1608,9 +1617,7 @@ namespace HRM.Data.Migrations
 
                     b.HasOne("HRM.Data.Entities.Test", "Test")
                         .WithMany()
-                        .HasForeignKey("TestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TestId");
 
                     b.Navigation("Position");
 
@@ -1640,7 +1647,7 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.ContractType", null)
+                    b.HasOne("HRM.Data.Entities.ContractType", "ContractType")
                         .WithMany("Contracts")
                         .HasForeignKey("ContractTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1654,13 +1661,15 @@ namespace HRM.Data.Migrations
 
                     b.Navigation("ContractSalary");
 
+                    b.Navigation("ContractType");
+
                     b.Navigation("Position");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.ContractAllowance", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.Allowance", null)
-                        .WithMany("ContractAllowances")
+                    b.HasOne("HRM.Data.Entities.Allowance", "Allowance")
+                        .WithMany()
                         .HasForeignKey("AllowanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1670,6 +1679,8 @@ namespace HRM.Data.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Allowance");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.ContractInsurance", b =>
@@ -1680,11 +1691,13 @@ namespace HRM.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRM.Data.Entities.Insurance", null)
+                    b.HasOne("HRM.Data.Entities.Insurance", "Insurance")
                         .WithMany("ContractInsurance")
                         .HasForeignKey("InsuranceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Insurance");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.DeductionDetails", b =>
@@ -1869,11 +1882,6 @@ namespace HRM.Data.Migrations
                         .HasForeignKey("PartimePlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("HRM.Data.Entities.Allowance", b =>
-                {
-                    b.Navigation("ContractAllowances");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Applicants", b =>

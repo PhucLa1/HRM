@@ -1,4 +1,4 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
@@ -45,5 +45,23 @@ namespace HRM.Apis.Controllers
         {
             return Ok(await _employeesService.GetAllFaceRegisByEmployeeId(id));
         }
+        
+        
+        /// <summary>
+        /// Get all employee defination
+        /// </summary>
+        /// <response code="200">Return all the employee defination in the metadata of api response</response>
+        [HttpGet] 
+        [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<EmployeeResult>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<EmployeeResult>))]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _employeesService.GetAllEmployee());
+        }
     }
 }
+
+
+        
+

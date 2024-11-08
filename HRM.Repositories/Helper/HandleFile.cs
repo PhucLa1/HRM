@@ -59,7 +59,41 @@ namespace HRM.Repositories.Helper
                 throw new Exception(ex.Message); // Trả về mã lỗi 500 nếu có ngoại lệ
             }
         }
-        public static string READ_FILE(string folder, string fileName)
+
+		public static string UPLOAD_GETPATH(string folder, IFormFile file)
+		{
+			try
+			{
+				var extension = Path.GetExtension(file.FileName);
+				var fileName = DateTime.Now.Ticks + extension; // unique filename using ticks
+
+				// Combine path to save the file in the desired folder
+				var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder);
+
+				// Create directory if it doesn't exist
+				if (!Directory.Exists(folderPath))
+				{
+					Directory.CreateDirectory(folderPath);
+				}
+
+				// Combine the exact path for saving the file
+				var exactPath = Path.Combine(folderPath, fileName);
+
+				// Save the file
+				using (var stream = new FileStream(exactPath, FileMode.Create))
+				{
+					file.CopyTo(stream);
+				}
+
+				// Return the relative path to access the file
+				return Path.Combine(folder, fileName);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"File upload failed: {ex.Message}");
+			}
+		}
+		public static string READ_FILE(string folder, string fileName)
         {
             string content = "";
             try

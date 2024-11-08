@@ -7,6 +7,7 @@ using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HRM.Services.User
 {
@@ -19,6 +20,7 @@ namespace HRM.Services.User
         Task<ApiResponse<bool>> RegistrationFace(int employeeId, List<FaceRegis> faceRegises);
         Task<ApiResponse<List<FaceRegisResult>>> GetAllFaceRegisByEmployeeId(int id);
         Task<ApiResponse<bool>> UpdateFaceRegis(int employeeId, List<FaceRegisUpdate> faceRegisUpdates);
+        Task<ApiResponse<IEnumerable<EmployeeResult>>> GetAllEmployee();
     }
     public class EmployeesService : IEmployeesService
     {
@@ -150,6 +152,40 @@ namespace HRM.Services.User
                 await _employeeImageRepository.AddRangeAsync(employeeImages);
                 await _employeeImageRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
+                }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<ApiResponse<IEnumerable<EmployeeResult>>> GetAllEmployee()
+        {
+            try
+            {
+                return new ApiResponse<IEnumerable<EmployeeResult>>
+                {
+
+                    Metadata = await _employeeRepository.GetAllQueryAble().Select(e => new EmployeeResult
+                    {
+                        Id = e.Id,
+                        Name = e.Contract.Name,
+                        DateOfBirth = e.Contract.DateOfBirth,
+                        Gender = e.Contract.Gender,
+                        Address = e.Contract.Address,
+                        CountrySide = e.Contract.CountrySide,
+                        NationalID = e.Contract.NationalID,
+                        NationalStartDate = e.Contract.NationalStartDate,
+                        NationalAddress = e.Contract.NationalAddress,
+                        Level = e.Contract.Level,
+                        Major = e.Contract.Major,
+                        PositionName = e.Contract.Position.Name,
+                        PositionId = e.Contract.PositionId,
+                        PhoneNumber = e.PhoneNumber,
+                        Email = e.Email
+                    }).ToListAsync(),
+                    IsSuccess = true
+
+                };
             }
             catch (Exception ex)
             {

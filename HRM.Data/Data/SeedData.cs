@@ -68,6 +68,7 @@ namespace HRM.Data.Data
                         //Thêm contract
                         var contract = new Contract
                         {
+                            Name ="Nguyễn Văn Toàn",
                             ContractSalaryId = contractSalary.Id,
                             ContractTypeId = contractType.Id,
                             PositionId = 1,
@@ -92,14 +93,13 @@ namespace HRM.Data.Data
                         };
                         await context.Employees.AddAsync(employee);
                         await context.SaveChangesAsync();
-
-
-                        //Commit dữ liệu
-                        await transaction.CommitAsync();
+						
+						//Commit dữ liệu
+						await transaction.CommitAsync();
                     }
                     catch (Exception ex)
                     {
-                        await transaction.RollbackAsync();
+						await transaction.RollbackAsync();
                         throw new Exception(ex.Message);
                     }
                 }

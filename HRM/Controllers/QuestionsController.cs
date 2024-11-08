@@ -36,6 +36,19 @@ namespace HRM.Apis.Controllers
 			return Ok(await _questionService.GetAllQuestion());
 		}
 
+		/// <summary>
+		/// Get all questions from id in company
+		/// </summary>
+		/// <response code="200">Return all the questions from id in the company in the metadata of api response</response>
+		[HttpGet]
+		[Route("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<QuestionResult>>))]
+		[SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuestionResponseExample))]
+		public async Task<IActionResult> GetAllQuestionId(int id)
+		{
+			return Ok(await _questionService.GetAllQuestionId(id));
+		}
+
 
 		/// <summary>
 		/// Add new question in the company
