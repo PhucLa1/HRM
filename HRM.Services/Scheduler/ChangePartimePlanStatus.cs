@@ -23,7 +23,8 @@ namespace HRM.Services.Scheduler
                 //Thực hiện tác vụ
                 var partimePlans = await _partimePlanRepository
                     .GetAllQueryAble()
-                   .Where(e => e.TimeStart <= DateOnly.FromDateTime(DateTime.Now))
+                   .Where(e => e.TimeStart <= DateOnly.FromDateTime(DateTime.Now)
+                   && e.StatusCalendar == StatusCalendar.Submit)
                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.StatusCalendar, StatusCalendar.Cancel));
 
                 watch.Stop();

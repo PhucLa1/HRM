@@ -4,6 +4,7 @@ using HRM.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRM.Data.Migrations
 {
     [DbContext(typeof(HRMDbContext))]
-    partial class HRMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241028030645_ChangeHistoryTable")]
+    partial class ChangeHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -767,50 +770,6 @@ namespace HRM.Data.Migrations
                     b.HasIndex("ContractId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("HRM.Data.Entities.EmployeeImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Descriptor")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StatusFaceTurn")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int>("UpdatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("updated_by");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("EmployeeImages");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Fomula", b =>
@@ -1713,15 +1672,6 @@ namespace HRM.Data.Migrations
                     b.Navigation("Contract");
                 });
 
-            modelBuilder.Entity("HRM.Data.Entities.EmployeeImage", b =>
-                {
-                    b.HasOne("HRM.Data.Entities.Employee", null)
-                        .WithMany("employeeImages")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("HRM.Data.Entities.History", b =>
                 {
                     b.HasOne("HRM.Data.Entities.Employee", null)
@@ -1911,8 +1861,6 @@ namespace HRM.Data.Migrations
             modelBuilder.Entity("HRM.Data.Entities.Employee", b =>
                 {
                     b.Navigation("advances");
-
-                    b.Navigation("employeeImages");
 
                     b.Navigation("histories");
 

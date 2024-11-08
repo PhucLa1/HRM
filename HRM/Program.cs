@@ -5,11 +5,11 @@ using FluentValidation;
 using HRM.Apis.Setting;
 using HRM.Apis.Swagger;
 using HRM.Data.Data;
+using HRM.Data.Entities;
 using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
-using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
 using HRM.Services.RecruitmentManager;
@@ -81,6 +81,9 @@ builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>(
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 builder.Services.AddScoped<IValidator<WorkPlanInsert>, WorkPlanInsertValidator>();
 builder.Services.AddScoped<IValidator<UserCalendarInsert>, UserCalendarInsertValidator>();
+builder.Services.AddScoped<IValidator<HistoryUpsert>, HistoryUpsertValidator>();
+builder.Services.AddScoped<IValidator<FaceRegis>, FaceRegisValidator>();
+builder.Services.AddScoped<IValidator<FaceRegisUpdate>, FaceRegisUpdateValidator>();
 
 #endregion
 
@@ -118,6 +121,8 @@ builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IWorkShiftService, WorkShiftService>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+
 #endregion
 
 
@@ -170,7 +175,11 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.User.ToString())); 
+    options.AddPolicy(RoleExtensions.PARTIME_ROLE, policy => policy.RequireClaim("Role", Role.Partime.ToString())); 
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.FULLTIME_ROLE, policy => policy.RequireClaim("Role", Role.FullTime.ToString()));
 });
 
 
@@ -250,6 +259,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseSerilogRequestLogging();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseJwtMiddleware();
 app.UseCors("AllowOrigin");

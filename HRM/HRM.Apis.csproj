@@ -41,8 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\Excel\" />
     <Folder Include="wwwroot\Logo\" />
     <Folder Include="wwwroot\CV\" />
+    <Folder Include="wwwroot\Employee\" />
   </ItemGroup>
 
 </Project>
