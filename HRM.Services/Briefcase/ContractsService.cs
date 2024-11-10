@@ -1,5 +1,6 @@
 ﻿using Aspose.Words;
 using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using FluentValidation;
@@ -12,6 +13,7 @@ using HRM.Repositories.Setting;
 using HRM.Services.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using AsposeDocument = Aspose.Words.Document;
 using Body = DocumentFormat.OpenXml.Wordprocessing.Body;
 using Position = HRM.Data.Entities.Position;
@@ -274,9 +276,15 @@ namespace HRM.Services.Briefcase
                             ContractTypeId = contractAdd.ContractTypeId,
                             StartDate = contractAdd.StartDate,
                             EndDate = contractAdd.EndDate,
-                            CompanySignStatus = CompanySignStatus.Signed,
-                            TypeContract = contractAdd.TypeContract,
+                            CompanySignStatus = CompanySignStatus.NotSigned,
+                            EmployeeSignStatus = EmployeeSignStatus.NotSigned, // Chờ nhân viên kí
+                            TypeContract = contractAdd.TypeContract, 
+                            ContractStatus = ContractStatus.Pending // Chờ duyệt
                         };
+                        // 0 Chờ duyệt. ContractStatus: Pending : đã xong giao diện, api
+                        // 1 Manager duyệt. ContractStatus: Pending, CompanySignStatus =  CompanySignStatus.Signed,// Làm đến bước này
+                        // 2 Employee kí. ContractStatus: Valid,  EmployeeSignStatus = EmployeeSignStatus.Signed,
+
 
                         // Thêm trường position vào
                         contract.PositionId = applicant.PositionId;
@@ -314,11 +322,11 @@ namespace HRM.Services.Briefcase
                 }
 
 
-                /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
-                 và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
-                */
+            /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
+             và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
+            */
 
-
+                //linkWebsite: HttpClient:/localhoset... employee - shared / emnployee - information / id
                 var bodyContentEmail = HandleFile.READ_FILE(FOLER, CONTRACT_NOTIFICATION_FILE)
                     .Replace("{applicantName}", applicant.Name)
                     .Replace("{linkWebsite}", "https://www.youtube.com/watch?v=PRKYGpc44R0&list=RDMMmkRZ625Pvok&index=14")
