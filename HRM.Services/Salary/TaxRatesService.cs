@@ -36,6 +36,9 @@ namespace HRM.Services.Salary
                         Name = e.Name,
                         Percent = e.Percent,
                         Condition = e.Condition,
+                        MinTaxIncome = e.MinTaxIncome,
+                        MaxTaxIncome = e.MaxTaxIncome,
+                        MinusAmount = e.MinusAmount,
                         ParameterName = e.ParameterName
                     }).ToListAsync(),
                     IsSuccess = true
@@ -59,6 +62,9 @@ namespace HRM.Services.Salary
                     Name = taxRateAdd.Name.Trim(),
                     Percent = taxRateAdd.Percent,
                     Condition = taxRateAdd.Condition,
+                    MinTaxIncome = taxRateAdd.MinTaxIncome,
+                    MaxTaxIncome = taxRateAdd.MaxTaxIncome,
+                    MinusAmount = taxRateAdd.MinusAmount,
                     ParameterName = taxRateAdd.ParameterName,
                 });
                 await _baseRepository.SaveChangeAsync();

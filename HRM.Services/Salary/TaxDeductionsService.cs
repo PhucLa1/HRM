@@ -33,7 +33,7 @@ namespace HRM.Services.Salary
                     {
                         Id = e.Id,
                         Name = e.Name,
-                        FomulaType = e.FomulaType,
+                        Amount = e.Amount,
                         Terms = e.Terms,
                         ParameterName = e.ParameterName
                     }).ToListAsync(),
@@ -56,7 +56,7 @@ namespace HRM.Services.Salary
                 }
                 await _baseRepository.AddAsync(new TaxDeduction { 
                     Name = taxDeductionAdd.Name.Trim(),
-                    FomulaType = taxDeductionAdd.FomulaType,
+                    Amount = taxDeductionAdd.Amount,
                     Terms = taxDeductionAdd.Terms,
                     ParameterName = taxDeductionAdd.ParameterName,
                 });
@@ -80,7 +80,7 @@ namespace HRM.Services.Salary
                 var taxDeduction = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
                 taxDeduction.Name = taxDeductionUpdate.Name.Trim();
                 taxDeduction.ParameterName = taxDeductionUpdate.ParameterName.Trim();
-                taxDeduction.FomulaType = taxDeductionUpdate.FomulaType;
+                taxDeduction.Amount = taxDeductionUpdate.Amount;
                 taxDeduction.Terms = taxDeductionUpdate.Terms;
                 _baseRepository.Update(taxDeduction);
                 await _baseRepository.SaveChangeAsync();

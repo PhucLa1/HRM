@@ -480,6 +480,7 @@ namespace HRM.Services.Briefcase
                 throw new Exception(ex.Message);
             }
         }
+        
         private void ReplacePlaceholder(Body body, string placeholder, string value)
         {
             foreach (var text in body.Descendants<Text>())
@@ -490,6 +491,7 @@ namespace HRM.Services.Briefcase
                 }
             }
         }
+        
         private string CalculateDifferenceInYearsOrMonths(DateTime startDate, DateTime endDate)
         {
             var difference = endDate - startDate;
@@ -505,6 +507,7 @@ namespace HRM.Services.Briefcase
                 return $"{Math.Floor(totalMonths)} tháng";
             }
         }
+        
         private string ConvertDayOfWeekFromEngToVn(string dayOfWeek)
         {
             var dayOfWeeks = new Dictionary<string, string>()

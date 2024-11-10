@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
-        public int FomulaType { get; set; } = 0;
+        public double Amount { get; set; } = 0;
         public string Terms { get; set; } = "";
         public string ParameterName { get; set; } = "";
     }

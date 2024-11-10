@@ -15,7 +15,7 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     {
                         Id = 1,
                         Name = "Giảm trừ gia cảnh",
-                        FomulaType = 1,
+                        Amount = 100000,
                         Terms = "Nhà có con nhỏ",
                         ParameterName = "PARAM_TAXDEDUCTION_GIACANH"
                     },
@@ -23,7 +23,7 @@ namespace HRM.Apis.Swagger.Examples.Responses
                     {
                         Id = 2,
                         Name = "Giảm trừ các nhân đóng thuế",
-                        FomulaType = 2,
+                        Amount = 2000000,
                         Terms = "Cá nhân đóng thuế được giảm",
                         ParameterName = "PARAM_TAXDEDUCTION_PERSONAL"
                     }
