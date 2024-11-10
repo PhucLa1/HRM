@@ -1,16 +1,17 @@
 ﻿using Asp.Versioning;
+using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/auth")]
     [ApiController]
-    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -56,6 +57,44 @@ namespace HRM.Apis.Controllers
                 SetJWT(result.Metadata);
             }
             return Ok(result);
+        }
+
+
+
+        /// <summary>
+        /// This endpoint get the info of current user
+        /// </summary>
+        /// /// <remarks>
+        /// This endpoint allows clients to fetch details about the logged-in user, 
+        /// including user profile information, preferences, and any relevant settings. 
+        /// It is useful for personalizing user experience and managing user-specific data.
+        /// <para> 
+        /// About Role : 
+        /// </para>
+        /// <para>
+        /// 1 : Admin
+        /// </para>
+        /// <para>
+        /// 2 : User
+        /// </para>
+        /// <para> 
+        /// About TypeContract : 
+        /// </para>
+        /// <para>
+        /// 1 : Partime
+        /// </para>
+        /// <para>
+        /// 2 : Fulltime
+        /// </para>
+        /// </remarks>
+        /// <response code="200">Return all the bonus defination in the metadata of api response</response>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<AccountInfo>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(AccountInfoResponseExample))]
+        [HttpGet]
+        [Route("get-current-user")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            return Ok(await _authService.GetCurrentAccount());
         }
 
 

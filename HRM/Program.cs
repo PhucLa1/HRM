@@ -82,19 +82,17 @@ builder.Services.AddScoped<IValidator<TestUpsert>, TestUpsertValidator>();
 builder.Services.AddScoped<IValidator<WebUpsert>, WebUpsertValidator>();
 builder.Services.AddScoped<IValidator<ContractAdd>, ContractAddValidator>();
 builder.Services.AddScoped<IValidator<ContractUpdate>, ContractUpdateValidator>();
-
 builder.Services.AddScoped<IValidator<GmailUpsert>, GmailUpsertValidator>();
-
 builder.Services.AddScoped<IValidator<JobPostingUpsert>, JobPostingUpsertValidator>();
-
 builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
-
+builder.Services.AddScoped<IValidator<WorkPlanInsert>, WorkPlanInsertValidator>();
+builder.Services.AddScoped<IValidator<UserCalendarInsert>, UserCalendarInsertValidator>();
+builder.Services.AddScoped<IValidator<HistoryUpsert>, HistoryUpsertValidator>();
+builder.Services.AddScoped<IValidator<FaceRegis>, FaceRegisValidator>();
+builder.Services.AddScoped<IValidator<FaceRegisUpdate>, FaceRegisUpdateValidator>();
 builder.Services.AddScoped<IValidator<AdvanceUpsert>, AdvanceUpsertValidator>();
-
 builder.Services.AddScoped<IValidator<RecruitmentWebUpsert>, RecruitmentWebUpsertValidator>();
-
 builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>();
-builder.Services.AddScoped<IValidator<CalendarUpsert>, CalendarUpsertValidator>();
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
 builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
 builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
@@ -105,14 +103,13 @@ builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidat
 #region + Repositories
 //Repositories
 builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 #endregion
 
 
 
 #region + Services
-
 
 //Services
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -132,27 +129,24 @@ builder.Services.AddScoped<ITaxRatesService, TaxRatesService>();
 builder.Services.AddScoped<IFomulasService, FomulasService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IContractsService, ContractsService>();
-
 builder.Services.AddScoped<IGmailsService, GmailsService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
-
-
+builder.Services.AddScoped<IWorkShiftService, WorkShiftService>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
-
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IAdvancesService, AdvancesService>();
-
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
-
+builder.Services.AddScoped<IPayrollsService, PayrollsService>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
 builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
-
 builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();
-
 builder.Services.AddScoped<IApplicantsService, ApplicantsService>();
-
 builder.Services.AddScoped<ITestResultsService, TestResultsService>();
 #endregion
+
 
 
 #region + Mapper
@@ -203,7 +197,11 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(RoleExtensions.USER_ROLE, policy => policy.RequireClaim("Role", Role.User.ToString())); 
+    options.AddPolicy(RoleExtensions.PARTIME_ROLE, policy => policy.RequireClaim("Role", Role.Partime.ToString())); 
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleExtensions.FULLTIME_ROLE, policy => policy.RequireClaim("Role", Role.FullTime.ToString()));
 });
 
 

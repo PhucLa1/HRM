@@ -21,6 +21,7 @@ namespace HRM.Services.Briefcase
         Task<ApiResponse<bool>> UpdateDepartment(int id, DepartmentUpsert departmentUpdate);
         Task<ApiResponse<bool>> RemoveDepartment(int id);
         Task<ApiResponse<List<DepartmentUserResult>>> GetAllEmployeeInDepartment(int id);
+        Task<ApiResponse<List<DepartmentEmployeeCountResult>>> GetEmployeeCountByDepartment(); // New method
     }
     public class DepartmentsService : IDepartmentsService
     {
@@ -79,6 +80,58 @@ namespace HRM.Services.Briefcase
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ApiResponse<List<DepartmentEmployeeCountResult>>> GetEmployeeCountByDepartment()
+        {
+            try
+            {
+                // Lấy danh sách tất cả các phòng ban
+                var departments = await _baseRepository
+                    .GetAllQueryAble()
+                    .ToListAsync();
+
+                // Tạo danh sách kết quả bao gồm thông tin về số lượng nhân viên trong từng phòng ban
+                var departmentEmployeeCounts = new List<DepartmentEmployeeCountResult>();
+
+                foreach (var department in departments)
+                {
+                    // Lấy hết những vị trí thuộc phòng ban đó
+                    var positionIds = await _positionRepository
+                        .GetAllQueryAble()
+                        .Where(p => p.DepartmentId == department.Id)
+                        .Select(p => p.Id)
+                        .ToListAsync();
+
+                    // Đếm số lượng nhân viên thuộc những vị trí đó
+                    var employeeCount = await _contractRepository
+                        .GetAllQueryAble()
+                        .Where(c => positionIds.Contains(c.PositionId))
+                        .Join(_employeeRepository.GetAllQueryAble(),
+                            contract => contract.Id,
+                            employee => employee.ContractId,
+                            (contract, employee) => employee)
+                        .CountAsync();
+
+                    departmentEmployeeCounts.Add(new DepartmentEmployeeCountResult
+                    {
+                        Id = department.Id,
+                        Name = department.Name,
+                        EmployeeCount = employeeCount
+                    });
+                }
+
+                return new ApiResponse<List<DepartmentEmployeeCountResult>>
+                {
+                    Metadata = departmentEmployeeCounts,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<ApiResponse<bool>> AddNewDepartment(DepartmentUpsert departmentAdd)
         {
             try

@@ -18,7 +18,9 @@ namespace HRM.Data.Entities
         public ICollection<TaxDeductionDetails>? taxDeductionDetails { get; set; }
         public ICollection<Advance>? advances { get; set; }
         public ICollection<Payroll>? payrolls { get; set; }
-	}
+        public ICollection<History>? histories { get; set; }
+        public ICollection<EmployeeImage>? employeeImages { get; set; }
+    }
     public enum StatusEmployee
     {
         OnLeave = 1,
