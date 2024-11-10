@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using HRM.Apis.Swagger.Examples.Responses;
+using HRM.Data.Entities;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.RecruitmentManager;
@@ -33,6 +34,19 @@ namespace HRM.Apis.Controllers
 		public async Task<IActionResult> GetAll()
 		{
 			return Ok(await _questionService.GetAllQuestion());
+		}
+
+		/// <summary>
+		/// Get all questions from id in company
+		/// </summary>
+		/// <response code="200">Return all the questions from id in the company in the metadata of api response</response>
+		[HttpGet]
+		[Route("{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<QuestionResult>>))]
+		[SwaggerResponseExample(StatusCodes.Status200OK, typeof(QuestionResponseExample))]
+		public async Task<IActionResult> GetAllQuestionId(int id)
+		{
+			return Ok(await _questionService.GetAllQuestionId(id));
 		}
 
 

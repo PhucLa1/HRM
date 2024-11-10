@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using HRM.Data.Entities;
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;

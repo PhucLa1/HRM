@@ -7,5 +7,6 @@ namespace HRM.Data.Entities
         public int QuestionsId { get; set; }
         public int ApplicantId { get; set; }
         public double Point { get; set; }
-    }
+        public string? Comment { get; set; }
+	}
 }

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using NPOI.HPSF;
 
 namespace HRM.Repositories.Helper
 {
@@ -11,7 +13,7 @@ namespace HRM.Repositories.Helper
             try
             {
                 var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-                fileName = DateTime.Now.Ticks.ToString() + extension + folder;
+                fileName = DateTime.Now.Ticks.ToString() + extension;
 
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), folder);
 
@@ -33,7 +35,65 @@ namespace HRM.Repositories.Helper
             }
             return fileName;
         }
-        public static string READ_FILE(string folder, string fileName)
+        public static IActionResult DownloadFile(string folder, string fileName)
+        {
+            try
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder, fileName);
+
+                // Kiểm tra xem file có tồn tại không
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return new NotFoundResult();
+                }
+
+                // Đọc file và trả về file cho client
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                return new FileContentResult(fileBytes, "application/octet-stream")
+                {
+                    FileDownloadName = fileName
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message); // Trả về mã lỗi 500 nếu có ngoại lệ
+            }
+        }
+
+		public static string UPLOAD_GETPATH(string folder, IFormFile file)
+		{
+			try
+			{
+				var extension = Path.GetExtension(file.FileName);
+				var fileName = DateTime.Now.Ticks + extension; // unique filename using ticks
+
+				// Combine path to save the file in the desired folder
+				var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder);
+
+				// Create directory if it doesn't exist
+				if (!Directory.Exists(folderPath))
+				{
+					Directory.CreateDirectory(folderPath);
+				}
+
+				// Combine the exact path for saving the file
+				var exactPath = Path.Combine(folderPath, fileName);
+
+				// Save the file
+				using (var stream = new FileStream(exactPath, FileMode.Create))
+				{
+					file.CopyTo(stream);
+				}
+
+				// Return the relative path to access the file
+				return Path.Combine(folder, fileName);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"File upload failed: {ex.Message}");
+			}
+		}
+		public static string READ_FILE(string folder, string fileName)
         {
             string content = "";
             try

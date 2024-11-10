@@ -31,10 +31,7 @@ namespace HRM.Services.User
 
         public string TemplateContent => templateContent;
 
-        public EmailService(
-            IOptions<EmailSetting> serverMailSetting,
-            IOptions<CompanySetting> serverCompanySetting
-            )
+        public EmailService(IOptions<EmailSetting> serverMailSetting,IOptions<CompanySetting> serverCompanySetting)
         {
             _serverMailSetting = serverMailSetting.Value;
             _serverCompanySetting = serverCompanySetting.Value;

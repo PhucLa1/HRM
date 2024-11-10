@@ -6,7 +6,8 @@ namespace HRM.Repositories.Dtos.Models
     public class AdvanceUpsert
     {
         public double Amount { get; set; }
-        public string? PayPeriod { get; set; }
+        public MonthPeriod Month { get; set; }
+        public int Year { get; set; }
         public required int EmployeeId { get; set; }
         public required string Reason { get; set; }
         public string? Note { get; set; }

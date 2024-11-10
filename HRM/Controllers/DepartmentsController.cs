@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using HRM.Apis.Swagger.Examples.Responses;
+using HRM.Data.Entities;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.Briefcase;
@@ -35,6 +36,16 @@ namespace HRM.Apis.Controllers
             return Ok(await _departmentService.GetAllEmployeeInDepartment(id));
         }
 
+        /// <summary>
+        /// Get the count of employees in each department
+        /// </summary>
+        [HttpGet]
+        [Route("employee-count")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<DepartmentEmployeeCountResult>>))]
+        public async Task<IActionResult> GetEmployeeCountByDepartment()
+        {
+            return Ok(await _departmentService.GetEmployeeCountByDepartment());
+        }
 
         /// <summary>
         /// Get all departments in company
