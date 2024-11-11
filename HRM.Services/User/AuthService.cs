@@ -18,10 +18,12 @@ namespace HRM.Services.User
     {
         public const string EMAIL_NOT_CORRECT = "Email đã nhập không tồn tại";
         public const string PASS_NOT_CORRECT = "Mật khẩu đã nhập bị sai";
+        public const string FORBIDDEN = "Không đủ quyền hạn để thay đổi .";
     }
     public interface IAuthService
     {
         Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin); //Chỉ dùng riêng cho admin
+        Task<ApiResponse<bool>> ChangeAccountInformation(int employeeId, AccountUpdate accountUpdate); //Dùng cho cả admin và user
         Task<ApiResponse<string>> EmployeeLogin(AccountLogin employeeLogin); //Dùng cho nhân viên
         Task<ApiResponse<AccountInfo>> GetCurrentAccount();
     }
@@ -32,12 +34,14 @@ namespace HRM.Services.User
         private readonly IBaseRepository<Contract> _contractRepository;
         private readonly JwtSetting _jwtServerSetting;
         private readonly IValidator<AccountLogin> _accountLoginValidator;
+        private readonly IValidator<AccountUpdate> _accountUpdateValidator;
         public AuthService(
             IBaseRepository<Admin> adminRepository,
             IOptions<JwtSetting> jwtServerSetting,
             IValidator<AccountLogin> accountLoginValidator,
             IBaseRepository<Employee> employeeRepository,
-            IBaseRepository<Contract> contractRepository
+            IBaseRepository<Contract> contractRepository,
+            IValidator<AccountUpdate> accountUpdateValidator
             )
         {
             _adminRepository = adminRepository;
@@ -45,6 +49,54 @@ namespace HRM.Services.User
             _accountLoginValidator = accountLoginValidator;
             _employeeRepository = employeeRepository;
             _contractRepository = contractRepository;
+            _accountUpdateValidator = accountUpdateValidator;
+        }
+
+        public async Task<ApiResponse<bool>> ChangeAccountInformation(int employeeId, AccountUpdate accountUpdate)
+        {
+            try
+            {
+                //Check validate
+                var resultValidation = _accountUpdateValidator.Validate(accountUpdate);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+
+                /* Yêu cầu : 
+                 * Admin có thể chỉnh sửa tài khoản mật khẩu của user
+                 * User chỉ có thể chỉnh sửa tài khoản, mật khẩu của chính bản thân mình .
+                 */
+
+                //Check xem có phải admin không ?
+                var currentUserRole = _employeeRepository.Context.GetCurrentUserRole();
+                var currentUserId = _employeeRepository.Context.GetCurrentUserId();
+                var employee = await _employeeRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == employeeId)
+                    .FirstAsync();
+                if (currentUserRole != Role.Admin && currentUserId != employeeId )
+                {
+                    //Nếu không phải admin và người chỉnh sửa không phải chính bản thân nó
+                    return new ApiResponse<bool> { Message = [AuthError.FORBIDDEN] };
+                }
+
+
+                //Thay đổi tài khoản, mật khẩu của user
+                employee.UserName = accountUpdate.UserName;
+                employee.Password = BCrypt.Net.BCrypt.HashPassword(accountUpdate.Password);
+                employee.Email = accountUpdate.Email;
+                _employeeRepository.Update(employee);
+                await _employeeRepository.SaveChangeAsync();
+
+                return new ApiResponse<bool> { IsSuccess = true };
+
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<ApiResponse<AccountInfo>> GetCurrentAccount()
@@ -89,7 +141,6 @@ namespace HRM.Services.User
                     Role = currentRole,
                     Name = name,
                     Email = email,
-                    TypeContract = type == null ? 0 : type,
                 };
                 return new ApiResponse<AccountInfo>
                 {

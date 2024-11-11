@@ -60,7 +60,7 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate);
-        Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
+        Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
         Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công 
 
         // Tính số giờ làm cho nhân viên 
@@ -348,27 +348,26 @@ namespace HRM.Services.TimeKeeping
 
         //Chấm công đầu vào không được trước quá 30p - kể từ thời điểm bắt đầu giờ làm
         //Chấm công đầu ra không được sau quá 30p - kể từ thời điểm bắt đầu tan
-        public async Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd)
+        public async Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd)
         {
             try
             {
                 var resultValidation = _historyUpsertValidator.Validate(historyAdd);
                 if (!resultValidation.IsValid)
                 {
-                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                    return ApiResponse<HistoryCheckResult>.FailtureValidation(resultValidation.Errors);
                 }
-                /*
-                //Lấy ra kiểu nhân viên đang chấm công - Kiểm tra xem nhân viên đó có phải là nhân viên partime không
-                var typeContract = await (from em in _employeeRepository.GetAllQueryAble()
+                
+                var employee = await (from em in _employeeRepository.GetAllQueryAble()
                                           join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
                                           where em.Id == employeeId
-                                          select c.TypeContract).FirstAsync();
+                                          select new
+                                          {
+                                              Name = c.Name
+                                          }
+                                          ).FirstAsync();
 
-                if (typeContract == TypeContract.Fulltime)
-                {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_TYPE_CONTRACT] };
-                }
-                */
+               
                 var history = new History()
                 {
                     StatusHistory = historyAdd.StatusHistory,
@@ -377,7 +376,13 @@ namespace HRM.Services.TimeKeeping
                 };
                 await _historyRepository.AddAsync(history);
                 await _historyRepository.SaveChangeAsync();
-                return new ApiResponse<bool> { IsSuccess = true };
+                var dataReturn = new HistoryCheckResult
+                {
+                    EmployeeName = employee.Name,
+                    Id = employeeId,
+                    TimeSweep = historyAdd.TimeSweep
+                };
+                return new ApiResponse<HistoryCheckResult> { IsSuccess = true, Metadata = dataReturn };
             }
             catch (Exception ex)
             {

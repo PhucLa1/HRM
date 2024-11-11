@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using HRM.Apis.Swagger.Examples.Requests;
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
@@ -109,6 +110,24 @@ namespace HRM.Apis.Controllers
             DeleteJWT();
             return Ok(new ApiResponse<bool> { IsSuccess = true });
         }
+
+
+
+        /// <summary>
+        /// This endpoint will update the information of account user
+        /// </summary>
+        /// <returns>Return the api response with T is bool</returns>
+        [HttpPut]
+        [Route("update-account/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
+        [SwaggerRequestExample(typeof(AccountUpdate), typeof(AccountUpdateRequestExample))]
+        public async Task<ActionResult> UpdateAccountInformation(int id, [FromBody] AccountUpdate accountUpdate)
+        {
+            return Ok(await _authService.ChangeAccountInformation(id, accountUpdate));
+        }
+
+
+
 
 
         private void SetJWT(string encryptedToken)

@@ -32,7 +32,7 @@ public interface IPayrollsService
     //Payroll data
     Task<ApiResponse<List<List<ColumnTableHeader>>>> GetPayrollTableHeader(PayrollPeriod period);
     Task<ApiResponse<IEnumerable<DynamicColumn>>> GetPayrollTableColumn(PayrollPeriod period);
-    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> employeeIds=null);
+    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> employeeIds = null);
 }
 public class PayrollsService : IPayrollsService
 {
@@ -168,20 +168,20 @@ public class PayrollsService : IPayrollsService
                                        EmployeeName = c != null ? c.Name : null
                                    };
 
-            var departmentPosition = (from d in _departmentRepository.GetAllQueryAble()
-                                      join p in _positionRepository.GetAllQueryAble() on d.Id equals p.DepartmentId into positionGroup
-                                      from dp in positionGroup.DefaultIfEmpty()
-                                      join ec in employeeContract on dp.Id equals ec.PositionId into ecGroup
-                                      from dpec in ecGroup.DefaultIfEmpty()
-                                      select new
-                                      {
-                                          DepartmentId = d.Id,
-                                          DepartmentName = d.Name,
-                                          PositionId = dp != null ? dp.Id : (int?)null,
-                                          PositionName = dp != null ? dp.Name : null,
-                                          EmployeeId = dpec != null ? dpec.EmployeeId : (int?)null,
-                                          EmployeeName = dpec != null ? dpec.EmployeeName : null
-                                      }).ToList();
+            var departmentPosition = await (from d in _departmentRepository.GetAllQueryAble()
+                                            join p in _positionRepository.GetAllQueryAble() on d.Id equals p.DepartmentId into positionGroup
+                                            from dp in positionGroup.DefaultIfEmpty()
+                                            join ec in employeeContract on dp.Id equals ec.PositionId into ecGroup
+                                            from dpec in ecGroup.DefaultIfEmpty()
+                                            select new
+                                            {
+                                                DepartmentId = d.Id,
+                                                DepartmentName = d.Name,
+                                                PositionId = dp != null ? dp.Id : (int?)null,
+                                                PositionName = dp != null ? dp.Name : null,
+                                                EmployeeId = dpec != null ? dpec.EmployeeId : (int?)null,
+                                                EmployeeName = dpec != null ? dpec.EmployeeName : null
+                                            }).ToListAsync();
 
             // Nhóm theo DepartmentId
             var result = departmentPosition.GroupBy(d => new { d.DepartmentId, d.DepartmentName })
@@ -295,9 +295,9 @@ public class PayrollsService : IPayrollsService
         try
         {
             var lstSelectedPayrollRes = await GetPayrollTableData(period, employeeIds);
-            if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0]??"Lỗi lấy dữ liệu");
+            if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0] ?? "Lỗi lấy dữ liệu");
 
-         
+
 
             var lstPayroll = lstSelectedPayrollRes.Metadata;
             foreach (var payroll in lstPayroll)
@@ -310,7 +310,7 @@ public class PayrollsService : IPayrollsService
 
             throw;
         }
-        
+
         return new ApiResponse<bool>()
         {
             IsSuccess = true,
@@ -1418,7 +1418,7 @@ public class PayrollsService : IPayrollsService
             {
                 payrollByPeriod = await _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month).ToListAsync();
             }
-           
+
             var lstContractIds = payrollByPeriod.Select(x => x.ContractId).ToList(); ;
             var lstEmployeeIds = payrollByPeriod.Select(x => x.EmployeeId).ToList(); ;
             var lstPayrollIds = payrollByPeriod.Select(x => x.Id).ToList();
@@ -2036,7 +2036,7 @@ public class PayrollsService : IPayrollsService
                  .Replace("{" + $"{FieldOtherDeduction}" + "}", "400")
                  .Replace("{" + $"{Fieldnet}" + "}", "40000000000");
             var bodyEmail = _emailService.TemplateContent
-                        .Replace("<main>","")
+                        .Replace("<main>", "")
                          .Replace("/<main>", "")
                        .Replace("{content}", bodyContentEmail);
 
@@ -2053,7 +2053,7 @@ public class PayrollsService : IPayrollsService
         {
             return e.Message;
         }
-        
+
 
     }
 

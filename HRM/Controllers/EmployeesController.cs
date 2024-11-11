@@ -5,7 +5,6 @@ using HRM.Repositories.Dtos.Results;
 using HRM.Services.User;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
-using System.Collections.Generic;
 
 namespace HRM.Apis.Controllers
 {
@@ -53,11 +52,53 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return all the employee defination in the metadata of api response</response>
         [HttpGet] 
         [Route("")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<EmployeeResult>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<EmployeeResult>>))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<EmployeeResult>))]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _employeesService.GetAllEmployee());
+        }
+
+
+
+
+        /// <summary>
+        /// Get current profile of current user
+        /// </summary>
+        /// <response code="200">Return the current user profile defination in the metadata of api response</response>
+        [HttpGet]
+        [Route("current-profile")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProfileDetail>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ProfileDetailResponseExample))]
+        public async Task<IActionResult> GetCurrentUserProfile()
+        {
+            return Ok(await _employeesService.GetCurrentProfileUser());
+        }
+
+
+        /// <summary>
+        /// Update face regis to employee to use face recognition
+        /// </summary>
+        /// <response code="200">Return the api response</response>
+        [HttpPut]
+        [Route("update-regis-face/{id}")]
+        public async Task<IActionResult> RegistrationFace(int id, [FromForm] List<FaceRegisUpdate> faceRegisUpdates)
+        {
+            return Ok(await _employeesService.UpdateFaceRegis(id, faceRegisUpdates));
+        }
+
+
+        /// <summary>
+        /// Get all employee label description
+        /// </summary>
+        /// <response code="200">Return all the employee label description in the metadata of api response</response>
+        [HttpGet]
+        [Route("get-all-labeled")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<LabelDescriptions>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LabelDescriptionsResponseExample))]
+        public async Task<IActionResult> GetAllLabelDescription()
+        {
+            return Ok(await _employeesService.GetAllLabelDescription());
         }
     }
 }
