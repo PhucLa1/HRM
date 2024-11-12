@@ -67,7 +67,8 @@ namespace HRM.Services.Recruitment
 					PositionId = applicantAdd.PositionId,
 					Rate = applicantAdd.Rate ?? null,
 					TestId = applicantAdd.TestId ?? null,
-					InterviewerName = applicantAdd.InterviewerName
+					InterviewerName = applicantAdd.InterviewerName,
+					Status = applicantAdd.Status
 				};
 				if (applicantAdd.file.Length > 0)
 				{
@@ -109,7 +110,8 @@ namespace HRM.Services.Recruitment
 										  Rate = a.Rate,
 										  TestId = t.Id,
 										  TestName = t.Name,
-										  InterviewerName = a.InterviewerName
+										  InterviewerName = a.InterviewerName,
+										  Status = a.Status
 									  }).ToListAsync(),
 					IsSuccess = true
 				};
@@ -144,7 +146,8 @@ namespace HRM.Services.Recruitment
 										  Rate = a.Rate,
 										  TestId = t.Id,
 										  TestName = t.Name,
-										  InterviewerName = a.InterviewerName
+										  InterviewerName = a.InterviewerName,
+										  Status = a.Status
 									  }).ToListAsync(),
 					IsSuccess = true
 				};

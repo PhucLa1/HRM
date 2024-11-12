@@ -1,25 +1,20 @@
 ﻿using FluentValidation;
-using Google.Apis.Util.Store;
+using HRM.Data.Entities;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRM.Repositories.Dtos.Models
 {
 	public class ApplicantUpsert
 	{
-		public required string? Name { get; set; }
-		public required string? Email { get; set; }
-		public required string? Phone { get; set; }
-		public string? FileDataStore { get; set; }
+		public required string Name { get; set; }
+		public required string Email { get; set; }
+		public required string Phone { get; set; }
 		public IFormFile? file { get; set; }
 		public int PositionId { get; set; }
 		public double? Rate { get; set; }
 		public int? TestId { get; set; }
 		public string? InterviewerName { get; set; }
+		public ApplicantStatus Status { get; set; }
 	}
 	public class ApplicantUpsertValidator : AbstractValidator<ApplicantUpsert>
 	{

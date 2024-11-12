@@ -86,9 +86,6 @@ namespace HRM.Services.Recruitment
 										  EmployeeId = jp.EmployeeId
 									  }).FirstOrDefaultAsync();
 
-				var decsription = await (from jp in _jobPostingRepository.GetAllQueryAble()
-										 where jp.Id == recruitmentWebAdd.JobPostingId
-										 select jp.Description).FirstOrDefaultAsync();
 				var resultValidation = _recruitmentWebUpsertValidator.Validate(recruitmentWebAdd);
 				if (!resultValidation.IsValid)
 				{
