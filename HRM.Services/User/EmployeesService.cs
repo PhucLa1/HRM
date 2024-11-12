@@ -174,25 +174,7 @@ namespace HRM.Services.User
         {
             try
             {
-                var employeeInfo = (from e in _employeeRepository.GetAllQueryAble()
-                                    join c in _contractRepository.GetAllQueryAble() on e.ContractId equals c.Id into empGroup
-                                    from c in empGroup.DefaultIfEmpty()
-                                    join p in _positionRepository.GetAllQueryAble() on c.PositionId equals p.Id into contractGroup
-                                    from p in contractGroup.DefaultIfEmpty()
-                                    join d in _departmentRepository.GetAllQueryAble() on p.DepartmentId equals d.Id into positonGroup
-                                    from d in positonGroup.DefaultIfEmpty()
-                                    select new
-                                    {
-                                        ContractId = c.Id,
-                                        EmployeeName = c.Name,
-                                        DepartmentName = d.Name,
-                                        PositionName = p.Name,
-                                        Email = e.Email,
-                                        PhoneNumber = e.PhoneNumber,
-                                        DateHired = c.StartDate.ToString("dd/MM/yyyy"),
-                                        EmployeeId = "NV-00" + e.Id,
-
-                                    }).ToList();
+                
                 return new ApiResponse<IEnumerable<EmployeeResult>>
                 {
 
