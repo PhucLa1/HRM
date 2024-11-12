@@ -49,6 +49,21 @@ namespace HRM.Apis.Controllers
         }
 
         /// <summary>
+        /// Get all partime plans by current partime employee 
+        /// </summary>
+        /// <response code="200">Return the api response</response>
+        [HttpGet]
+        [Route("get-partimeplans-by-current-employee")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PartimePlanResult>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PartimePlanResultResponseExample))]
+        public async Task<IActionResult> GetAllPartimePlanByCurrentEmployeeId()
+        {
+            return Ok(await _workShiftService.GetAllPartimePlanByCurrentEmployeeId());
+        }
+
+
+
+        /// <summary>
         /// Get  partime plans by id from employee
         /// </summary>
         /// <response code="200">Return the api response</response>

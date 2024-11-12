@@ -53,6 +53,7 @@ namespace HRM.Services.TimeKeeping
     {
         Task<ApiResponse<bool>> RegisterWorkShift(WorkPlanInsert workPlanInsert);
         Task<ApiResponse<List<PartimePlanResult>>> GetAllPartimePlan();
+        Task<ApiResponse<List<PartimePlanResult>>> GetAllPartimePlanByCurrentEmployeeId();
         Task<ApiResponse<PartimePlanResult>> GetDetailPartimePlan(int partimePlanId);
         Task<ApiResponse<List<UserCalendarResult>>> GetAllWorkShiftByPartimePlanId(int partimePlanId);
         Task<ApiResponse<bool>> ProcessPartimePlanRequest(int partimePlanId, StatusCalendar statusCalendar);
@@ -60,7 +61,7 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate);
-        Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
+        Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
         Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công 
 
         // Tính số giờ làm cho nhân viên 
@@ -262,7 +263,7 @@ namespace HRM.Services.TimeKeeping
                                           join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
                                           select c.TypeContract).FirstAsync();
 
-                if (employeeType == TypeContract.Fulltime)
+                if (employeeType == TypeContract.Partime)
                 {
                     return new ApiResponse<List<EmployeeAttendanceRecord>> { Message = [WorkShiftError.NOT_FULLTIME_EMPLOYEE] };
                 }
@@ -348,27 +349,26 @@ namespace HRM.Services.TimeKeeping
 
         //Chấm công đầu vào không được trước quá 30p - kể từ thời điểm bắt đầu giờ làm
         //Chấm công đầu ra không được sau quá 30p - kể từ thời điểm bắt đầu tan
-        public async Task<ApiResponse<bool>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd)
+        public async Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd)
         {
             try
             {
                 var resultValidation = _historyUpsertValidator.Validate(historyAdd);
                 if (!resultValidation.IsValid)
                 {
-                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                    return ApiResponse<HistoryCheckResult>.FailtureValidation(resultValidation.Errors);
                 }
-                /*
-                //Lấy ra kiểu nhân viên đang chấm công - Kiểm tra xem nhân viên đó có phải là nhân viên partime không
-                var typeContract = await (from em in _employeeRepository.GetAllQueryAble()
-                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
-                                          where em.Id == employeeId
-                                          select c.TypeContract).FirstAsync();
 
-                if (typeContract == TypeContract.Fulltime)
-                {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_TYPE_CONTRACT] };
-                }
-                */
+                var employee = await (from em in _employeeRepository.GetAllQueryAble()
+                                      join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                      where em.Id == employeeId
+                                      select new
+                                      {
+                                          Name = c.Name
+                                      }
+                                          ).FirstAsync();
+
+
                 var history = new History()
                 {
                     StatusHistory = historyAdd.StatusHistory,
@@ -377,7 +377,13 @@ namespace HRM.Services.TimeKeeping
                 };
                 await _historyRepository.AddAsync(history);
                 await _historyRepository.SaveChangeAsync();
-                return new ApiResponse<bool> { IsSuccess = true };
+                var dataReturn = new HistoryCheckResult
+                {
+                    EmployeeName = employee.Name,
+                    Id = employeeId,
+                    TimeSweep = historyAdd.TimeSweep
+                };
+                return new ApiResponse<HistoryCheckResult> { IsSuccess = true, Metadata = dataReturn };
             }
             catch (Exception ex)
             {
@@ -723,6 +729,23 @@ namespace HRM.Services.TimeKeeping
                 }
 
 
+                var currentRole = _userCalendarRepository.Context.GetCurrentUserRole();
+                if(currentRole != Role.Admin)
+                {
+                    return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_PLAN] };
+                }
+
+                //Những ngày đã được đăng kí trước sẽ bị đè vào
+                /*Lấy những ngày đã đăng kí trong khoảng thời gian này*/
+                var userCalendarIdDeletes = await _userCalendarRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.PresentShift <= partimePlan.TimeEnd
+                    && e.PresentShift >= partimePlan.TimeStart
+                    && (e.UserCalendarStatus == UserCalendarStatus.Submit
+                    || e.UserCalendarStatus == UserCalendarStatus.Approved))
+                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.UserCalendarStatus, UserCalendarStatus.Inactive));
+
+
                 partimePlan.StatusCalendar = statusCalendar;
                 _partimePlanRepository.Update(partimePlan);
                 var userCalendarIds = await _userCalendarRepository
@@ -798,6 +821,41 @@ namespace HRM.Services.TimeKeeping
             }
         }
 
+        public async Task<ApiResponse<List<PartimePlanResult>>> GetAllPartimePlanByCurrentEmployeeId()
+        {
+            try
+            {
+                var employeeId = _employeeRepository.Context.GetCurrentUserId();
+                var employeeRole = _employeeRepository.Context.GetCurrentUserRole();
+
+                if (employeeRole != Role.Partime)
+                {
+                    return new ApiResponse<List<PartimePlanResult>> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                }
+
+                var partimePlans = await (from pt in _partimePlanRepository.GetAllQueryAble()
+                                          join em in _employeeRepository.GetAllQueryAble() on pt.EmployeeId equals em.Id
+                                          join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          where em.Id == employeeId
+                                          select new PartimePlanResult
+                                          {
+                                              TimeStart = pt.TimeStart,
+                                              TimeEnd = pt.TimeEnd,
+                                              StatusCalendar = pt.StatusCalendar,
+                                              CreatedAt = pt.CreatedAt,
+                                              EmployeeName = c.Name,
+                                              Id = pt.Id,
+                                              DiffTime = pt.TimeEnd.DayNumber - pt.TimeStart.DayNumber
+                                          }).OrderByDescending(e => e.CreatedAt).ToListAsync();
+
+                return new ApiResponse<List<PartimePlanResult>> { IsSuccess = true, Metadata = partimePlans };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<ApiResponse<List<PartimePlanResult>>> GetAllPartimePlan()
         {
             try
@@ -814,7 +872,7 @@ namespace HRM.Services.TimeKeeping
                                               EmployeeName = c.Name,
                                               Id = pt.Id,
                                               DiffTime = pt.TimeEnd.DayNumber - pt.TimeStart.DayNumber
-                                          }).ToListAsync();
+                                          }).OrderByDescending(e => e.CreatedAt).ToListAsync();
                 return new ApiResponse<List<PartimePlanResult>> { Metadata = partimePlans, IsSuccess = true };
             }
             catch (Exception ex)
@@ -851,7 +909,7 @@ namespace HRM.Services.TimeKeeping
                 var role = _partimePlanRepository
                     .Context.GetCurrentUserRole();
 
-                if (role == Role.Admin)
+                if (role == Role.Admin || role == Role.FullTime)
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
                 }
@@ -866,16 +924,6 @@ namespace HRM.Services.TimeKeeping
                     return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
                 }
 
-
-                //Những ngày đã được đăng kí trước sẽ bị đè vào
-                /*Lấy những ngày đã đăng kí trong khoảng thời gian này*/
-                var userCalendarIds = await _userCalendarRepository
-                    .GetAllQueryAble()
-                    .Where(e => e.PresentShift <= workPlanInsert.TimeEnd
-                    && e.PresentShift >= workPlanInsert.TimeStart
-                    && (e.UserCalendarStatus == UserCalendarStatus.Submit
-                    || e.UserCalendarStatus == UserCalendarStatus.Approved))
-                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.UserCalendarStatus, UserCalendarStatus.Inactive));
 
                 //Thêm mới các công ca
                 using (var transaction = await _partimePlanRepository.Context.Database.BeginTransactionAsync())

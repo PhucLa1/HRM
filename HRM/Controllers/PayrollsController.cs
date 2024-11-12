@@ -57,6 +57,7 @@ namespace HRM.Apis.Controllers
             return Ok(await _payrollsService.UpdatePayroll(payrollListUpsert.Period, payrollListUpsert.EmployeeIds));
         }
 
+
         /// <summary>
         /// Update specific payroll of an employee in period
         /// </summary>
@@ -181,6 +182,17 @@ namespace HRM.Apis.Controllers
         public async Task<IActionResult> GetEmployeeDetailSCByPeriod(int payrollId)
         {
             return Ok(await _payrollsService.GetEmployeeDetailSCByPeriod(payrollId));
+        }
+
+        /// <summary>
+        /// Send payslip for list employee in specific payroll
+        /// </summary>
+        /// <response code="200">Return status of email forwarding in the metadata of api response</response>
+        [HttpPost]
+        [Route("employee-salary/payslip/{year}/{month}")]
+        public async Task<IActionResult> GetListEmployeeSCByPeriod(int year, MonthPeriod month, [FromBody] List<int> employeeIds)
+        {
+            return Ok(await _payrollsService.SendPayslip(new PayrollPeriod() { Month = month, Year = year }, employeeIds));
         }
     }
 }

@@ -45,7 +45,7 @@ namespace HRM.Services.Salary
                 return new ApiResponse<IEnumerable<AdvanceResult>>
                 {
 
-                    Metadata = (from a in _advanceRepository.GetAllQueryAble()
+                    Metadata = await (from a in _advanceRepository.GetAllQueryAble()
                                 join e in _employeeRepository.GetAllQueryAble() on a.EmployeeId equals e.Id into employeeGroup
                                 from e in employeeGroup.DefaultIfEmpty() // Left join
                                 join d in _departmentRepository.GetAllQueryAble() on e.Contract.Position.DepartmentId equals d.Id into departmentGroup
@@ -64,7 +64,7 @@ namespace HRM.Services.Salary
                                     EmployeeName = (e != null && e.Contract != null && e.Contract.Name != null) ? e.Contract.Name : "",
                                     DepartmentName = d != null ? d.Name : "",
                                     StatusName = getStatusName(a.Status)
-                                }).ToList(),
+                                }).ToListAsync(),
                     IsSuccess = true
 
                 };

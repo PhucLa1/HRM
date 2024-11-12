@@ -1,397 +1,179 @@
 ﻿<div style="background: #f0f0f0; display: flex; justify-content: center; padding: 20px;">
-    <style>
-        * {
-            font-size: 12px;
-            color: #444;
-        }
-
-        #payslip {
-            width: calc(8.5in - 80px);
-            height: calc(11in - 60px);
-            background: #fff;
-            padding: 30px 40px;
-        }
-
-        #title {
-            margin-bottom: 20px;
-            font-size: 38px;
-            font-weight: 600;
-        }
-
-        #scope {
-            border-top: 1px solid #ccc;
-            border-bottom: 1px solid #ccc;
-            padding: 7px 0 4px 0;
-            display: flex;
-            justify-content: space-around;
-        }
-
-            #scope > .scope-entry {
-                text-align: center;
-            }
-
-                #scope > .scope-entry > .value {
-                    font-size: 14px;
-                    font-weight: 700;
-                }
-
-        .content {
-            display: flex;
-            border-bottom: 1px solid #ccc;
-            height: 880px;
-        }
-
-            .content .left-panel {
-                border-right: 1px solid #ccc;
-                min-width: 200px;
-                padding: 20px 16px 0 0;
-            }
-
-            .content .right-panel {
-                width: 100%;
-                padding: 10px 0 0 16px;
-            }
-
-        #employee {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-            #employee #name {
-                font-size: 15px;
-                font-weight: 700;
-            }
-
-            #employee #email {
-                font-size: 11px;
-                font-weight: 300;
-            }
-
-        .details,
-        .contributions,
-        .ytd,
-        .gross {
-            margin-bottom: 20px;
-        }
-
-            .details .entry,
-            .contributions .entry,
-            .ytd .entry {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 6px;
-            }
-
-                .details .entry .value,
-                .contributions .entry .value,
-                .ytd .entry .value {
-                    font-weight: 700;
-                    max-width: 130px;
-                    text-align: right;
-                }
-
-            .gross .entry .value {
-                font-weight: 700;
-                text-align: right;
-                font-size: 16px;
-            }
-
-            .contributions .title,
-            .ytd .title,
-            .gross .title {
-                font-size: 15px;
-                font-weight: 700;
-                border-bottom: 1px solid #ccc;
-                padding-bottom: 4px;
-                margin-bottom: 6px;
-            }
-
-        .content .right-panel .details {
-            width: 100%;
-        }
-
-            .content .right-panel .details .entry {
-                display: flex;
-                padding: 0 10px;
-                margin: 6px 0;
-            }
-
-            .content .right-panel .details .label {
-                font-weight: 700;
-                width: 120px;
-            }
-
-            .content .right-panel .details .detail {
-                font-weight: 600;
-                width: 130px;
-            }
-
-            .content .right-panel .details .rate {
-                font-weight: 400;
-                width: 80px;
-                font-style: italic;
-                letter-spacing: 1px;
-            }
-
-            .content .right-panel .details .amount {
-                text-align: right;
-                font-weight: 700;
-                width: 90px;
-            }
-
-            .content .right-panel .details .net_pay div,
-            .content .right-panel .details .nti div {
-                font-weight: 600;
-                font-size: 12px;
-            }
-
-            .content .right-panel .details .net_pay,
-            .content .right-panel .details .nti {
-                padding: 3px 0 2px 0;
-                margin-bottom: 10px;
-                background: rgba(0, 0, 0, 0.04);
-            }
-    </style>
-    <div id="payslip">
-        <div id="title">Phiếu lương</div>
-        <div id="scope">
-            <div class="scope-entry">
-                <div class="title">Ngày xuất phiếu</div>
+    <div id="payslip" style="width: calc(8.5in - 20px); height: calc(11in - 60px); background: #fff; padding: 30px 40px;">
+        <div id="title" style="margin-bottom: 20px; font-size: 38px; font-weight: 600;">Phiếu lương</div>
+        <div id="scope" style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 7px 0 4px 0;justify-content: space-between; display: flex;">
+            <div class="scope-entry" style="text-align: center;">
+                <div class="title" style="font-weight:700;">Ngày xuất phiếu</div>
                 <div class="value"> {sentDate}</div>
             </div>
-            <div class="scope-entry">
-                <div class="title">Kì lương</div>
+            <div class="scope-entry" style="text-align: center;">
+                <div class="title" style="font-weight:700;">Kì lương</div>
                 <div class="value">{payPeriod}</div>
             </div>
         </div>
-        <div class="content">
-            <div class="left-panel">
-                <div id="employee">
-                    <div id="name">
-                        {employeeName}
+        <div class="content" style="display: flex; border-bottom: 1px solid #ccc; height: 880px;">
+            <div class="left-panel" style="border-right: 1px solid #ccc; min-width: 230px; padding: 20px 16px 0 0;">
+                <div id="employee" style="text-align: center; margin-bottom: 20px;">
+                    <div id="name" style="font-size: 15px; font-weight: 700;">{employeeName}</div>
+                    <div id="email" style="font-size: 11px; font-weight: 300;">{email}</div>
+                </div>
+                <div class="details" style="margin-bottom: 20px;">
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Mã nhân viên</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">{employeeId}</div>
                     </div>
-                    <div id="email">
-                        {email}
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Ngày gia nhập</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">{dateHired}</div>
+                    </div>
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Vị trí</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">{positionName}</div>
+                    </div>
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Phòng ban</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">{departmentName}</div>
+                    </div>
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Hình thức trả lương</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">Theo kì</div>
+                    </div>
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <div class="label" style="font-weight: 700; width: 120px;">Mã số thuế</div>
+                        <div class="value" style="max-width: 130px; text-align: right;">{taxCode}</div>
                     </div>
                 </div>
-                <div class="details">
-                    <div class="entry">
-                        <div class="label">Mã nhân viên</div>
-                        <div class="value">{employeeId}</div>
-                    </div>
-                    <div class="entry">
-                        <div class="label">Ngày gia nhập</div>
-                        <div class="value">{dateHired}</div>
-                    </div>
-                    <div class="entry">
-                        <div class="label">Vị trí</div>
-                        <div class="value">{positionName}</div>
-                    </div>
-                    <div class="entry">
-                        <div class="label">Phòng ban</div>
-                        <div class="value">{departmentName}</div>
-                    </div>
-                    <div class="entry">
-                        <div class="label">Hình thức trả lương</div>
-                        <div class="value">Theo kì</div>
-                    </div>
-                    <div class="entry">
-                        <div class="label">Mã số thuế</div>
-                        <div class="value">{taxCode}</div>
-                    </div>
-                </div>
-                <div class="gross">
-                    <div class="title">Tổng thu nhập</div>
-                    <div class="entry">
+                <div class="gross" style="margin-bottom: 20px;">
+                    <div class="title" style="font-size: 15px; font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 6px;">Tổng thu nhập</div>
+                    <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <div class="label"></div>
-                        <div class="value">{FORMULA_TONG_THU_NHAP}</div>
+                        <div class="value" style="font-weight: 700; text-align: right!important; font-size: 16px;">{FORMULA_TONG_THU_NHAP}</div>
                     </div>
                 </div>
             </div>
-            <div class="right-panel">
-                <div class="details">
+            <div class="right-panel" style="width: 100%; padding: 10px 0 0 16px;">
+                <div class="details" style="width: 100%;">
                     <div class="basic-pay">
-                        <div class="entry">
-                            <div class="label">Lương cơ bản</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="">{PARAM_BASE_SALARY}</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Lương cơ bản</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right;width: 170px;">{PARAM_BASE_SALARY}</div>
                         </div>
-                        <div class="entry">
-                            <div class="label">Số công quy định</div>
-                            <div class="detail"></div>
-                            <div class="rate">{PARAM_BASE_WAGE_HOURS}</div>
-                            <div class="">{PARAM_BASE_HOURS}</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Số công quy định</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;">{PARAM_BASE_WAGE_HOURS}</div>
+                            <div class="" style="text-align: right;width: 170px;">{PARAM_BASE_HOURS}</div>
                         </div>
-                        <div class="entry">
-                            <div class="label">Số công thực tế</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="">{PARAM_REAL_HOURS}</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Số công thực tế</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right;width: 170px;">{PARAM_REAL_HOURS}</div>
                         </div>
                     </div>
-                    <div class="basic-pay" style="border-bottom: 1px solid #ccc;border-top: 1px solid #ccc;">
-                        <div class="entry">
-                            <div class="label">Lương thời gian</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount">{FORMULA_LUONG_THOI_GIAN_HOURS}</div>
+                    <div class="basic-pay" style="border-bottom: 1px solid #ccc; border-top: 1px solid #ccc;">
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Lương thời gian</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; font-weight: 700; width: 170px;">{FORMULA_LUONG_THOI_GIAN_HOURS}</div>
                         </div>
                     </div>
                     <div class="gross-income">
-                        <div class="entry">
-                            <div class="label">Các khoản phụ cấp</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount"></div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Các khoản phụ cấp</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; width: 170px;"></div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Undertime</div>
-                            <div class="rate"></div>
-                            <div class="">(33,231.36)</div>
+                        {allowanceList}
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Các khoản thưởng</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; width: 170px;"></div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Unworked Holiday</div>
-                            <div class="rate"></div>
-                            <div class="">4,153.92</div>
-                        </div>
-                        <div class="entry">
-                            <div class="label">Các khoản thưởng</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount"></div>
-                        </div>
-                        <div class="entry paid">
-                            <div class="label"></div>
-                            <div class="detail">Paid Leave</div>
-                            <div class="rate"></div>
-                            <div class="">2,076.92</div>
-                        </div>
-                        <div class="entry unpaid">
-                            <div class="label"></div>
-                            <div class="detail">Thưởng khác</div>
-                            <div class="rate">8hrs@259.62/hr</div>
-                            <div class="">{PARAM_OTHER_BONUS}</div>
+                        {bonusList}
+                        <div class="entry unpaid" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;"></div>
+                            <div class="detail" style="font-weight: 600; width: 130px;">Thưởng khác</div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right; width: 170px;">{PARAM_OTHER_BONUS}</div>
                         </div>
                     </div>
-                    <div class="gross-income" style="background-color:rgba(0, 0, 0, 0.04);border-bottom: 1px solid #ccc;border-top: 1px solid #ccc;">
-                        <div class="entry">
-                            <div class="label">Tổng thu nhập</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount">{FORMULA_TONG_THU_NHAP}</div>
+                    <div class="gross-income" style="background-color:rgba(0, 0, 0, 0.04); border-bottom: 1px solid #ccc; border-top: 1px solid #ccc;">
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Tổng thu nhập</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; font-weight: 700; width: 170px;">{FORMULA_TONG_THU_NHAP}</div>
                         </div>
                     </div>
                     <div class="tax-deduction">
-                        <div class="entry">
-                            <div class="label">Bảo hiểm</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount"></div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Bảo hiểm</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right;width: 170px;"></div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">BHXH</div>
-                            <div class="rate">10%</div>
-                            <div class="">19,409.34</div>
-                        </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">BHYT</div>
-                            <div class="rate">10%</div>
-                            <div class="">19,409.34</div>
-                        </div>
-                        <div class="entry">
-                            <div class="label">Giảm trừ gia cảnh</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class=""></div>
-                        </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Giảm trừ bản thân</div>
-                            <div class="rate"></div>
-                            <div class="">(581.30)</div>
-                        </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Giảm trừ người phụ thuộc</div>
-                            <div class="rate"></div>
-                            <div class="">(100.00)</div>
+                        {insuranceList}
+                        {taxDeductionList}
+                    </div>
+                    <div class="tax-deduction" style="background-color:rgba(0, 0, 0, 0.04); border-bottom: 1px solid #ccc; border-top: 1px solid #ccc;">
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Tổng khấu trừ</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; font-weight: 700; width: 170px;">{FORMULA_TONG_KHAU_TRU}</div>
                         </div>
                     </div>
-                    <div class="tax-deduction" style="background-color:rgba(0, 0, 0, 0.04);border-bottom: 1px solid #ccc;border-top: 1px solid #ccc;">
-                        <div class="entry">
-                            <div class="label">Tổng khấu trừ</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount">{FORMULA_TONG_KHAU_TRU}</div>
-                        </div>
-                    </div>
-                    <div class="tax" style="background-color:rgba(0, 0, 0, 0.04);border-bottom: 1px solid #ccc;border-top: 1px solid #ccc;">
-                        <div class="entry">
-                            <div class="label">Thuế TNCN</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount">{PARAM_TOTAL_TAX}</div>
+                    <div class="tax" style="background-color:rgba(0, 0, 0, 0.04); border-bottom: 1px solid #ccc; border-top: 1px solid #ccc;">
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Thuế TNCN</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; font-weight: 700; width: 170px;">{PARAM_TOTAL_TAX}</div>
                         </div>
                     </div>
                     <div class="no-tax">
-                        <div class="entry">
-                            <div class="label">Tạm ứng</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="">{PARAM_TOTAL_ADVANCE}</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Tạm ứng</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right; width: 170px;">{PARAM_TOTAL_ADVANCE}</div>
                         </div>
-                        <div class="entry">
-                            <div class="label">Các khoản trừ</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="">10000</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Các khoản trừ</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right; width: 170px;">10000</div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Giảm trừ bản thân</div>
-                            <div class="rate"></div>
-                            <div class="">(581.30)</div>
+                        {deductionNoTaxList}
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;"></div>
+                            <div class="detail" style="font-weight: 600; width: 130px;">Trừ khác</div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right; width: 170px;">{PARAM_OTHER_DEDUCTION}</div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Giảm trừ người phụ thuộc</div>
-                            <div class="rate"></div>
-                            <div class="">(100.00)</div>
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">Các khoản cộng</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="" style="text-align: right; width: 170px;"></div>
                         </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Trừ khác</div>
-                            <div class="rate"></div>
-                            <div class="">{PARAM_OTHER_DEDUCTION}</div>
-                        </div>
-                        <div class="entry">
-                            <div class="label">Các khoản cộng</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class=""></div>
-                        </div>
-                        <div class="entry">
-                            <div class="label"></div>
-                            <div class="detail">Phụ cấp ăn</div>
-                            <div class="rate"></div>
-                            <div class="">(581.30)</div>
-                        </div>
+                        {bonusNoTaxList}
                     </div>
-                    <div class="net" style="background-color:rgba(0, 0, 0, 0.04);border-bottom: 1px solid #ccc;border-top: 1px solid #ccc;">
-                        <div class="entry">
-                            <div class="label">THỰC LĨNH</div>
-                            <div class="detail"></div>
-                            <div class="rate"></div>
-                            <div class="amount">{PARAM_NET}</div>
+                    <div class="net" style="background-color:rgba(0, 0, 0, 0.04); border-bottom: 1px solid #ccc; border-top: 1px solid #ccc;">
+                        <div class="entry" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="label" style="font-weight: 700; width: 120px;">THỰC LĨNH</div>
+                            <div class="detail" style="font-weight: 600; width: 130px;"></div>
+                            <div class="rate" style="font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;"></div>
+                            <div class="amount" style="text-align: right; font-weight: 700; width: 170px;">{PARAM_NET}</div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
