@@ -215,7 +215,10 @@ namespace HRM.Services.Dashboard
                 {
                     Name = p.Name,
                     Count = applicantCounts.FirstOrDefault(ac => ac.PositionId == p.Id)?.Count ?? 0
-                }).ToList();
+                })
+                .OrderByDescending(r => r.Count)
+                .Take(10)
+                .ToList();
 
                 return new ApiResponse<IEnumerable<ApplicantForPositionResult>>
                 {
