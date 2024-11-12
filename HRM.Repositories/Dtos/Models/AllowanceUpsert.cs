@@ -15,6 +15,9 @@ namespace HRM.Repositories.Dtos.Models
         {
             RuleFor(p => p.Name.Trim())
                 .NotEmpty().WithMessage("Tên không được để trống.");
+            RuleFor(p => p.ParameterName).NotEmpty().Must(x => x.StartsWith("PARAM_ALLOWANCE_")).WithMessage("Parameter Name must start with 'PARAM_ALLOWANCE_''");
+            RuleFor(p => p.ParameterName).NotEmpty().Must(x => !x.Contains("-") && !x.Contains("+") && !x.Contains("+") && !x.Contains("/") && !x.Contains("*") && !x.Contains("%")).WithMessage("Parameter Name must not contains '+/-/*/%/'");
+
         }
     }
 }
