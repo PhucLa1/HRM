@@ -14,9 +14,11 @@ using HRM.Services.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
+using NPOI.SS.Formula.Functions;
 using AsposeDocument = Aspose.Words.Document;
 using Body = DocumentFormat.OpenXml.Wordprocessing.Body;
 using Position = HRM.Data.Entities.Position;
+using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 namespace HRM.Services.Briefcase
 {
     public interface IContractsService
@@ -26,6 +28,8 @@ namespace HRM.Services.Briefcase
         Task<ApiResponse<bool>> CreateNewContract(int applicantId, ContractAdd contractAdd);
         Task<ApiResponse<bool>> RemoveContract(int id);
         Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate);
+        Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate);
+        Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status);
         Task<ApiResponse<bool>> SignContract();
     }
     public class ContractsService : IContractsService
@@ -179,7 +183,7 @@ namespace HRM.Services.Briefcase
                     ContractTypeId = contractAdd.ContractTypeId,
                     StartDate = contractAdd.StartDate,
                     EndDate = contractAdd.EndDate,
-                    CompanySignStatus = CompanySignStatus.Signed,
+                    CompanySignStatus = CompanySignStatus.NotSigned,
                     TypeContract = contractAdd.TypeContract,
                     PositionId = contractAdd.PositionId,
                     Name = contractAdd.Name,
@@ -349,6 +353,128 @@ namespace HRM.Services.Briefcase
                 throw new Exception(ex.InnerException?.Message);
             }
         }
+
+        public async Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate)
+        {
+            try
+            {
+                var resultValidation = _contractUpsertValidator.Validate(contractUpdate);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+
+                // Retrieve the existing contract
+                var contract = await _contractRepository
+                    .GetAllQueryAble()
+                    .Include(e => e.ContractAllowances)
+                    .Include(e => e.Position)
+                    .Include(e => e.ContractSalary)
+                    .Where(e => e.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if (contract == null)
+                {
+                    throw new Exception("Contract not found.");
+                }
+
+                // Update the contract properties
+                contract.Name = contractUpdate.Name;
+                contract.DateOfBirth = contractUpdate.DateOfBirth;
+                contract.Gender = contractUpdate.Gender;
+                contract.Address = contractUpdate.Address;
+                contract.CountrySide = contractUpdate.CountrySide;
+                contract.NationalID = contractUpdate.NationalID;
+                contract.NationalStartDate = contractUpdate.NationalStartDate;
+                contract.NationalAddress = contractUpdate.NationalAddress;
+                contract.Level = contractUpdate.Level;
+                contract.Major = contractUpdate.Major;
+                contract.ContractSalaryId = contractUpdate.ContractSalaryId;
+                contract.ContractTypeId = contractUpdate.ContractTypeId;
+                contract.StartDate = contractUpdate.StartDate;
+                contract.EndDate = contractUpdate.EndDate;
+                contract.TypeContract = contractUpdate.TypeContract;
+                contract.PositionId = contractUpdate.PositionId;
+
+                using (var transaction = await _contractRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        // Update allowances
+                        contract.ContractAllowances.Clear();
+                        if (contractUpdate.AllowanceIds != null)
+                        {
+                            foreach (var allowanceId in contractUpdate.AllowanceIds)
+                            {
+                                contract.ContractAllowances.Add(new ContractAllowance
+                                {
+                                    ContractId = contract.Id,
+                                    AllowanceId = allowanceId
+                                });
+                            }
+                        }
+
+                        // Update insurances
+                        var contractInsurances = new List<ContractInsurance>();
+                        if (contractUpdate.InsuranceIds != null)
+                        {
+                            foreach (var insuranceId in contractUpdate.InsuranceIds)
+                            {
+                                contractInsurances.Add(new ContractInsurance
+                                {
+                                    ContractId = contract.Id,
+                                    InsuranceId = insuranceId
+                                });
+                            }
+                            await _contractInsuranceRepository.AddRangeAsync(contractInsurances);
+                            await _contractInsuranceRepository.SaveChangeAsync();
+                        }
+
+                        _contractRepository.Update(contract);
+                        await _contractRepository.SaveChangeAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception("Transaction failed: " + ex.Message);
+                    }
+                }
+
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Update failed: " + ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status)
+        {
+            try
+            {
+                var selectedContract = await _contractRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+                if (selectedContract == null)
+                {
+                    return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { "Không tìm thấy " } };
+
+                }
+                selectedContract.ContractStatus = status;
+                _contractRepository.Update(selectedContract);
+                await _contractRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { ex.Message }
+                };
+            }
+        }
+
 
         public async Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate)
         {
