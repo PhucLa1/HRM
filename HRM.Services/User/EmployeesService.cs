@@ -29,18 +29,24 @@ namespace HRM.Services.User
         private readonly IBaseRepository<ContractSalary> _contractSalaryRepository;
         private readonly IBaseRepository<EmployeeImage> _employeeImageRepository;
         private readonly IBaseRepository<Contract> _contractRepository;
+
         private readonly IBaseRepository<Department> _departmentRepository;
         private readonly IBaseRepository<Position> _positionRepository;
         private readonly IBaseRepository<ContractType> _contractTypeRepository;
+        
         private readonly IValidator<FaceRegis> _faceRegisValidator;
         private readonly CompanySetting _serverCompanySetting;
         private const string FOLDER_EMPLOYEE_IMAGE = "Employee";
+
+        private readonly IBaseRepository<TaxDeductionDetails> _taxDeductionDetailsRepository;
         public EmployeesService(
             IBaseRepository<Employee> employeeRepository,
             IBaseRepository<EmployeeImage> employeeImageRepository,
             IValidator<FaceRegis> faceRegisValidator,
             IBaseRepository<Contract> contractRepository,
             IOptions<CompanySetting> serverCompanySetting,
+            IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository)
+            
             IBaseRepository<ContractSalary> contractSalaryRepository,
             IBaseRepository<Department> departmentRepository,
             IBaseRepository<Position> positionRepository,
@@ -51,6 +57,7 @@ namespace HRM.Services.User
             _faceRegisValidator = faceRegisValidator;
             _contractRepository = contractRepository;
             _serverCompanySetting = serverCompanySetting.Value;
+            _taxDeductionDetailsRepository = taxDeductionDetailsRepository;
             _contractSalaryRepository = contractSalaryRepository;
             _positionRepository = positionRepository;
             _departmentRepository = departmentRepository;
@@ -250,6 +257,7 @@ namespace HRM.Services.User
         {
             try
             {
+                
                 return new ApiResponse<IEnumerable<EmployeeResult>>
                 {
 
