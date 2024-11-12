@@ -196,6 +196,9 @@ namespace HRM.Data.Migrations
                     b.Property<double?>("Rate")
                         .HasColumnType("float");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<int?>("TestId")
                         .HasColumnType("int");
 

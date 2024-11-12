@@ -17,7 +17,15 @@ namespace HRM.Data.Entities
         public Position? Position { get; set; }
         public Test? Test { get; set; }
         public ICollection<TestResult>? testResults { get; set; }
-        [NotMapped]
+        public ApplicantStatus Status { get; set; }
+
+		[NotMapped]
 		public IFormFile? file { get; set; }
+	}
+     public enum ApplicantStatus
+    {
+        Wait = 1,
+        Decline = 2,
+		Pass = 3
 	}
 }
