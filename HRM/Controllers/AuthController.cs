@@ -76,16 +76,10 @@ namespace HRM.Apis.Controllers
         /// 1 : Admin
         /// </para>
         /// <para>
-        /// 2 : User
+        /// 2 : Partime
         /// </para>
         /// <para> 
-        /// About TypeContract : 
-        /// </para>
-        /// <para>
-        /// 1 : Partime
-        /// </para>
-        /// <para>
-        /// 2 : Fulltime
+        /// 3 : FullTime 
         /// </para>
         /// </remarks>
         /// <response code="200">Return all the bonus defination in the metadata of api response</response>
