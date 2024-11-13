@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using HRM.Apis.Swagger.Examples.Requests;
 using HRM.Apis.Swagger.Examples.Responses;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
@@ -53,12 +54,79 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return all the employee defination in the metadata of api response</response>
         [HttpGet] 
         [Route("")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<EmployeeResult>))]
-        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<EmployeeResult>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<EmployeeResult>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<List<EmployeeResult>>))]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _employeesService.GetAllEmployee());
         }
+
+        /// <summary>
+        /// Get employee infor by contract id defination
+        /// </summary>
+        /// <response code="200">Return selected employee by contract id defination in the metadata of api response</response>
+        [HttpGet]
+        [Route("contract/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<EmployeeResult>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<EmployeeResult>))]
+        public async Task<IActionResult> GetEmployeeByContractId(int contractId)
+        {
+            return Ok(await _employeesService.GetEmployeeInfoByContract(contractId));
+        }
+
+        /// <summary>
+        /// Get list contract id not in used defination
+        /// </summary>
+        /// <response code="200">Return contract id not in used defination in the metadata of api response</response>
+        [HttpGet]
+        [Route("contract/not-inused")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<int>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(ApiResponse<int>))]
+        public async Task<IActionResult> GetListContractId()
+        {
+            return Ok(await _employeesService.GetContractIdsNotInUsed());
+        }
+
+
+
+        /// <summary>
+        /// Add new employee defination
+        /// </summary>
+        /// <response code="200">Return the api response when inserted succesfully</response>
+        [HttpPost]
+        [Route("")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerRequestExample(typeof(EmployeeUpsert), typeof(EmployeeUpsert))]
+        public async Task<IActionResult> AddEmployee([FromBody] EmployeeUpsert employeeUpsert)
+        {
+            return Ok(await _employeesService.AddEmployee(employeeUpsert));
+        }
+
+        /// <summary>
+        /// Update a employee defination by id
+        /// </summary>
+        /// <response code="200">Return the api response when updated succesfully</response>
+        [HttpPut]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerRequestExample(typeof(EmployeeUpsert), typeof(EmployeeUpsert))]
+        public async Task<IActionResult> UpdateEmployee(int id, [FromBody] EmployeeUpsert employeeUpsert)
+        {
+            return Ok(await _employeesService.UpdateEmployee(id, employeeUpsert));
+        }
+
+        /// <summary>
+        /// Delete a employee defination by id
+        /// </summary>
+        /// <response code="200">Return the api response when deleted succesfully</response>
+        [HttpDelete]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> RemoveEmployee(int id)
+        {
+            return Ok(await _employeesService.RemoveEmployee(id));
+        }
+
     }
 }
 

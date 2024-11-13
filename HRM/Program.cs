@@ -96,6 +96,7 @@ builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>(
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
 builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
 builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
+builder.Services.AddScoped<IValidator<EmployeeUpsert>, EmployeeUpsertValidator>();
 #endregion
 
 
