@@ -13,6 +13,7 @@ namespace HRM.Repositories.Dtos.Models
 		public int PositionId { get; set; }
 		public double? Rate { get; set; }
 		public int? TestId { get; set; }
+		//public int? InterviewerId { get; set; }
 		public string? InterviewerName { get; set; }
 		public ApplicantStatus Status { get; set; }
 	}

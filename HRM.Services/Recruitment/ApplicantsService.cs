@@ -7,6 +7,7 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Helper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing.Matching;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,7 @@ namespace HRM.Services.Recruitment
 				{
 					return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
 				}
+				var statusEnum = (ApplicantStatus)Enum.Parse(typeof(ApplicantStatus), applicantAdd.Status.ToString());
 				var applicant = new Applicants
 				{
 					Name = applicantAdd.Name.Trim(),
@@ -68,7 +70,7 @@ namespace HRM.Services.Recruitment
 					Rate = applicantAdd.Rate ?? null,
 					TestId = applicantAdd.TestId ?? null,
 					InterviewerName = applicantAdd.InterviewerName,
-					Status = applicantAdd.Status
+					Status = statusEnum
 				};
 				if (applicantAdd.file.Length > 0)
 				{
@@ -181,6 +183,7 @@ namespace HRM.Services.Recruitment
 				{
 					return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
 				}
+				var statusEnum = (ApplicantStatus)Enum.Parse(typeof(ApplicantStatus), applicantUpdate.Status.ToString());
 				var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
 				//Nhập lại dữ liệu
 				applicant.Name = applicantUpdate.Name.Trim();
@@ -190,6 +193,7 @@ namespace HRM.Services.Recruitment
 				applicant.Rate = applicantUpdate.Rate ?? null;
 				applicant.TestId = applicantUpdate.TestId ?? null;
 				applicant.InterviewerName = applicantUpdate.InterviewerName;
+				applicant.Status = statusEnum;
 				_baseRepository.Update(applicant);
 				await _baseRepository.SaveChangeAsync();
 				return new ApiResponse<bool> { IsSuccess = true };
@@ -219,9 +223,9 @@ namespace HRM.Services.Recruitment
 				double totalPoints = testResults.Sum(tr => tr.Point);
 				int questionCount = testResults.Count;
 
-				// Tính tỷ lệ
-				//applicant.Rate = questionCount > 0 ? totalPoints / questionCount : 0;
-				applicant.Rate = totalPoints; // Tránh chia cho 0
+				// Tính điểm trung bình và làm tròn tới 1 chữ số thập phân (hàng phần trăm)
+				double averagePoint = questionCount > 0 ? totalPoints / questionCount : 0;
+				applicant.Rate = Math.Round(averagePoint, 1);
 
 				// Cập nhật thông tin ứng viên
 				_baseRepository.Update(applicant);

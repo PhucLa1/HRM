@@ -19,6 +19,7 @@ namespace HRM.Repositories.Dtos.Results
 		public double? Rate { get; set; }
 		public int? TestId { get; set; }
 		public string? TestName { get; set; }
+		//public int? InterviewerId { get; set; }
 		public string? InterviewerName { get; set; }
 		public ApplicantStatus Status { get; set; }
 	}

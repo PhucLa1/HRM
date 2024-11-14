@@ -96,18 +96,6 @@ namespace HRM.Services.Recruitment
 				bool success = false;
 				if (Mess != null)
 				{
-					//var content = HandlePostForm.CreatePostContent(
-					//	Mess.PositionName ?? "Chưa xác định",
-					//	Mess.Description ?? "Chưa có mô tả",
-					//	Mess.Location ?? "Chưa có địa điểm",
-					//	Mess.PostingDate.ToString("dd/MM/yyyy") ?? "Không có ngày đăng tuyển",
-					//	Mess.ExpirationDate.ToString("dd/MM/yyyy") ?? "Không có ngày hết hạn",
-					//	Mess.SalaryRangeMin,
-					//	Mess.SalaryRangeMax,
-					//	Mess.ExperienceRequired ?? "Không yêu cầu",
-					//	Mess.EmployeeName ?? "Chưa xác định"
-					//	);
-					//throw new Exception(content);
 					var content = HandlePostForm.CreatePostContent(Mess);
 					success = await _linkedInPostService.PostToLinkedIn4(content);
 				}
