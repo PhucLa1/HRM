@@ -186,8 +186,8 @@ namespace HRM.Services.Recruitment
 				var statusEnum = (ApplicantStatus)Enum.Parse(typeof(ApplicantStatus), applicantUpdate.Status.ToString());
 				var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
 				//Nhập lại dữ liệu
-				applicant.Name = applicantUpdate.Name.Trim();
-				applicant.Email = applicantUpdate.Email;
+				applicant.Name = applicantUpdate.Name!.Trim();
+				applicant.Email = applicantUpdate.Email!;
 				applicant.PhoneNumber = applicantUpdate.Phone;
 				applicant.PositionId = applicantUpdate.PositionId;
 				applicant.Rate = applicantUpdate.Rate ?? null;

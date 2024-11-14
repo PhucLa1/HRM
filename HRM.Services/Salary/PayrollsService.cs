@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Data;
 using HRM.Services.User;
 using HRM.Repositories.Helper;
+using NPOI.HSSF.Record.Chart;
 
 namespace HRM.Services.Salary;
 
@@ -32,7 +33,9 @@ public interface IPayrollsService
     //Payroll data
     Task<ApiResponse<List<List<ColumnTableHeader>>>> GetPayrollTableHeader(PayrollPeriod period);
     Task<ApiResponse<IEnumerable<DynamicColumn>>> GetPayrollTableColumn(PayrollPeriod period);
+
     Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> employeeIds=null);
+    Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period, List<int> employeeIds);
 }
 public class PayrollsService : IPayrollsService
 {
@@ -168,20 +171,20 @@ public class PayrollsService : IPayrollsService
                                        EmployeeName = c != null ? c.Name : null
                                    };
 
-            var departmentPosition = (from d in _departmentRepository.GetAllQueryAble()
-                                      join p in _positionRepository.GetAllQueryAble() on d.Id equals p.DepartmentId into positionGroup
-                                      from dp in positionGroup.DefaultIfEmpty()
-                                      join ec in employeeContract on dp.Id equals ec.PositionId into ecGroup
-                                      from dpec in ecGroup.DefaultIfEmpty()
-                                      select new
-                                      {
-                                          DepartmentId = d.Id,
-                                          DepartmentName = d.Name,
-                                          PositionId = dp != null ? dp.Id : (int?)null,
-                                          PositionName = dp != null ? dp.Name : null,
-                                          EmployeeId = dpec != null ? dpec.EmployeeId : (int?)null,
-                                          EmployeeName = dpec != null ? dpec.EmployeeName : null
-                                      }).ToList();
+            var departmentPosition = await (from d in _departmentRepository.GetAllQueryAble()
+                                            join p in _positionRepository.GetAllQueryAble() on d.Id equals p.DepartmentId into positionGroup
+                                            from dp in positionGroup.DefaultIfEmpty()
+                                            join ec in employeeContract on dp.Id equals ec.PositionId into ecGroup
+                                            from dpec in ecGroup.DefaultIfEmpty()
+                                            select new
+                                            {
+                                                DepartmentId = d.Id,
+                                                DepartmentName = d.Name,
+                                                PositionId = dp != null ? dp.Id : (int?)null,
+                                                PositionName = dp != null ? dp.Name : null,
+                                                EmployeeId = dpec != null ? dpec.EmployeeId : (int?)null,
+                                                EmployeeName = dpec != null ? dpec.EmployeeName : null
+                                            }).ToListAsync();
 
             // Nhóm theo DepartmentId
             var result = departmentPosition.GroupBy(d => new { d.DepartmentId, d.DepartmentName })
@@ -294,15 +297,108 @@ public class PayrollsService : IPayrollsService
     {
         try
         {
+            var refColumnsApi = await GetPayrollTableColumn(period);
+            if (!refColumnsApi.IsSuccess) throw new Exception(refColumnsApi?.Message[0] ?? "Lỗi lấy dữ liệu");
+            var refColumns = refColumnsApi?.Metadata?.ToList() ?? new List<DynamicColumn>();
+
+            var lstAllowances = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_ALLOWANCE")).ToList();
+            var lstBonus = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_BONUS")).ToList();
+            var lstInsurance = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_INSURANCE")).ToList();
+            var lstTaxDeduction = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_TAXDEDUCTION")).ToList();
+            var lstDeductionNoTax = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_DEDUCTION")).ToList();
+  
+
             var lstSelectedPayrollRes = await GetPayrollTableData(period, employeeIds);
             if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0]??"Lỗi lấy dữ liệu");
+            var lstPayroll = lstSelectedPayrollRes?.Metadata?.ToList()??new List<PayrollTableData>();
+            if (lstPayroll == null || lstPayroll.Count == 0)
+            {
+                throw new Exception(lstSelectedPayrollRes?.Message[0] ?? "Bảng lương trống hoặc không tồn tại nhân viên để gửi phiếu");
+            }
 
-         
+            var lstEmail = new List<Email>();
 
-            var lstPayroll = lstSelectedPayrollRes.Metadata;
             foreach (var payroll in lstPayroll)
             {
+                var htmlAllowanceList = "";
+                foreach (var sc in lstAllowances)
+                {
+                    if (sc.Field.Contains("NOTAX")) continue;
+                    htmlAllowanceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.","")]);
+                }
 
+                var htmlBonusList = "";
+                foreach (var sc in lstBonus)
+                {
+                    htmlBonusList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                }
+
+                var htmlInsuranceList = "";
+                foreach (var sc in lstInsurance)
+                {
+                    htmlInsuranceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                }
+
+                var htmlITaxDeductionList = "";
+                foreach (var sc in lstTaxDeduction)
+                {
+                    htmlITaxDeductionList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                }
+
+                var htmlDeductionNoTaxList = "";
+                foreach (var sc in lstDeductionNoTax)
+                {
+                    htmlDeductionNoTaxList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                }
+
+
+                var bodyContentEmail = HandleFile.READ_FILE("Email", "Payslip.html")
+                 .Replace("{sentDate}", DateTime.Now.ToString("dd/MM/yyyy"))
+                 .Replace("{payPeriod}", $"Tháng {(int)period.Month} năm {period.Year}")
+                 .Replace("{employeeName}", payroll.EmployeeName)
+                 .Replace("{email}", payroll.Email)
+                 .Replace("{employeeId}", "NV-00" + payroll.EmployeeId)
+                 .Replace("{dateHired}", payroll.DateHired)
+                 .Replace("{positionName}", payroll.PositionName)
+                 .Replace("{departmentName}", payroll.DepartmentName)
+                 .Replace("{taxCode}", "102-231-322-123")
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldBaseSalary}" + "}", payroll.DynamicProperties[FieldBaseSalary].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldBaseWageHours}" + "}", payroll.DynamicProperties[FieldBaseWageHours].ToString("#,##0.00")+"/h")
+                 .Replace("{" + $"{FieldBaseHours}" + "}", payroll.DynamicProperties[FieldBaseHours].ToString())
+                 .Replace("{" + $"{FieldRealHours}" + "}", payroll.DynamicProperties[FieldRealHours].ToString())
+                 .Replace("{" + $"{FieldHourWageCheckout}" + "}", payroll.DynamicProperties[FieldHourWageCheckout].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldOtherBonus}" + "}", payroll.DynamicProperties[FieldOtherBonus].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldTotalTaxDeduction}" + "}", payroll.DynamicProperties[FieldTotalTaxDeduction].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldTaxCheckout}" + "}", payroll.DynamicProperties[FieldTaxCheckout].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldTotalAdvance}" + "}", payroll.DynamicProperties[FieldTotalAdvance].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldOtherDeduction}" + "}", payroll.DynamicProperties[FieldRealHours].ToString("#,##0.00"))
+                 .Replace("{" + $"{Fieldnet}" + "}", payroll.DynamicProperties[Fieldnet].ToString("#,##0.00"))
+                 .Replace("{allowanceList}", htmlAllowanceList)
+                 .Replace("{bonusList}", htmlBonusList)
+                 .Replace("{insuranceList}", htmlInsuranceList)
+                 .Replace("{taxDeductionList}", htmlITaxDeductionList)
+                 .Replace("{deductionNoTaxList}", htmlDeductionNoTaxList)
+                 .Replace("{bonusNoTaxList}", "");
+                var bodyEmail = _emailService.TemplateContent
+                                .Replace("<main>", "")
+                                .Replace("/<main>", "")
+                                .Replace("{content}", bodyContentEmail);
+
+                var email = new Email()
+                {
+                    To = payroll.Email,
+                    Body = bodyEmail,
+                    Subject = $"[HRM] - PHIẾU LƯƠNG THÁNG {period.Month} NĂM {period.Year}"
+                };
+                lstEmail.Add(email);
+
+            }
+
+            foreach (var email in lstEmail)
+            {
+                await _emailService.SendEmailToRecipient(email);
             }
         }
         catch (Exception)
@@ -310,12 +406,25 @@ public class PayrollsService : IPayrollsService
 
             throw;
         }
-        
+
         return new ApiResponse<bool>()
         {
             IsSuccess = true,
             Metadata = true
         };
+    }
+
+    private string getTemplateSCHtml(DynamicColumn column, double value)
+    {
+        var res = @$"<div class=""entry"" style=""display: flex; justify-content: space-between; margin-bottom: 6px;"">
+                            <div class=""label"" style=""font-weight: 700; width: 120px;""></div>
+                            <div class=""detail"" style=""font-weight: 600; width: 130px;"">{column.Header}</div>
+                            <div class=""rate"" style=""font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;""></div>
+                            <div class="""" style=""text-align: right; width: 170px;"">{value.ToString("#,##0.00")}</div>
+                        </div>";
+        
+
+        return res;
     }
 
     #endregion
@@ -1418,7 +1527,7 @@ public class PayrollsService : IPayrollsService
             {
                 payrollByPeriod = await _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month).ToListAsync();
             }
-           
+
             var lstContractIds = payrollByPeriod.Select(x => x.ContractId).ToList(); ;
             var lstEmployeeIds = payrollByPeriod.Select(x => x.EmployeeId).ToList(); ;
             var lstPayrollIds = payrollByPeriod.Select(x => x.Id).ToList();
@@ -1452,6 +1561,8 @@ public class PayrollsService : IPayrollsService
                                     PositionName = p.Name,
                                     Email = e.Email,
                                     PhoneNumber = e.PhoneNumber,
+                                    DateHired = c.StartDate.ToString("dd/MM/yyyy"),
+                                    EmployeeId = "NV-00"+e.Id,
 
                                     BaseSalary = c.ContractSalary != null ? c.ContractSalary.BaseSalary : 0,
                                     BaseInsurance = c.ContractSalary != null ? c.ContractSalary.BaseInsurance : 0,
@@ -1488,6 +1599,7 @@ public class PayrollsService : IPayrollsService
                 tableRow.PositionName = selectedEmployee?.PositionName ?? "Not found";
                 tableRow.Email = selectedEmployee?.Email ?? "undefined";
                 tableRow.PhoneNumber = selectedEmployee?.PhoneNumber ?? "undefined";
+                tableRow.DateHired = selectedEmployee?.DateHired ?? "undefined";
 
                 double totalTax = 0;
                 var stringFormulaAll = extractAllFormula(selectedFormula.Id, lstAllFormula);
@@ -2018,6 +2130,8 @@ public class PayrollsService : IPayrollsService
                  .Replace("{sentDate}", DateTime.Now.ToString("dd/MM/yyyy"))
                  .Replace("{payPeriod}", "Tháng 11 năm 2024")
                  .Replace("{employeeName}", "Nguyễn Thành Hưng")
+                 .Replace("{email}", "thanh.hung.st302@gmail.com")
+                 .Replace("{employeeId}", "NVF-001")
                  .Replace("{dateHired}", "10/10/2020")
                  .Replace("{positionName}", "Kĩ sư phần mềm")
                  .Replace("{departmentName}", "Phòng IT")
@@ -2036,9 +2150,9 @@ public class PayrollsService : IPayrollsService
                  .Replace("{" + $"{FieldOtherDeduction}" + "}", "400")
                  .Replace("{" + $"{Fieldnet}" + "}", "40000000000");
             var bodyEmail = _emailService.TemplateContent
-                        .Replace("<main>","")
-                         .Replace("/<main>", "")
-                       .Replace("{content}", bodyContentEmail);
+                            .Replace("<main>","")
+                            .Replace("/<main>", "")
+                            .Replace("{content}", bodyContentEmail);
 
             var email = new Email()
             {
@@ -2053,7 +2167,7 @@ public class PayrollsService : IPayrollsService
         {
             return e.Message;
         }
-        
+
 
     }
 

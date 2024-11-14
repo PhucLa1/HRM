@@ -5,14 +5,14 @@ using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
 using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
+using HRM.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-	[ApiVersion(1)]
+    [ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/testResults")]
 	[ApiController]
 	[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]

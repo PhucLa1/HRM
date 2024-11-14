@@ -45,9 +45,11 @@ namespace HRM.Data.Entities
     public enum ContractStatus
     {
         Expired = 1,
-        Valid = 2,
+        Valid = 2,// ca 2 da ky
         Canceled = 3,
-        Pending = 4
+        Pending = 4,// nhan vien moi tao
+        Approved = 5, //cong ty ky
+        Declined = 6, // quan ly tu choi ky
     }
     public enum TypeContract
     {

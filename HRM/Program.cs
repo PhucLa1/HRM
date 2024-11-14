@@ -14,6 +14,7 @@ using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
+using HRM.Services.Dashboard;
 using HRM.Services.Recruitment;
 using HRM.Services.RecruitmentManager;
 using HRM.Services.Salary;
@@ -96,6 +97,7 @@ builder.Services.AddScoped<IValidator<ContractUpsert>, ContractUpsertValidator>(
 builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationValidator>();
 builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
 builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
+builder.Services.AddScoped<IValidator<AccountUpdate>, AccountUpdateValidator>();
 #endregion
 
 
@@ -137,6 +139,7 @@ builder.Services.AddScoped<IJobPostingsService, JobPostingsService>();
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<IAdvancesService, AdvancesService>();
 builder.Services.AddScoped<ILeaveApplicationsService, LeaveApplicationsService>();
+builder.Services.AddScoped<IDashboardsService, DashboardsService>();
 builder.Services.AddScoped<IPayrollsService, PayrollsService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
