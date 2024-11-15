@@ -7,7 +7,6 @@ using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HRM.Services.User
 {
@@ -29,43 +28,128 @@ namespace HRM.Services.User
         Task<ApiResponse<bool>> AddEmployee(EmployeeUpsert employeeAdd);
         Task<ApiResponse<bool>> UpdateEmployee(int id, EmployeeUpsert employeeUpdate);
         Task<ApiResponse<bool>> RemoveEmployee(int id);
+        Task<ApiResponse<ProfileDetail>> GetCurrentProfileUser();
+        Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription();
     }
     public class EmployeesService : IEmployeesService
     {
         private readonly IBaseRepository<Employee> _employeeRepository;
+        private readonly IBaseRepository<ContractSalary> _contractSalaryRepository;
         private readonly IBaseRepository<EmployeeImage> _employeeImageRepository;
         private readonly IBaseRepository<Contract> _contractRepository;
 
+        private readonly IBaseRepository<Department> _departmentRepository;
+        private readonly IBaseRepository<Position> _positionRepository;
+        private readonly IBaseRepository<ContractType> _contractTypeRepository;
+        
         private readonly IValidator<FaceRegis> _faceRegisValidator;
         private readonly CompanySetting _serverCompanySetting;
         private const string FOLDER_EMPLOYEE_IMAGE = "Employee";
 
-        private readonly IBaseRepository<Department> _departmentRepository;
-        private readonly IBaseRepository<Position> _positionRepository;
         private readonly IBaseRepository<TaxDeductionDetails> _taxDeductionDetailsRepository;
         private readonly IValidator<EmployeeUpsert> _employeeUpsertValidator;
         public EmployeesService(
             IBaseRepository<Employee> employeeRepository,
             IBaseRepository<EmployeeImage> employeeImageRepository,
             IValidator<FaceRegis> faceRegisValidator,
-            HttpClient httpClient,
             IBaseRepository<Contract> contractRepository,
             IOptions<CompanySetting> serverCompanySetting,
+            IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository,
+
+            IBaseRepository<ContractSalary> contractSalaryRepository,
             IBaseRepository<Department> departmentRepository,
             IBaseRepository<Position> positionRepository,
-            IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository,
-            IValidator<EmployeeUpsert> employeeUpsertValidator)
+            IValidator<EmployeeUpsert> employeeUpsertValidator,
+            IBaseRepository<ContractType> contractTypeRepository)
         {
             _employeeRepository = employeeRepository;
             _employeeImageRepository = employeeImageRepository;
             _faceRegisValidator = faceRegisValidator;
             _contractRepository = contractRepository;
             _serverCompanySetting = serverCompanySetting.Value;
-
+            _taxDeductionDetailsRepository = taxDeductionDetailsRepository;
+            _contractSalaryRepository = contractSalaryRepository;
+            _positionRepository = positionRepository;
+            _departmentRepository = departmentRepository;
+            _contractTypeRepository = contractTypeRepository;
             _departmentRepository = departmentRepository;
             _positionRepository = positionRepository;
-            _taxDeductionDetailsRepository = taxDeductionDetailsRepository;
             _employeeUpsertValidator = employeeUpsertValidator;
+        }
+        public async Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription()
+        {
+            try
+            {
+                // Lấy tên , id employee và gộp descriptor vào thành 1 mảng
+                var labelEmployees = await (from em in _employeeRepository.GetAllQueryAble().Include(e => e.employeeImages)
+                                            join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                            select new LabelDescriptions
+                                            {
+                                                Id = em.Id,
+                                                Name = c.Name,
+                                                Descriptions =
+                                                em.employeeImages == null
+                                                ? new List<string>()
+                                                : em.employeeImages!.Select(e => e.Descriptor).ToList()!
+                                            })
+                                            .ToListAsync();
+
+                return new ApiResponse<List<LabelDescriptions>> { IsSuccess = true, Metadata = labelEmployees };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<ApiResponse<ProfileDetail>> GetCurrentProfileUser()
+        {
+            try
+            {
+                var currentId = _employeeRepository.Context.GetCurrentUserId();
+
+                var employeeProfile = await (from em in _employeeRepository.GetAllQueryAble()
+                                             join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                             join ct in _contractTypeRepository.GetAllQueryAble() on c.ContractTypeId equals ct.Id
+                                             join p in _positionRepository.GetAllQueryAble() on c.PositionId equals p.Id
+                                             join d in _departmentRepository.GetAllQueryAble() on p.DepartmentId equals d.Id
+                                             join cs in _contractSalaryRepository.GetAllQueryAble() on c.ContractSalaryId equals cs.Id
+                                             where em.Id == currentId
+                                             select new ProfileDetail
+                                             {
+                                                 UserName = em.UserName,
+                                                 Password = em.Password,
+                                                 Email = em.Email,
+                                                 TypeContract = c.TypeContract == TypeContract.Fulltime ? "FullTime" : "Partime",
+                                                 DepartmentName = d.Name,
+                                                 PositionName = p.Name,
+                                                 ContractTypeName = ct.Name,
+                                                 Name = c.Name,
+                                                 DOB = c.DateOfBirth,
+                                                 Address = c.Address,
+                                                 Gender = c.Gender == true ? "Nam" : "Nữ",
+                                                 Countryside = c.CountrySide,
+                                                 NationalId = c.NationalID,
+                                                 Level = c.Level,
+                                                 Major = c.Major,
+                                                 BaseSalary = cs.BaseSalary,
+                                                 BaseInsurance = cs.BaseInsurance,
+                                                 RequiredDays = cs.RequiredDays,
+                                                 RequiredHours = cs.RequiredHours,
+                                                 WageDaily = cs.WageDaily,
+                                                 WageHourly = cs.WageHourly,
+                                                 Factor = cs.Factor,
+                                                 FileUrlSigned = c.FileUrlSigned,
+                                                 FireUrlBase = c.FireUrlBase,
+                                             })
+                                             .FirstAsync();
+
+                return new ApiResponse<ProfileDetail> { Metadata = employeeProfile, IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
 
         public async Task<ApiResponse<bool>> UpdateFaceRegis(int employeeId, List<FaceRegisUpdate> faceRegisUpdates)
@@ -114,6 +198,7 @@ namespace HRM.Services.User
                     .Where(e => e.EmployeeId == id)
                     .Select(e => new FaceRegisResult
                     {
+                        Id = e.Id,
                         Url = _serverCompanySetting.CompanyHost + FOLDER_EMPLOYEE_IMAGE + "/" + e.Url,
                         StatusFaceTurn = e.StatusFaceTurn,
                         Descriptor = e.Descriptor,

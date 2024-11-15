@@ -73,6 +73,30 @@ namespace HRM.Apis.Controllers
         }
 
         /// <summary>
+        /// Update the whole contract?
+        /// </summary>
+        /// <response code="200">Return the api response when updated succesfully</response>
+        [HttpPut]
+        [Route("update-contract/{id}")]
+        public async Task<IActionResult> UpdateContract(int id, [FromBody] ContractUpsert contractUpdate)
+        {
+            return Ok(await _contractsService.UpdateContract(id, contractUpdate));
+        }
+
+        /// <summary>
+        /// Update advance status by id: just for role admin
+        /// </summary>
+        /// <response code="200">Return the api response when updated succesfully</response>
+        [HttpPut]
+        [Route("update-status/{id}/{status}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerRequestExample(typeof(AdvanceUpsert), typeof(AdvanceUpsert))]
+        public async Task<IActionResult> UpdateContractStatus(int id, ContractStatus status)
+        {
+            return Ok(await _contractsService.UpdateContractStatus(id, status));
+        }
+        
+        /// <summary>
         /// Delete a Contract in the company by id
         /// </summary>
         /// <response code="200">Return the api response </response>
@@ -82,6 +106,18 @@ namespace HRM.Apis.Controllers
         public async Task<IActionResult> RemoveContract(int id)
         {
             return Ok(await _contractsService.RemoveContract(id));
+        }
+
+        /// <summary>
+        /// Sign contract by employee
+        /// </summary>
+        /// <response code="200">Return status after signing the api response</response>
+        [HttpPost]
+        [Route("add-employee-signature/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> AddEmployeeSignature(int contractId, [FromForm] DigitalSignature signatureModel)
+        {
+            return Ok(await _contractsService.SignContract(contractId, signatureModel));
         }
     }
 }

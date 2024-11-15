@@ -1,7 +1,11 @@
-﻿using Aspose.Words;
+﻿extern alias BouncyCastleOrg;
+using BouncyCastleOrg::Org.BouncyCastle.Crypto;
+using BouncyCastleOrg::Org.BouncyCastle.Pkcs;
+using BouncyCastleOrg::Org.BouncyCastle.X509;
+
+using Aspose.Words;
 using AutoMapper;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using FluentValidation;
 using HRM.Data.Entities;
 using HRM.Repositories.Base;
@@ -10,11 +14,19 @@ using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.User;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
+
 using AsposeDocument = Aspose.Words.Document;
 using Body = DocumentFormat.OpenXml.Wordprocessing.Body;
 using Position = HRM.Data.Entities.Position;
+using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
+using DocumentFormat.OpenXml.Office2010.Excel;
+
 namespace HRM.Services.Briefcase
 {
     public interface IContractsService
@@ -24,7 +36,9 @@ namespace HRM.Services.Briefcase
         Task<ApiResponse<bool>> CreateNewContract(int applicantId, ContractAdd contractAdd);
         Task<ApiResponse<bool>> RemoveContract(int id);
         Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate);
-        Task<ApiResponse<bool>> SignContract();
+        Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate);
+        Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status);
+        Task<ApiResponse<bool>> SignContract(int contractId, DigitalSignature signatureModel);
     }
     public class ContractsService : IContractsService
     {
@@ -177,7 +191,7 @@ namespace HRM.Services.Briefcase
                     ContractTypeId = contractAdd.ContractTypeId,
                     StartDate = contractAdd.StartDate,
                     EndDate = contractAdd.EndDate,
-                    CompanySignStatus = CompanySignStatus.Signed,
+                    CompanySignStatus = CompanySignStatus.NotSigned,
                     TypeContract = contractAdd.TypeContract,
                     PositionId = contractAdd.PositionId,
                     Name = contractAdd.Name,
@@ -274,9 +288,15 @@ namespace HRM.Services.Briefcase
                             ContractTypeId = contractAdd.ContractTypeId,
                             StartDate = contractAdd.StartDate,
                             EndDate = contractAdd.EndDate,
-                            CompanySignStatus = CompanySignStatus.Signed,
-                            TypeContract = contractAdd.TypeContract,
+                            CompanySignStatus = CompanySignStatus.NotSigned,
+                            EmployeeSignStatus = EmployeeSignStatus.NotSigned, // Chờ nhân viên kí
+                            TypeContract = contractAdd.TypeContract, 
+                            ContractStatus = ContractStatus.Pending // Chờ duyệt
                         };
+                        // 0 Chờ duyệt. ContractStatus: Pending : đã xong giao diện, api
+                        // 1 Manager duyệt. ContractStatus: Pending, CompanySignStatus =  CompanySignStatus.Signed,// Làm đến bước này
+                        // 2 Employee kí. ContractStatus: Valid,  EmployeeSignStatus = EmployeeSignStatus.Signed,
+
 
                         // Thêm trường position vào
                         contract.PositionId = applicant.PositionId;
@@ -314,11 +334,11 @@ namespace HRM.Services.Briefcase
                 }
 
 
-                /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
-                 và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
-                */
+            /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
+             và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
+            */
 
-
+                //linkWebsite: HttpClient:/localhoset... employee - shared / emnployee - information / id
                 var bodyContentEmail = HandleFile.READ_FILE(FOLER, CONTRACT_NOTIFICATION_FILE)
                     .Replace("{applicantName}", applicant.Name)
                     .Replace("{linkWebsite}", "https://www.youtube.com/watch?v=PRKYGpc44R0&list=RDMMmkRZ625Pvok&index=14")
@@ -341,6 +361,128 @@ namespace HRM.Services.Briefcase
                 throw new Exception(ex.InnerException?.Message);
             }
         }
+
+        public async Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate)
+        {
+            try
+            {
+                var resultValidation = _contractUpsertValidator.Validate(contractUpdate);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+
+                // Retrieve the existing contract
+                var contract = await _contractRepository
+                    .GetAllQueryAble()
+                    .Include(e => e.ContractAllowances)
+                    .Include(e => e.Position)
+                    .Include(e => e.ContractSalary)
+                    .Where(e => e.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if (contract == null)
+                {
+                    throw new Exception("Contract not found.");
+                }
+
+                // Update the contract properties
+                contract.Name = contractUpdate.Name;
+                contract.DateOfBirth = contractUpdate.DateOfBirth;
+                contract.Gender = contractUpdate.Gender;
+                contract.Address = contractUpdate.Address;
+                contract.CountrySide = contractUpdate.CountrySide;
+                contract.NationalID = contractUpdate.NationalID;
+                contract.NationalStartDate = contractUpdate.NationalStartDate;
+                contract.NationalAddress = contractUpdate.NationalAddress;
+                contract.Level = contractUpdate.Level;
+                contract.Major = contractUpdate.Major;
+                contract.ContractSalaryId = contractUpdate.ContractSalaryId;
+                contract.ContractTypeId = contractUpdate.ContractTypeId;
+                contract.StartDate = contractUpdate.StartDate;
+                contract.EndDate = contractUpdate.EndDate;
+                contract.TypeContract = contractUpdate.TypeContract;
+                contract.PositionId = contractUpdate.PositionId;
+
+                using (var transaction = await _contractRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        // Update allowances
+                        contract.ContractAllowances.Clear();
+                        if (contractUpdate.AllowanceIds != null)
+                        {
+                            foreach (var allowanceId in contractUpdate.AllowanceIds)
+                            {
+                                contract.ContractAllowances.Add(new ContractAllowance
+                                {
+                                    ContractId = contract.Id,
+                                    AllowanceId = allowanceId
+                                });
+                            }
+                        }
+
+                        // Update insurances
+                        var contractInsurances = new List<ContractInsurance>();
+                        if (contractUpdate.InsuranceIds != null)
+                        {
+                            foreach (var insuranceId in contractUpdate.InsuranceIds)
+                            {
+                                contractInsurances.Add(new ContractInsurance
+                                {
+                                    ContractId = contract.Id,
+                                    InsuranceId = insuranceId
+                                });
+                            }
+                            await _contractInsuranceRepository.AddRangeAsync(contractInsurances);
+                            await _contractInsuranceRepository.SaveChangeAsync();
+                        }
+
+                        _contractRepository.Update(contract);
+                        await _contractRepository.SaveChangeAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception("Transaction failed: " + ex.Message);
+                    }
+                }
+
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Update failed: " + ex.Message);
+            }
+        }
+
+        public async Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status)
+        {
+            try
+            {
+                var selectedContract = await _contractRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+                if (selectedContract == null)
+                {
+                    return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { "Không tìm thấy " } };
+
+                }
+                selectedContract.ContractStatus = status;
+                _contractRepository.Update(selectedContract);
+                await _contractRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool>()
+                {
+                    IsSuccess = false,
+                    Message = new List<string>() { ex.Message }
+                };
+            }
+        }
+
 
         public async Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate)
         {
@@ -536,9 +678,84 @@ namespace HRM.Services.Briefcase
             }
         }
 
-        public Task<ApiResponse<bool>> SignContract()
+        public async Task<ApiResponse<bool>> SignContract(int contractId,DigitalSignature signatureModel)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Kiểm tra xem file có hợp lệ không
+                if (signatureModel.CertificateFile == null || signatureModel.CertificateFile.Length == 0)
+                {
+                    throw new Exception("File chứng thư không được trống!");
+                }
+
+                var selectedContract = await _contractRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == contractId);
+                if (selectedContract == null) throw new Exception("Không tìm thấy hợp đồng tương ứng!");
+
+                // Step 2: Load PDF Document
+                var contractFileName = $"{selectedContract.Name}-hop-dong-so-{selectedContract.Id}";
+                var fileURLRaw = $"{Directory.GetCurrentDirectory()}/wwwroot/Contract/{contractFileName}";
+                string pdfFilePath = $"{fileURLRaw}.pdf";
+                PdfReader pdfReader = new PdfReader(pdfFilePath);
+
+                // Step 3: Load PFX Certificate
+                var cerFile = signatureModel.CertificateFile.OpenReadStream();
+                var pfxKeyStore = new Pkcs12Store(cerFile, signatureModel.Password.ToCharArray());
+
+                // Step 4: Initialize the PDF Stamper And Creating the Signature Appearance
+                Stream fileStream = new FileStream($"{fileURLRaw}_signed.pdf", FileMode.Create);
+                PdfStamper pdfStamper = PdfStamper.CreateSignature(pdfReader, fileStream, '\0', null, true);
+
+                PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
+                signatureAppearance.SignDate = DateTime.Now;
+                signatureAppearance.Reason = signatureModel.Reason;
+               // signatureAppearance.Location = signatureModel.Location;
+
+                if (signatureModel.SignatureImageFile != null && signatureModel.SignatureImageFile.Length != 0)
+                {
+                    signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION;
+                    signatureAppearance.SignatureGraphic = Image.GetInstance(signatureModel.SignatureImageFile.OpenReadStream());
+                }
+
+                // Set the signature appearance location (in points)
+                float x = 360;
+                float y = 530;
+                float width = 200; // Width of the signature rectangle
+                float height = 100; // Height of the signature rectangle
+                int page = 5;
+                signatureAppearance.Acro6Layers = false;
+                //signatureAppearance.Layer4Text = PdfSignatureAppearance.questionMark;
+                signatureAppearance.Layer4Text = "Signature valid";
+
+                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature");
+
+                // Step 5: Sign the Document
+                string alias = pfxKeyStore.Aliases.Cast<string>().FirstOrDefault(entryAlias => pfxKeyStore.IsKeyEntry(entryAlias));
+
+                if (alias != null)
+                {
+                    ICipherParameters privateKey = pfxKeyStore.GetKey(alias).Key;
+                    IExternalSignature pks = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256);
+                    MakeSignature.SignDetached(signatureAppearance, pks, new X509Certificate[] { pfxKeyStore.GetCertificate(alias).Certificate }, null, null, null, 0, CryptoStandard.CMS);
+                }
+                else
+                {
+                    throw new Exception("Private key not found in the PFX certificate.");
+                }
+
+                // Step 6: Save the Signed PDF
+                pdfStamper.Close();
+
+                selectedContract.FileUrlSigned = contractFileName + "_signed.pdf";
+                _contractRepository.Update(selectedContract);
+                await _contractRepository.SaveChangeAsync();
+
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<bool>() { IsSuccess = false, Message = new List<string>() { e.Message } };
+            }
         }
+
     }
 }

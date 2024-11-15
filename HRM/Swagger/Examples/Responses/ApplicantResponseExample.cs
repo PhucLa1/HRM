@@ -1,4 +1,5 @@
-﻿using HRM.Repositories.Dtos.Results;
+﻿using HRM.Data.Entities;
+using HRM.Repositories.Dtos.Results;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Swagger.Examples.Responses
@@ -23,7 +24,8 @@ namespace HRM.Apis.Swagger.Examples.Responses
 						Rate = 4.5,
 						TestId = 1,
 						TestName = "Full Stack Developer Test",
-						InterviewerName = "Jane Doe"
+						InterviewerName = "Jane Doe",
+						Status = ApplicantStatus.Wait,
 					}
 				},
 				IsSuccess = true,

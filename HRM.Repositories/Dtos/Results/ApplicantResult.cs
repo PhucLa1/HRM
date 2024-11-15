@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HRM.Data.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,6 @@ namespace HRM.Repositories.Dtos.Results
 		public int? TestId { get; set; }
 		public string? TestName { get; set; }
 		public string? InterviewerName { get; set; }
+		public ApplicantStatus Status { get; set; }
 	}
 }

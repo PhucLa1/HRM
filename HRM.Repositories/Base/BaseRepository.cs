@@ -1,4 +1,5 @@
 ﻿using HRM.Data.Data;
+using HRM.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRM.Repositories.Base
@@ -62,7 +63,7 @@ namespace HRM.Repositories.Base
         }
         public void RemoveRange(IEnumerable<T> entities)
         {
-             _dbSet.RemoveRange(entities);
+            _dbSet.RemoveRange(entities);
         }
 
         public void RemoveRangeByEntitiesAsync(List<T> entities)
@@ -86,6 +87,11 @@ namespace HRM.Repositories.Base
         public void UpdateMany(IEnumerable<T> entities)
         {
             _dbSet.UpdateRange(entities);
+        }
+
+        public object Join(DbSet<Contract> contracts, Func<object, object> value1, Func<Contract, int> value2, Func<object, object, object> value3)
+        {
+            throw new NotImplementedException();
         }
     }
 }

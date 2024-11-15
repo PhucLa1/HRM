@@ -1,4 +1,6 @@
 ﻿using HRM.Data.Data;
+using HRM.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRM.Repositories.Base
 {
@@ -19,5 +21,6 @@ namespace HRM.Repositories.Base
         Task<List<T>> CallStoredProcedureAsync(string storedProcedure, params object[] parameters);
         Task<T> CallStoredProcedureAsyncDetail(string storedProcedure, params object[] parameters);
         Task<int> ExecuteStoredProcedureAsync(string storedProcedure, params object[] parameters);
+        object Join(DbSet<Contract> contracts, Func<object, object> value1, Func<Contract, int> value2, Func<object, object, object> value3);
     }
 }
