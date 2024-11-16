@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using HRM.Data.Entities;
+using HRM.Repositories.Dtos.Models;
 
 namespace HRM.Controllers
 {
@@ -31,6 +32,49 @@ namespace HRM.Controllers
             return Ok(await _dashboardsService.GetEmployeeCountByBaseSalary());
         }
 
+
+        /// <summary>
+        /// Get all page flexible dashboard
+        /// </summary>
+        /// <response code="200">Returnall page flexible dashboard in the metadata of api response</response>
+        [HttpGet("all-flexible-dashboards")]
+        public async Task<IActionResult> GetAllFlexibleDashboard()
+        {
+            return Ok(await _dashboardsService.GetAllFlexibleDashboard());
+        }
+
+        /// <summary>
+        /// Add new flexible dashboard
+        /// </summary>
+        [HttpPost("create-flexible-dashboards")]
+        public async Task<IActionResult> CreateNewPageFlexibleDashboard()
+        {
+            return Ok(await _dashboardsService.CreateNewPageFlexibleDashboard());
+        }
+
+
+        /// <summary>
+        /// Add new chart in flexible dashboard
+        /// </summary>
+        [HttpPost("charts")]
+        public async Task<IActionResult> CreateNewChart([FromBody] ChartUpsert chartAdd)
+        {
+            return Ok(await _dashboardsService.CreateNewChart(chartAdd));
+        }
+
+
+        /// <summary>
+        /// Get all charts by page id
+        /// </summary>
+        /// <response code="200">Return all charts by page id in the metadata of api response</response>
+        [HttpGet("{pageId}/charts")]
+        public async Task<IActionResult> GetAllChartByPageFlexibleId(int pageId)
+        {
+            return Ok(await _dashboardsService.GetAllChartByPageFlexibleId(pageId));
+        }
+
+
+
         /// <summary>
         /// Get job posting count
         /// </summary>
@@ -41,6 +85,8 @@ namespace HRM.Controllers
             return Ok(await _dashboardsService.GetJobPostingCount());
         }
 
+
+
         /// <summary>
         /// Get all applicant count by position
         /// </summary>
@@ -50,6 +96,10 @@ namespace HRM.Controllers
         {
             return Ok(await _dashboardsService.GetApplicantForPosition());
         }
+
+
+
+
 
         /// <summary>
         /// Get applicant count
@@ -88,7 +138,15 @@ namespace HRM.Controllers
         [HttpGet("advances-by-pay-period")]
         public async Task<IActionResult> GetAdvancesByPayPeriod(string start, string end)
         {
-            return Ok(await _dashboardsService.GetAdvanceCountByPeriod(start, end));            
+            return Ok(await _dashboardsService.GetAdvanceCountByPeriod(start, end));
+        }
+
+
+
+        [HttpGet("flexible-dashboard")]
+        public async Task<IActionResult> FlexibleDashboard()
+        {
+            return Ok(await _dashboardsService.FlexibleDashboard());
         }
     }
 }

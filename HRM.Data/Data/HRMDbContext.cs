@@ -130,6 +130,8 @@ namespace HRM.Data.Data
         public DbSet<Web> Webs { get; set; }
         public DbSet<EmployeeImage> EmployeeImages { get; set; }
         public DbSet<PayrollHistory> PayrollHistories { get; set; }
+        public DbSet<PageFlexibleDashboard> PageFlexibleDashboards { get; set; }
+        public DbSet<Chart> Charts { get; set; }
 
     }
 }

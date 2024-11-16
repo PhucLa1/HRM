@@ -37,15 +37,13 @@ namespace HRM.Services.User
         private readonly IBaseRepository<ContractSalary> _contractSalaryRepository;
         private readonly IBaseRepository<EmployeeImage> _employeeImageRepository;
         private readonly IBaseRepository<Contract> _contractRepository;
-
         private readonly IBaseRepository<Department> _departmentRepository;
         private readonly IBaseRepository<Position> _positionRepository;
         private readonly IBaseRepository<ContractType> _contractTypeRepository;
-        
         private readonly IValidator<FaceRegis> _faceRegisValidator;
         private readonly CompanySetting _serverCompanySetting;
         private const string FOLDER_EMPLOYEE_IMAGE = "Employee";
-
+        private const string FOLDER_CV_NAME = "CV";
         private readonly IBaseRepository<TaxDeductionDetails> _taxDeductionDetailsRepository;
         private readonly IValidator<EmployeeUpsert> _employeeUpsertValidator;
         public EmployeesService(
@@ -55,7 +53,6 @@ namespace HRM.Services.User
             IBaseRepository<Contract> contractRepository,
             IOptions<CompanySetting> serverCompanySetting,
             IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository,
-
             IBaseRepository<ContractSalary> contractSalaryRepository,
             IBaseRepository<Department> departmentRepository,
             IBaseRepository<Position> positionRepository,
@@ -83,14 +80,12 @@ namespace HRM.Services.User
                 // Lấy tên , id employee và gộp descriptor vào thành 1 mảng
                 var labelEmployees = await (from em in _employeeRepository.GetAllQueryAble().Include(e => e.employeeImages)
                                             join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                            where em.employeeImages!.Select(e => e.Descriptor).ToList()!.Count > 0
                                             select new LabelDescriptions
                                             {
                                                 Id = em.Id,
                                                 Name = c.Name,
-                                                Descriptions =
-                                                em.employeeImages == null
-                                                ? new List<string>()
-                                                : em.employeeImages!.Select(e => e.Descriptor).ToList()!
+                                                Descriptions = em.employeeImages!.Select(e => e.Descriptor).ToList()!
                                             })
                                             .ToListAsync();
 
@@ -138,6 +133,7 @@ namespace HRM.Services.User
                                                  WageDaily = cs.WageDaily,
                                                  WageHourly = cs.WageHourly,
                                                  Factor = cs.Factor,
+                                                 
                                                  FileUrlSigned = c.FileUrlSigned,
                                                  FireUrlBase = c.FireUrlBase,
                                                  ContractId = c.Id,
