@@ -116,6 +116,21 @@ namespace HRM.Apis.Controllers
             return Ok(await _workShiftService.GetAllWorkShiftByPartimeEmployee(employeeId, startDate, endDate));
         }
 
+
+        /// <summary>
+        /// Get all work shift by employee id - (yyyy-mm-dd)
+        /// </summary>
+        /// <response code="200">Return the api response</response>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<TotalWorkHours>>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(TotalWorkHoursResponseExample))]
+        [HttpPost]
+        [Route("get-total-work-hours")]
+        public async Task<IActionResult> GetAllWorkHoursTotal([FromBody] List<int> employeeIds, string startDate, string endDate)
+        {
+            return Ok(await _workShiftService.GetTotalHoursOfEmployeeWork(employeeIds, startDate, endDate));
+        }
+
+
         /// <summary>
         /// Get all history result by employee id - (yyyy-mm-dd) - fulltime
         /// </summary>

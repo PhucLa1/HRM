@@ -10,8 +10,6 @@ using HRM.Data.Jwt;
 using HRM.Repositories;
 using HRM.Repositories.Base;
 using HRM.Repositories.Dtos.Models;
-using HRM.Repositories.Dtos.Results;
-using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.Briefcase;
 using HRM.Services.Dashboard;
@@ -26,7 +24,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
-using System.Configuration;
 using System.Reflection;
 using System.Text;
 
@@ -98,6 +95,7 @@ builder.Services.AddScoped<IValidator<LeaveApplicationUpSert>, LeaveApplicationV
 builder.Services.AddScoped<IValidator<ApplicantUpsert>, ApplicantUpsertValidator>();
 builder.Services.AddScoped<IValidator<TestResultUpsert>, TestResultUpsertValidator>();
 builder.Services.AddScoped<IValidator<AccountUpdate>, AccountUpdateValidator>();
+builder.Services.AddScoped<IValidator<ChartUpsert>, ChartUpsertValidator>();
 #endregion
 
 
@@ -148,9 +146,8 @@ builder.Services.AddScoped<IRecruitmentWebsService, RecruitmentWebsService>();
 builder.Services.AddScoped<ILinkedInPostService, LinkedinPostsService>();
 builder.Services.AddScoped<IApplicantsService, ApplicantsService>();
 builder.Services.AddScoped<ITestResultsService, TestResultsService>();
+
 #endregion
-
-
 
 #region + Mapper
 
