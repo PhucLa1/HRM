@@ -107,5 +107,17 @@ namespace HRM.Apis.Controllers
         {
             return Ok(await _contractsService.RemoveContract(id));
         }
+
+        /// <summary>
+        /// Sign contract by employee
+        /// </summary>
+        /// <response code="200">Return status after signing the api response</response>
+        [HttpPost]
+        [Route("add-employee-signature/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> AddEmployeeSignature(int contractId, [FromForm] DigitalSignature signatureModel)
+        {
+            return Ok(await _contractsService.SignContract(contractId, signatureModel));
+        }
     }
 }

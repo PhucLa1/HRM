@@ -19,7 +19,15 @@ namespace HRM.Services.User
         Task<ApiResponse<bool>> RegistrationFace(int employeeId, List<FaceRegis> faceRegises);
         Task<ApiResponse<List<FaceRegisResult>>> GetAllFaceRegisByEmployeeId(int id);
         Task<ApiResponse<bool>> UpdateFaceRegis(int employeeId, List<FaceRegisUpdate> faceRegisUpdates);
+        
+        //employee crud
         Task<ApiResponse<IEnumerable<EmployeeResult>>> GetAllEmployee();
+        Task<ApiResponse<EmployeeResult>> GetEmployeeInfoByContract(int contractId);
+        Task<ApiResponse<IEnumerable<int>>> GetContractIdsNotInUsed();
+
+        Task<ApiResponse<bool>> AddEmployee(EmployeeUpsert employeeAdd);
+        Task<ApiResponse<bool>> UpdateEmployee(int id, EmployeeUpsert employeeUpdate);
+        Task<ApiResponse<bool>> RemoveEmployee(int id);
         Task<ApiResponse<ProfileDetail>> GetCurrentProfileUser();
         Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription();
     }
@@ -37,6 +45,7 @@ namespace HRM.Services.User
         private const string FOLDER_EMPLOYEE_IMAGE = "Employee";
         private const string FOLDER_CV_NAME = "CV";
         private readonly IBaseRepository<TaxDeductionDetails> _taxDeductionDetailsRepository;
+        private readonly IValidator<EmployeeUpsert> _employeeUpsertValidator;
         public EmployeesService(
             IBaseRepository<Employee> employeeRepository,
             IBaseRepository<EmployeeImage> employeeImageRepository,
@@ -47,6 +56,7 @@ namespace HRM.Services.User
             IBaseRepository<ContractSalary> contractSalaryRepository,
             IBaseRepository<Department> departmentRepository,
             IBaseRepository<Position> positionRepository,
+            IValidator<EmployeeUpsert> employeeUpsertValidator,
             IBaseRepository<ContractType> contractTypeRepository)
         {
             _employeeRepository = employeeRepository;
@@ -59,6 +69,9 @@ namespace HRM.Services.User
             _positionRepository = positionRepository;
             _departmentRepository = departmentRepository;
             _contractTypeRepository = contractTypeRepository;
+            _departmentRepository = departmentRepository;
+            _positionRepository = positionRepository;
+            _employeeUpsertValidator = employeeUpsertValidator;
         }
         public async Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription()
         {
@@ -120,8 +133,11 @@ namespace HRM.Services.User
                                                  WageDaily = cs.WageDaily,
                                                  WageHourly = cs.WageHourly,
                                                  Factor = cs.Factor,
-                                                 FileUrlSigned = _serverCompanySetting.CompanyHost + "/" + FOLDER_CV_NAME + "/" + c.FileUrlSigned,
-                                                 FireUrlBase = _serverCompanySetting.CompanyHost + "/" + FOLDER_CV_NAME + "/" + c.FireUrlBase,
+                                                 
+                                                 FileUrlSigned = c.FileUrlSigned,
+                                                 FireUrlBase = c.FireUrlBase,
+                                                 ContractId = c.Id,
+                                                 EmployeeSignStatus = c.EmployeeSignStatus
                                              })
                                              .FirstAsync();
 
@@ -131,6 +147,7 @@ namespace HRM.Services.User
             {
                 throw new Exception(ex.Message);
             }
+
         }
 
         public async Task<ApiResponse<bool>> UpdateFaceRegis(int employeeId, List<FaceRegisUpdate> faceRegisUpdates)
@@ -248,36 +265,52 @@ namespace HRM.Services.User
                 throw new Exception(ex.Message);
             }
         }
+
+
         public async Task<ApiResponse<IEnumerable<EmployeeResult>>> GetAllEmployee()
         {
             try
             {
+                var allTaxDeductionDetails = _taxDeductionDetailsRepository.GetAllQueryAble();
+                var employeeInfo = (from e in _employeeRepository.GetAllQueryAble()
+                                    join c in _contractRepository.GetAllQueryAble() on e.ContractId equals c.Id into empGroup
+                                    from c in empGroup.DefaultIfEmpty()
+                                    join p in _positionRepository.GetAllQueryAble() on c.PositionId equals p.Id into contractGroup
+                                    from p in contractGroup.DefaultIfEmpty()
+                                    join d in _departmentRepository.GetAllQueryAble() on p.DepartmentId equals d.Id into positonGroup
+                                    from d in positonGroup.DefaultIfEmpty()
+                                    select new EmployeeResult
+                                    {
+                                        Id = e.Id,
+                                        ContractId = c.Id,
+                                        Name = c.Name,
+                                        DepartmentName = d.Name,
+                                        PositionName = p.Name,
+                                        Email = e.Email,
+                                        PhoneNumber = e.PhoneNumber,
+                                        DateOfBirth = c.DateOfBirth,
+                                        Age = DateTime.Now.Year - c.DateOfBirth.Year - (DateTime.Now.DayOfYear < c.DateOfBirth.DayOfYear ? 1 : 0), // Tính tuổi
+                                        Gender = c.Gender,
+                                        Tenure = DateTime.Now.Year - c.StartDate.Year - (DateTime.Now.DayOfYear < c.StartDate.DayOfYear ? 1 : 0), // Tính thâm niên
+                                        Address = c.Address,
+                                        CountrySide = c.CountrySide,
+                                        NationalID = c.NationalID,
+                                        NationalStartDate = c.NationalStartDate,
+                                        NationalAddress = c.NationalAddress,
+                                        Level = c.Level,
+                                        Major = c.Major,
+                                        PositionId = c.PositionId,
+                                        DepartmentId = d.Id,
 
+                                        TaxDeductionIds = allTaxDeductionDetails.Where(x=>x.EmployeeId == e.Id).Select(x=>x.TaxDeductionId).ToList(),
+                                        UserName = e.UserName??"undefined",
+                                        Password = "?????????"
+                                        
+                                    }).ToList();
                 return new ApiResponse<IEnumerable<EmployeeResult>>
                 {
 
-                    Metadata = await _employeeRepository.GetAllQueryAble().Select(e => new EmployeeResult
-                    {
-                        Id = e.Id,
-                        Name = e.Contract!.Name!,
-                        DateOfBirth = e.Contract.DateOfBirth,
-                        Age = DateTime.Now.Year - e.Contract.DateOfBirth.Year
-                                 - (DateTime.Now.DayOfYear < e.Contract.DateOfBirth.DayOfYear ? 1 : 0), // Tính tuổi
-                        Gender = e.Contract.Gender,
-                        Tenure = DateTime.Now.Year - e.Contract.StartDate.Year
-                         - (DateTime.Now.DayOfYear < e.Contract.StartDate.DayOfYear ? 1 : 0), // Tính thâm niên
-                        Address = e.Contract.Address!,
-                        CountrySide = e.Contract.CountrySide!,
-                        NationalID = e.Contract.NationalID!,
-                        NationalStartDate = e.Contract.NationalStartDate,
-                        NationalAddress = e.Contract.NationalAddress!,
-                        Level = e.Contract.Level!,
-                        Major = e.Contract.Major!,
-                        PositionName = e.Contract.Position!.Name,
-                        PositionId = e.Contract.PositionId,
-                        PhoneNumber = e.PhoneNumber!,
-                        Email = e.Email!
-                    }).ToListAsync(),
+                    Metadata = employeeInfo,
                     IsSuccess = true
 
                 };
@@ -285,6 +318,258 @@ namespace HRM.Services.User
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+        public async Task<ApiResponse<EmployeeResult>> GetEmployeeInfoByContract(int contractId)
+        {       
+            try
+            {
+                var selectedContract = await _contractRepository.GetAllQueryAble().Where(x => x.Id == contractId).FirstOrDefaultAsync();
+                if (selectedContract == null) throw new Exception("Không tìm thấy thoog tin hợp đồng!");
+                var selectedPosition = await _positionRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == selectedContract.PositionId);
+                var department = await _departmentRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == selectedPosition.DepartmentId);
+                var employeeInfor = new EmployeeResult
+                {
+                    ContractId = selectedContract.Id,
+                    Name = selectedContract.Name??"",
+                    DepartmentName = department?.Name??"Không có phòng ban",
+                    PositionName = selectedPosition?.Name??"Không chức vị",
+                    DateOfBirth = selectedContract.DateOfBirth,
+                    Age = DateTime.Now.Year - selectedContract.DateOfBirth.Year - (DateTime.Now.DayOfYear < selectedContract.DateOfBirth.DayOfYear ? 1 : 0), // Tính tuổi
+                    Gender = selectedContract.Gender,
+                    Tenure = DateTime.Now.Year - selectedContract.StartDate.Year - (DateTime.Now.DayOfYear < selectedContract.StartDate.DayOfYear ? 1 : 0), // Tính thâm niên
+                    Address = selectedContract.Address??"",
+                    CountrySide = selectedContract.CountrySide??"",
+                    NationalID = selectedContract.NationalID??"",
+                    NationalStartDate = selectedContract.NationalStartDate,
+                    NationalAddress = selectedContract.NationalAddress??"",
+                    Level = selectedContract.Level??"",
+                    Major = selectedContract.Major??"",
+                    PositionId = selectedPosition.Id,
+                    DepartmentId = department?.Id??0,
+                    Password = "?????????"
+
+                };
+                return new ApiResponse<EmployeeResult> { IsSuccess = true, Metadata = employeeInfor };
+            }
+            catch (Exception ex)
+            {
+
+                return new ApiResponse<EmployeeResult> { IsSuccess = false, Message = new List<string>() { ex.Message }, Metadata = null };
+            }
+        }
+        public async Task<ApiResponse<IEnumerable<int>>> GetContractIdsNotInUsed()
+        {
+            try
+            {
+                var lstContractIdInused = await _employeeRepository.GetAllQueryAble().Select(x=>x.ContractId).ToListAsync();
+                var lstContractNOTInUsed = await _contractRepository.GetAllQueryAble().Where(x=> !lstContractIdInused.Contains(x.Id)).Select(x => x.Id).ToListAsync();
+                return new ApiResponse<IEnumerable<int>>
+                {
+                    Metadata = lstContractNOTInUsed,
+                    IsSuccess = true
+
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<IEnumerable<int>> { IsSuccess = false, Message = new List<string>() { ex.Message }, Metadata = new List<int>() };
+            }
+        }
+        public async Task<ApiResponse<bool>> AddEmployee(EmployeeUpsert employeeAdd)
+        {
+            try
+            {
+                var resultValidation = _employeeUpsertValidator.Validate(employeeAdd);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+
+                var allEmployee = await _employeeRepository.GetAllQueryAble().ToListAsync();
+
+                //Check contract in used by other
+                if (allEmployee.Any(x => x.ContractId == employeeAdd.ContractId))
+                {
+                    throw new Exception("Hợp đồng không hợp lệ (do đã có người khác sử dụng)");
+                }
+
+                //check email is unique
+                if (allEmployee.Any(x => x.Email == employeeAdd.Email))
+                {
+                    throw new Exception("Email đã được đăng kí bới tài khoản khác!");
+                }
+
+
+                //check username is unique
+                if (allEmployee.Any(x => x.UserName == employeeAdd.UserName))
+                {
+                    throw new Exception("UserName đã được đăng kí bới tài khoản khác!");
+                }
+
+                var newEmployee = new Employee
+                {
+                    ContractId = employeeAdd.ContractId,
+                    PhoneNumber = employeeAdd.PhoneNumber,
+                    UserName = employeeAdd.UserName,
+                    Password = BCrypt.Net.BCrypt.HashPassword(employeeAdd.Password),
+                    Avatar = employeeAdd.Avatar ?? "user.png",
+                    StatusEmployee = StatusEmployee.Active
+
+                };
+
+                using(var transaction = await _employeeRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _employeeRepository.AddAsync(newEmployee);
+                        await _employeeRepository.SaveChangeAsync();
+
+                        if (employeeAdd.TaxDeductionIds != null && employeeAdd.TaxDeductionIds.Count > 0)
+                        {
+                            var lstTaxDeductionDetails = new List<TaxDeductionDetails>();
+                            foreach (var taxDeductionId in employeeAdd.TaxDeductionIds)
+                            {
+                                lstTaxDeductionDetails.Add(new TaxDeductionDetails
+                                {
+                                    TaxDeductionId = taxDeductionId,
+                                    EmployeeId = newEmployee.Id
+                                });
+                            }
+                            await _taxDeductionDetailsRepository.AddRangeAsync(lstTaxDeductionDetails);
+                            await _taxDeductionDetailsRepository.SaveChangeAsync();
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception(ex.Message);
+                    }
+                  
+                }
+              
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { ex.Message} };
+            }
+        }
+        public async Task<ApiResponse<bool>> UpdateEmployee(int id, EmployeeUpsert employeeUpdate)
+        {
+            try
+            {
+                var resultValidation = _employeeUpsertValidator.Validate(employeeUpdate);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+                var allEmployee = await _employeeRepository.GetAllQueryAble().ToListAsync();
+
+                var selectedEmployee = allEmployee.Where(e => e.Id == id).FirstOrDefault();
+                if (selectedEmployee == null)
+                {
+                    throw new Exception("Không tìm thấy nhân viên tương ứng!");
+                }
+
+                //Check contract in used by other
+                if (allEmployee.Any(x => x.Id!=id&&x.ContractId == employeeUpdate.ContractId))
+                {
+                    throw new Exception("Hợp đồng không hợp lệ (do đã có người khác sử dụng)");
+                }
+
+                //check email is unique
+                if (allEmployee.Any(x => x.Id != id && x.Email == employeeUpdate.Email))
+                {
+                    throw new Exception("Email đã được đăng kí bới tài khoản khác!");
+                }
+
+                //check username is unique
+                if (allEmployee.Any(x => x.Id != id && x.UserName == employeeUpdate.UserName))
+                {
+                    throw new Exception("UserName đã được đăng kí bới tài khoản khác!");
+                }
+                if (employeeUpdate.Password.Trim() != "?????????")
+                {
+                    selectedEmployee.Password = BCrypt.Net.BCrypt.HashPassword(employeeUpdate.Password);
+                }
+                selectedEmployee.ContractId = employeeUpdate.ContractId;
+                selectedEmployee.Email = employeeUpdate.Email;
+                selectedEmployee.PhoneNumber = employeeUpdate.PhoneNumber;
+                selectedEmployee.Avatar = employeeUpdate.Avatar ?? "user.png";
+
+                using (var transaction = await _employeeRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        _employeeRepository.Update(selectedEmployee);
+                        await _employeeRepository.SaveChangeAsync();
+
+                        var selectedTaxDeductionDetails = await _taxDeductionDetailsRepository.GetAllQueryAble().Where(x => x.EmployeeId == selectedEmployee.Id).ToListAsync();
+                        _taxDeductionDetailsRepository.RemoveRange(selectedTaxDeductionDetails);
+
+                        if (employeeUpdate.TaxDeductionIds != null && employeeUpdate.TaxDeductionIds.Count > 0)
+                        {
+                            var lstTaxDeductionDetails = new List<TaxDeductionDetails>();
+                            foreach (var taxDeductionId in employeeUpdate.TaxDeductionIds)
+                            {
+                                lstTaxDeductionDetails.Add(new TaxDeductionDetails
+                                {
+                                    TaxDeductionId = taxDeductionId,
+                                    EmployeeId = selectedEmployee.Id
+                                });
+                            }
+                            await _taxDeductionDetailsRepository.AddRangeAsync(lstTaxDeductionDetails);
+                        }
+
+                        await _taxDeductionDetailsRepository.SaveChangeAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception(ex.Message);
+                    }
+                }
+                  
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { ex.Message } };
+            }
+        }
+        public async Task<ApiResponse<bool>> RemoveEmployee(int id)
+        {
+            try
+            {
+                using (var transaction = await _employeeRepository.Context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _employeeRepository.RemoveAsync(id);
+                        await _employeeRepository.SaveChangeAsync();
+
+                        var selectedTaxDeductionDetails = await _taxDeductionDetailsRepository.GetAllQueryAble().Where(x => x.EmployeeId == id).ToListAsync();
+                        _taxDeductionDetailsRepository.RemoveRange(selectedTaxDeductionDetails);
+                        await _taxDeductionDetailsRepository.SaveChangeAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception(ex.Message);
+                    }
+                }
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { ex.Message } };
             }
         }
     }

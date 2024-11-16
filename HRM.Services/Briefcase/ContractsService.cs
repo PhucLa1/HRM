@@ -1,8 +1,11 @@
-﻿using Aspose.Words;
+﻿extern alias BouncyCastleOrg;
+using BouncyCastleOrg::Org.BouncyCastle.Crypto;
+using BouncyCastleOrg::Org.BouncyCastle.Pkcs;
+using BouncyCastleOrg::Org.BouncyCastle.X509;
+
+using Aspose.Words;
 using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using FluentValidation;
 using HRM.Data.Entities;
 using HRM.Repositories.Base;
@@ -11,14 +14,19 @@ using HRM.Repositories.Dtos.Results;
 using HRM.Repositories.Helper;
 using HRM.Repositories.Setting;
 using HRM.Services.User;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic;
-using NPOI.SS.Formula.Functions;
+
+
 using AsposeDocument = Aspose.Words.Document;
 using Body = DocumentFormat.OpenXml.Wordprocessing.Body;
 using Position = HRM.Data.Entities.Position;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
+using DocumentFormat.OpenXml.Office2010.Excel;
+
 namespace HRM.Services.Briefcase
 {
     public interface IContractsService
@@ -30,7 +38,7 @@ namespace HRM.Services.Briefcase
         Task<ApiResponse<bool>> FillContractDetails(int id, ContractUpdate contractUpdate);
         Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate);
         Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status);
-        Task<ApiResponse<bool>> SignContract();
+        Task<ApiResponse<bool>> SignContract(int contractId, DigitalSignature signatureModel);
     }
     public class ContractsService : IContractsService
     {
@@ -670,9 +678,84 @@ namespace HRM.Services.Briefcase
             }
         }
 
-        public Task<ApiResponse<bool>> SignContract()
+        public async Task<ApiResponse<bool>> SignContract(int contractId,DigitalSignature signatureModel)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // Kiểm tra xem file có hợp lệ không
+                if (signatureModel.CertificateFile == null || signatureModel.CertificateFile.Length == 0)
+                {
+                    throw new Exception("File chứng thư không được trống!");
+                }
+
+                var selectedContract = await _contractRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == contractId);
+                if (selectedContract == null) throw new Exception("Không tìm thấy hợp đồng tương ứng!");
+
+                // Step 2: Load PDF Document
+                var contractFileName = $"{selectedContract.Name}-hop-dong-so-{selectedContract.Id}";
+                var fileURLRaw = $"{Directory.GetCurrentDirectory()}/wwwroot/Contract/{contractFileName}";
+                string pdfFilePath = $"{fileURLRaw}.pdf";
+                PdfReader pdfReader = new PdfReader(pdfFilePath);
+
+                // Step 3: Load PFX Certificate
+                var cerFile = signatureModel.CertificateFile.OpenReadStream();
+                var pfxKeyStore = new Pkcs12Store(cerFile, signatureModel.Password.ToCharArray());
+
+                // Step 4: Initialize the PDF Stamper And Creating the Signature Appearance
+                Stream fileStream = new FileStream($"{fileURLRaw}_signed.pdf", FileMode.Create);
+                PdfStamper pdfStamper = PdfStamper.CreateSignature(pdfReader, fileStream, '\0', null, true);
+
+                PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
+                signatureAppearance.SignDate = DateTime.Now;
+                signatureAppearance.Reason = signatureModel.Reason;
+               // signatureAppearance.Location = signatureModel.Location;
+
+                if (signatureModel.SignatureImageFile != null && signatureModel.SignatureImageFile.Length != 0)
+                {
+                    signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION;
+                    signatureAppearance.SignatureGraphic = Image.GetInstance(signatureModel.SignatureImageFile.OpenReadStream());
+                }
+
+                // Set the signature appearance location (in points)
+                float x = 360;
+                float y = 530;
+                float width = 200; // Width of the signature rectangle
+                float height = 100; // Height of the signature rectangle
+                int page = 5;
+                signatureAppearance.Acro6Layers = false;
+                //signatureAppearance.Layer4Text = PdfSignatureAppearance.questionMark;
+                signatureAppearance.Layer4Text = "Signature valid";
+
+                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature");
+
+                // Step 5: Sign the Document
+                string alias = pfxKeyStore.Aliases.Cast<string>().FirstOrDefault(entryAlias => pfxKeyStore.IsKeyEntry(entryAlias));
+
+                if (alias != null)
+                {
+                    ICipherParameters privateKey = pfxKeyStore.GetKey(alias).Key;
+                    IExternalSignature pks = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256);
+                    MakeSignature.SignDetached(signatureAppearance, pks, new X509Certificate[] { pfxKeyStore.GetCertificate(alias).Certificate }, null, null, null, 0, CryptoStandard.CMS);
+                }
+                else
+                {
+                    throw new Exception("Private key not found in the PFX certificate.");
+                }
+
+                // Step 6: Save the Signed PDF
+                pdfStamper.Close();
+
+                selectedContract.FileUrlSigned = contractFileName + "_signed.pdf";
+                _contractRepository.Update(selectedContract);
+                await _contractRepository.SaveChangeAsync();
+
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse<bool>() { IsSuccess = false, Message = new List<string>() { e.Message } };
+            }
         }
+
     }
 }
