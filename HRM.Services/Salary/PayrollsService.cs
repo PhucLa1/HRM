@@ -108,6 +108,7 @@ public class PayrollsService : IPayrollsService
     private readonly IBaseRepository<Fomula> _fomulaRepository;
 
     private readonly IEmailService _emailService;
+    private readonly IBaseRepository<PayrollHistory> _payrollHistoryRepository;
     public PayrollsService(IBaseRepository<Payroll> payrollRepository,
                            IBaseRepository<Department> departmentRepository,
                            IBaseRepository<Position> positionRepository,
@@ -127,7 +128,8 @@ public class PayrollsService : IPayrollsService
                            IBaseRepository<Advance> advanceRepository,
                            IBaseRepository<TaxRate> taxRateRepository,
                            IBaseRepository<Fomula> fomulaRepository,
-                           IEmailService emailService
+                           IEmailService emailService,
+                           IBaseRepository<PayrollHistory> payrollHistoryRepository
                            )
     {
         _payrollRepository = payrollRepository;
@@ -150,6 +152,7 @@ public class PayrollsService : IPayrollsService
         _taxRateRepository = taxRateRepository;
         _fomulaRepository = fomulaRepository;
         _emailService = emailService;
+        _payrollHistoryRepository = payrollHistoryRepository;
 
     }
 
@@ -1999,7 +2002,6 @@ public class PayrollsService : IPayrollsService
             };
         }
     }
-
     public double GetEmployeeSalary(int employeeId, PayrollPeriod period)
     {
         var selectedPayroll = _payrollRepository.GetAllQueryAble()
@@ -2047,6 +2049,42 @@ public class PayrollsService : IPayrollsService
         return 0;
 
     }
+
+    public async Task<ApiResponse<bool>> SavePayrollHistory(PayrollHistoryUpsert payrollHistory)
+    {
+        try
+        {
+            var newPayrollHistory = new PayrollHistory()
+            {
+                Name = payrollHistory.Name,
+                Month = payrollHistory.Month,
+                Year = payrollHistory.Year,
+                Note = payrollHistory.Note,
+                PayrollHeader = payrollHistory.PayrollHeader,
+                PayrollColumn = payrollHistory.PayrollColumn,
+                PayrollData = payrollHistory.PayrollData,
+                CreatedAt = DateTime.Now
+            };
+            await _payrollHistoryRepository.AddAsync(newPayrollHistory);
+            await _payrollHistoryRepository.SaveChangeAsync();
+            return new ApiResponse<bool>()
+            {
+                IsSuccess = true,
+                Metadata = true
+            };
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<bool>()
+            {
+                IsSuccess = false,
+                Metadata = false,
+                Message = new List<string>() { e.Message }
+            };
+        }
+    }
+
+
     //Quy công thức về các paramerter base, fix
     // VD: fomula: ([PARAM_1]+[PARAM_2]-[FORMULA_4])*3-[FORMULA_5]
     private string extractAllFormula(int formulaId, List<Fomula> lstAllFotmulas)
@@ -2072,7 +2110,6 @@ public class PayrollsService : IPayrollsService
         }
         return fomulaDetails;
     }
-
     private string extractFormulaPartial(int formulaId, string formulaFindPartString, List<Fomula> lstAllFotmulas, bool beginMerge = false)
     {
         var currFormula = lstAllFotmulas.FirstOrDefault(x => x.Id == formulaId);
@@ -2109,7 +2146,6 @@ public class PayrollsService : IPayrollsService
 
 
     }
-
     private double calculateFormulaString(string fomulaString, Dictionary<string, double> map)
     {
         var formulasStringNumber = fomulaString;
@@ -2121,7 +2157,6 @@ public class PayrollsService : IPayrollsService
         var result = new DataTable().Compute(formulasStringNumber, null).ToString();
         return double.Parse(result);
     }
-
     public async Task<string> Test()
     {
         try
@@ -2170,6 +2205,7 @@ public class PayrollsService : IPayrollsService
 
 
     }
+
 
     #endregion
 
