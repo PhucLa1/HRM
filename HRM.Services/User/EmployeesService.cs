@@ -140,6 +140,8 @@ namespace HRM.Services.User
                                                  Factor = cs.Factor,
                                                  FileUrlSigned = c.FileUrlSigned,
                                                  FireUrlBase = c.FireUrlBase,
+                                                 ContractId = c.Id,
+                                                 EmployeeSignStatus = c.EmployeeSignStatus
                                              })
                                              .FirstAsync();
 
