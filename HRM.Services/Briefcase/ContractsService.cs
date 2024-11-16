@@ -270,12 +270,15 @@ namespace HRM.Services.Briefcase
 
                 //Thêm mới hợp đồng với 1 vài trường cơ bản, sau khi đã bàn bạc với ứng viên
 
+                var id = 0;
+
                 using (var transaction = await _contractRepository.Context.Database.BeginTransactionAsync())
                 {
                     try
                     {
                         var contract = new Contract()
                         {
+                            Name = contractAdd.Name,
                             ContractSalaryId = contractAdd.ContractSalaryId,
                             ContractTypeId = contractAdd.ContractTypeId,
                             StartDate = contractAdd.StartDate,
@@ -296,6 +299,7 @@ namespace HRM.Services.Briefcase
                         await _contractRepository.AddAsync(contract);
                         await _contractRepository.SaveChangeAsync();
 
+                        id = contract.Id;
                         //Lưu các allowance
                         var contractAllowance = new List<ContractAllowance>();
                         if (contractAdd.AllowanceIds != null)
@@ -312,6 +316,22 @@ namespace HRM.Services.Briefcase
                             await _contractAllowanceRepository.SaveChangeAsync();
                         }
 
+                        //Lưu các insurance
+                        var contractInsurance = new List<ContractInsurance>();
+                        if (contractAdd.InsuranceIds != null)
+                        {
+                            foreach (var insuranceId in contractAdd.InsuranceIds)
+                            {
+                                contractInsurance.Add(new ContractInsurance
+                                {
+                                    ContractId = contract.Id,
+                                    InsuranceId = insuranceId
+                                });
+                            }
+                            await _contractInsuranceRepository.AddRangeAsync(contractInsurance);
+                            await _contractInsuranceRepository.SaveChangeAsync();
+                        }
+
                         //Commit dữ liệu
                         await transaction.CommitAsync();
 
@@ -326,26 +346,29 @@ namespace HRM.Services.Briefcase
                 }
 
 
-            /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
-             và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
-            */
+                /*Sau đó gửi mail cho ứng cử viên về việc hợp đồng đã được tạo xong
+                 và trong mail sẽ redirect đến 1 trang để điền thông tin hợp đồng
+                */
 
                 //linkWebsite: HttpClient:/localhoset... employee - shared / emnployee - information / id
-                var bodyContentEmail = HandleFile.READ_FILE(FOLER, CONTRACT_NOTIFICATION_FILE)
-                    .Replace("{applicantName}", applicant.Name)
-                    .Replace("{linkWebsite}", "https://www.youtube.com/watch?v=PRKYGpc44R0&list=RDMMmkRZ625Pvok&index=14")
-                    .Replace("{companyName}", _serverCompanySetting.CompanyName);
-
-                var bodyEmail = _emailService.TemplateContent
-                    .Replace("{content}", bodyContentEmail);
-
-                var email = new Email()
+                if(id != 0)
                 {
-                    To = applicant.Email,
-                    Body = bodyEmail,
-                    Subject = CONTRACT_NOTIFICATION
-                };
-                await _emailService.SendEmailToRecipient(email);
+                    var bodyContentEmail = HandleFile.READ_FILE(FOLER, CONTRACT_NOTIFICATION_FILE)
+                        .Replace("{applicantName}", applicant.Name)
+                        .Replace("{linkWebsite}", "http://localhost:3000/employee-shared/employee-information/" + id)
+                        .Replace("{companyName}", _serverCompanySetting.CompanyName);
+
+                    var bodyEmail = _emailService.TemplateContent
+                        .Replace("{content}", bodyContentEmail);
+
+                    var email = new Email()
+                    {
+                        To = applicant.Email,
+                        Body = bodyEmail,
+                        Subject = CONTRACT_NOTIFICATION
+                    };
+                    await _emailService.SendEmailToRecipient(email);                   
+                }
                 return new ApiResponse<bool> { IsSuccess = true };
             }
             catch (Exception ex)
@@ -367,9 +390,6 @@ namespace HRM.Services.Briefcase
                 // Retrieve the existing contract
                 var contract = await _contractRepository
                     .GetAllQueryAble()
-                    .Include(e => e.ContractAllowances)
-                    .Include(e => e.Position)
-                    .Include(e => e.ContractSalary)
                     .Where(e => e.Id == id)
                     .FirstOrDefaultAsync();
 
@@ -401,20 +421,25 @@ namespace HRM.Services.Briefcase
                     try
                     {
                         // Update allowances
-                        contract.ContractAllowances.Clear();
+                        var listAllowanceRemove = _contractAllowanceRepository.GetAllQueryAble().Where(a => a.ContractId == id).ToList();
+                        _contractAllowanceRepository.RemoveRange(listAllowanceRemove);
+                        var contractAllowances = new List<ContractAllowance>();
                         if (contractUpdate.AllowanceIds != null)
                         {
                             foreach (var allowanceId in contractUpdate.AllowanceIds)
                             {
-                                contract.ContractAllowances.Add(new ContractAllowance
+                                contractAllowances.Add(new ContractAllowance
                                 {
                                     ContractId = contract.Id,
                                     AllowanceId = allowanceId
                                 });
                             }
+                            await _contractAllowanceRepository.AddRangeAsync(contractAllowances);
                         }
 
                         // Update insurances
+                        var listInsuranceRemove = _contractInsuranceRepository.GetAllQueryAble().Where(a => a.ContractId == id).ToList();
+                        _contractInsuranceRepository.RemoveRange(listInsuranceRemove);
                         var contractInsurances = new List<ContractInsurance>();
                         if (contractUpdate.InsuranceIds != null)
                         {
@@ -427,12 +452,11 @@ namespace HRM.Services.Briefcase
                                 });
                             }
                             await _contractInsuranceRepository.AddRangeAsync(contractInsurances);
-                            await _contractInsuranceRepository.SaveChangeAsync();
                         }
-
                         _contractRepository.Update(contract);
+                        await _contractAllowanceRepository.SaveChangeAsync();
+                        await _contractInsuranceRepository.SaveChangeAsync();
                         await _contractRepository.SaveChangeAsync();
-
                         await transaction.CommitAsync();
                     }
                     catch (Exception ex)
