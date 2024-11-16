@@ -1,18 +1,17 @@
 ﻿using Asp.Versioning;
 using HRM.Apis.Swagger.Examples.Responses;
+using HRM.Data.Entities;
 using HRM.Repositories.Dtos.Models;
 using HRM.Repositories.Dtos.Results;
-using HRM.Services.Briefcase;
 using HRM.Services.Recruitment;
 using HRM.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace HRM.Apis.Controllers
 {
-	[ApiVersion(1)]
+    [ApiVersion(1)]
 	[Route("api/v{v:apiVersion}/jobpostings")]
 	[ApiController]
 	[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
