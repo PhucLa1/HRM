@@ -129,6 +129,8 @@ namespace HRM.Data.Data
         public DbSet<UserCalendar> UserCalendars { get; set; }
         public DbSet<Web> Webs { get; set; }
         public DbSet<EmployeeImage> EmployeeImages { get; set; }
+        public DbSet<PageFlexibleDashboard> PageFlexibleDashboards { get; set; }
+        public DbSet<Chart> Charts { get; set; }
 
     }
 }

@@ -65,7 +65,7 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công 
 
         // Tính số giờ làm cho nhân viên 
-        //Task<ApiResponse<Dictionary<int, double>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds);
+        Task<ApiResponse<IEnumerable<TotalWorkHours>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate);
 
     }
     public class WorkShiftService : IWorkShiftService
@@ -107,8 +107,9 @@ namespace HRM.Services.TimeKeeping
             _emailService = emailService;
             _historyUpsertValidator = historyUpsertValidator;
         }
-        /*
-        public async Task<ApiResponse<Dictionary<int, double>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate)
+
+
+        public async Task<ApiResponse<IEnumerable<TotalWorkHours>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate)
         {
             try
             {
@@ -121,7 +122,7 @@ namespace HRM.Services.TimeKeeping
 
                 if (!isValidStartDate || !isValidEndDate)
                 {
-                    return new ApiResponse<Dictionary<int, double>> { Message = [WorkShiftError.FAILED_REGULAR] };
+                    return new ApiResponse<IEnumerable<TotalWorkHours>> { Message = [WorkShiftError.FAILED_REGULAR] };
                 }
 
                 //Chuyển sang dạng DateOnly
@@ -138,19 +139,124 @@ namespace HRM.Services.TimeKeeping
                 var partimeEmployees = employeeIdRoles.Where(x => x.TypeContract == TypeContract.Partime).Select(x => x.Id).ToList();
                 var fulltimeEmployees = employeeIdRoles.Where(x => x.TypeContract == TypeContract.Fulltime).Select(x => x.Id).ToList();
 
-                //Tính giờ làm cho partime 
-                var calendarEntries = await GetAllWorkShiftAttendanceTracking(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                //Tính giờ làm cho fulltime 
+                var histories = await _historyRepository
+                    .GetAllQueryAble()
+                    .Where(e => DateOnly.FromDateTime(e.TimeSweep) >= dateOnlyStartDate
+                        && DateOnly.FromDateTime(e.TimeSweep) <= dateOnlyEndDate
+                        && fulltimeEmployees.Contains(e.EmployeeId))
+                    .ToListAsync();
+                var employeeWorkHours = histories
+                    .GroupBy(e => e.EmployeeId) // Nhóm theo EmployeeId
+                    .Select(group => new TotalWorkHours
+                    {
+                        EmployeeId = group.Key,
+                        TotalWorkedHours = group
+                        .GroupBy(e => DateOnly.FromDateTime(e.TimeSweep)) // Nhóm tiếp theo từng ngày
+                        .Sum(dayGroup =>
+                            dayGroup.Count() > 1
+                            ? (dayGroup.Max(e => e.TimeSweep) - dayGroup.Min(e => e.TimeSweep)).TotalHours
+                            : 0 // Không tính ngày chỉ có 1 lần chấm công
+)
+                    })
+                    .ToList();
 
+                //Tính giờ làm cho partime
+                // Lấy danh sách các ca làm việc đã được phê duyệt
+                var userCalendars = await (from uc in _userCalendarRepository.GetAllQueryAble()
+                                           join pt in _partimePlanRepository.GetAllQueryAble() on uc.PartimePlanId equals pt.Id
+                                           where uc.PresentShift >= dateOnlyStartDate && uc.PresentShift <= dateOnlyEndDate // Thuộc khoảng đang xét
+                                                 && pt.StatusCalendar == StatusCalendar.Approved // Kế hoạch được chấp nhận
+                                                 && uc.UserCalendarStatus == UserCalendarStatus.Approved // Những ngày được chấp nhận
+                                                 && partimeEmployees.Contains(pt.EmployeeId) // Thuộc về nhân viên đang xét
+                                           orderby uc.PresentShift ascending // Theo ngày tháng tăng dần
+                                           select new UserCalendarResultTotalWork
+                                           {
+                                               EmployeeId = pt.EmployeeId, // Lấy thông tin EmployeeId
+                                               ShiftTime = uc.ShiftTime,
+                                               PresentShift = uc.PresentShift,
+                                               UserCalendarStatus = uc.UserCalendarStatus,
+                                           }).ToListAsync();
 
+                // Lấy danh sách chấm công trong khoảng thời gian đã chọn cho tất cả nhân viên
+                var historiesForPartime = await _historyRepository
+                    .GetAllQueryAble()
+                    .Where(e => DateOnly.FromDateTime(e.TimeSweep) >= dateOnlyStartDate
+                                && DateOnly.FromDateTime(e.TimeSweep) <= dateOnlyEndDate
+                                && partimeEmployees.Contains(e.EmployeeId)) // Lọc theo danh sách nhân viên
+                    .OrderBy(e => e.TimeSweep)
+                    .Select(e => new HistoryResult
+                    {
+                        Id = e.Id,
+                        TimeSweep = e.TimeSweep,
+                        EmployeeId = e.EmployeeId,
+                        StatusHistory = e.StatusHistory,
+                    })
+                    .ToListAsync();
 
-                //Tính giờ làm cho fulltime
+                // Tính tổng số giờ làm việc cho từng nhân viên
+                var shiftTimes = new Dictionary<ShiftTime, (TimeSpan start, TimeSpan end)>
+                {
+                    { ShiftTime.Morning, (new TimeSpan(6, 0, 0), new TimeSpan(12, 30, 0)) },
+                    { ShiftTime.Afternoon, (new TimeSpan(12, 0, 0), new TimeSpan(18, 0, 0)) },
+                    { ShiftTime.Evening, (new TimeSpan(18, 0, 0), new TimeSpan(23, 59, 59)) }
+                };
+
+                // Tính tổng số giờ làm việc cho từng nhân viên
+                var totalWorkedHoursByEmployee = userCalendars
+                    .GroupBy(uc => uc.EmployeeId) // Nhóm theo EmployeeId
+                    .Select(group =>
+                    {
+                        var employeeHistories = histories
+                            .Where(h => h.EmployeeId == group.Key) // Lọc ra các lần chấm công của nhân viên này
+                            .ToList();
+
+                        var totalWorkedHours = group
+                            .Sum(uc =>
+                            {
+                                // Lấy các lần chấm công thuộc ca hiện tại
+                                var checkInOut = employeeHistories
+                                    .Where(h => DateOnly.FromDateTime(h.TimeSweep) == uc.PresentShift) // Cùng ngày
+                                    .OrderBy(h => h.TimeSweep)
+                                    .ToList();
+
+                                // Chỉ tính giờ nếu có ít nhất 2 lần chấm công
+                                if (checkInOut.Count >= 2)
+                                {
+                                    var earliestTime = checkInOut.First().TimeSweep;
+                                    var latestTime = checkInOut.Last().TimeSweep;
+
+                                    // Kiểm tra xem thời gian chấm công có khớp với ca không
+                                    var shiftStart = uc.PresentShift.ToDateTime(new TimeOnly(shiftTimes[uc.ShiftTime].start.Hours, shiftTimes[uc.ShiftTime].start.Minutes)); // Chuyển thành TimeOnly rồi cộng vào
+                                    var shiftEnd = uc.PresentShift.ToDateTime(new TimeOnly(shiftTimes[uc.ShiftTime].end.Hours, shiftTimes[uc.ShiftTime].end.Minutes)); // Chuyển thành TimeOnly rồi cộng vào
+
+                                    // Sau đó, bạn có thể so sánh thời gian như bình thường
+                                    if (earliestTime >= shiftStart && latestTime <= shiftEnd)
+                                    {
+                                        return (latestTime - earliestTime).TotalHours; // Thời gian làm việc trong ca
+                                    }
+                                }
+                                return 0; // Không có giờ làm nếu không đủ chấm công
+                            });
+
+                        return new TotalWorkHours
+                        {
+                            EmployeeId = group.Key,
+                            TotalWorkedHours = totalWorkedHours
+                        };
+                    })
+                    .ToList();
+                var dataReturn = totalWorkedHoursByEmployee.Concat(employeeWorkHours);
+                return new ApiResponse<IEnumerable<TotalWorkHours>> { IsSuccess = true, Metadata = dataReturn };
+
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        */
+
+
 
         public async Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate)
         {
@@ -730,7 +836,7 @@ namespace HRM.Services.TimeKeeping
 
 
                 var currentRole = _userCalendarRepository.Context.GetCurrentUserRole();
-                if(currentRole != Role.Admin)
+                if (currentRole != Role.Admin)
                 {
                     return new ApiResponse<bool> { Message = [WorkShiftError.FORBIDDEN_PLAN] };
                 }
