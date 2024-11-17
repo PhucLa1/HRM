@@ -11,5 +11,6 @@ namespace HRM.Data.Entities
         public string PayrollHeader { get; set; } = "";
         public string PayrollColumn { get; set; } = "";
         public string PayrollData { get; set; } = "";
+        public string DisplayColumns { get; set; } = "";
     }
 }

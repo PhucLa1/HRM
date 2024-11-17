@@ -8,6 +8,8 @@ using System.Data;
 using HRM.Services.User;
 using HRM.Repositories.Helper;
 using NPOI.HSSF.Record.Chart;
+using Newtonsoft.Json;
+using HRM.Services.TimeKeeping;
 
 namespace HRM.Services.Salary;
 
@@ -34,8 +36,14 @@ public interface IPayrollsService
     Task<ApiResponse<List<List<ColumnTableHeader>>>> GetPayrollTableHeader(PayrollPeriod period);
     Task<ApiResponse<IEnumerable<DynamicColumn>>> GetPayrollTableColumn(PayrollPeriod period);
 
-    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> employeeIds=null);
-    Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period, List<int> employeeIds);
+    Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, string dfrom, string dto, List<int> employeeIds = null);
+    Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period,string dfrom, string dto, List<int> employeeIds);
+
+    //History
+    Task<ApiResponse<List<PayrollHistoryModel>>> GetAllPayrollHistory();
+    Task<ApiResponse<PayrollHistoryModel>> GetPayrollHistoryDetails(int payrollHistoryId);
+    Task<ApiResponse<bool>> SavePayrollHistory(PayrollHistoryModel payrollHistory);
+    Task<ApiResponse<bool>> RemovePayrollHistory(int id);
 }
 public class PayrollsService : IPayrollsService
 {
@@ -109,6 +117,8 @@ public class PayrollsService : IPayrollsService
 
     private readonly IEmailService _emailService;
     private readonly IBaseRepository<PayrollHistory> _payrollHistoryRepository;
+
+    private readonly IWorkShiftService _workShiftService;
     public PayrollsService(IBaseRepository<Payroll> payrollRepository,
                            IBaseRepository<Department> departmentRepository,
                            IBaseRepository<Position> positionRepository,
@@ -129,7 +139,8 @@ public class PayrollsService : IPayrollsService
                            IBaseRepository<TaxRate> taxRateRepository,
                            IBaseRepository<Fomula> fomulaRepository,
                            IEmailService emailService,
-                           IBaseRepository<PayrollHistory> payrollHistoryRepository
+                           IBaseRepository<PayrollHistory> payrollHistoryRepository,
+                           IWorkShiftService workShiftService
                            )
     {
         _payrollRepository = payrollRepository;
@@ -153,6 +164,7 @@ public class PayrollsService : IPayrollsService
         _fomulaRepository = fomulaRepository;
         _emailService = emailService;
         _payrollHistoryRepository = payrollHistoryRepository;
+        _workShiftService = workShiftService;
 
     }
 
@@ -296,7 +308,7 @@ public class PayrollsService : IPayrollsService
         };
     }
 
-    public async Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period, List<int> employeeIds)
+    public async Task<ApiResponse<bool>> SendPayslip(PayrollPeriod period, string dfrom, string dto, List<int> employeeIds)
     {
         try
         {
@@ -309,11 +321,11 @@ public class PayrollsService : IPayrollsService
             var lstInsurance = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_INSURANCE")).ToList();
             var lstTaxDeduction = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_TAXDEDUCTION")).ToList();
             var lstDeductionNoTax = refColumns.Where(x => x.Field.StartsWith("dp.PARAM_DEDUCTION")).ToList();
-  
 
-            var lstSelectedPayrollRes = await GetPayrollTableData(period, employeeIds);
-            if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0]??"Lỗi lấy dữ liệu");
-            var lstPayroll = lstSelectedPayrollRes?.Metadata?.ToList()??new List<PayrollTableData>();
+
+            var lstSelectedPayrollRes = await GetPayrollTableData(period, dfrom, dto, employeeIds);
+            if (!lstSelectedPayrollRes.IsSuccess) throw new Exception(lstSelectedPayrollRes?.Message[0] ?? "Lỗi lấy dữ liệu");
+            var lstPayroll = lstSelectedPayrollRes?.Metadata?.ToList() ?? new List<PayrollTableData>();
             if (lstPayroll == null || lstPayroll.Count == 0)
             {
                 throw new Exception(lstSelectedPayrollRes?.Message[0] ?? "Bảng lương trống hoặc không tồn tại nhân viên để gửi phiếu");
@@ -327,7 +339,7 @@ public class PayrollsService : IPayrollsService
                 foreach (var sc in lstAllowances)
                 {
                     if (sc.Field.Contains("NOTAX")) continue;
-                    htmlAllowanceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.","")]);
+                    htmlAllowanceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
                 }
 
                 var htmlBonusList = "";
@@ -367,7 +379,7 @@ public class PayrollsService : IPayrollsService
                  .Replace("{taxCode}", "102-231-322-123")
                  .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0.00"))
                  .Replace("{" + $"{FieldBaseSalary}" + "}", payroll.DynamicProperties[FieldBaseSalary].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldBaseWageHours}" + "}", payroll.DynamicProperties[FieldBaseWageHours].ToString("#,##0.00")+"/h")
+                 .Replace("{" + $"{FieldBaseWageHours}" + "}", payroll.DynamicProperties[FieldBaseWageHours].ToString("#,##0.00") + "/h")
                  .Replace("{" + $"{FieldBaseHours}" + "}", payroll.DynamicProperties[FieldBaseHours].ToString())
                  .Replace("{" + $"{FieldRealHours}" + "}", payroll.DynamicProperties[FieldRealHours].ToString())
                  .Replace("{" + $"{FieldHourWageCheckout}" + "}", payroll.DynamicProperties[FieldHourWageCheckout].ToString("#,##0.00"))
@@ -425,7 +437,7 @@ public class PayrollsService : IPayrollsService
                             <div class=""rate"" style=""font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;""></div>
                             <div class="""" style=""text-align: right; width: 170px;"">{value.ToString("#,##0.00")}</div>
                         </div>";
-        
+
 
         return res;
     }
@@ -1319,7 +1331,6 @@ public class PayrollsService : IPayrollsService
             Metadata = res
         };
     }
-
     public async Task<ApiResponse<IEnumerable<DynamicColumn>>> GetPayrollTableColumn(PayrollPeriod period)
     {
         var payrollByPeriod = _payrollRepository.GetAllQueryAble().Where(x => x.Year == period.Year && x.Month == period.Month);
@@ -1516,8 +1527,7 @@ public class PayrollsService : IPayrollsService
             Metadata = res
         };
     }
-
-    public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period, List<int> listEmployeeIds = null)
+    public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData(PayrollPeriod period,string dfrom, string dto, List<int> listEmployeeIds = null)
     {
         try
         {
@@ -1540,13 +1550,21 @@ public class PayrollsService : IPayrollsService
             var taskTaxDeduction = getListTaxDeductionInPeriod(lstEmployeeIds);
             var taskBonus = getListBonusInPeriod(lstPayrollIds);
             var taskDeduction = getListDeductionInPeriod(lstPayrollIds);
+            var taskWorkHours = _workShiftService.GetTotalHoursOfEmployeeWork(lstEmployeeIds, dfrom, dto);
 
-            Task.WaitAll(taskAllowance, taskInsurance, taskTaxDeduction, taskBonus, taskDeduction);
+            Task.WaitAll(taskAllowance, taskInsurance, taskTaxDeduction, taskBonus, taskDeduction, taskWorkHours);
             var allowanceColumn = taskAllowance.Result;
             var insuranceColumn = taskInsurance.Result;
             var taxDeductionColumn = taskTaxDeduction.Result;
             var bonusColumn = taskBonus.Result;
             var deductionColumn = taskDeduction.Result;
+            var lstWorkHoursAPI = taskWorkHours.Result;
+
+            var lstWorkHours = new List<TotalWorkHours>();
+            if (lstWorkHoursAPI.IsSuccess)
+            {
+                lstWorkHours = lstWorkHoursAPI.Metadata.ToList();
+            }
 
             #region + employee info
             var employeeInfo = (from e in _employeeRepository.GetAllQueryAble().Where(x => lstEmployeeIds.Contains(x.Id))
@@ -1565,7 +1583,7 @@ public class PayrollsService : IPayrollsService
                                     Email = e.Email,
                                     PhoneNumber = e.PhoneNumber,
                                     DateHired = c.StartDate.ToString("dd/MM/yyyy"),
-                                    EmployeeId = "NV-00"+e.Id,
+                                    EmployeeId = "NV-00" + e.Id,
 
                                     BaseSalary = c.ContractSalary != null ? c.ContractSalary.BaseSalary : 0,
                                     BaseInsurance = c.ContractSalary != null ? c.ContractSalary.BaseInsurance : 0,
@@ -1603,6 +1621,8 @@ public class PayrollsService : IPayrollsService
                 tableRow.Email = selectedEmployee?.Email ?? "undefined";
                 tableRow.PhoneNumber = selectedEmployee?.PhoneNumber ?? "undefined";
                 tableRow.DateHired = selectedEmployee?.DateHired ?? "undefined";
+                
+                var realHours = lstWorkHours.FirstOrDefault(x=>x.EmployeeId==payroll.EmployeeId);
 
                 double totalTax = 0;
                 var stringFormulaAll = extractAllFormula(selectedFormula.Id, lstAllFormula);
@@ -1611,9 +1631,9 @@ public class PayrollsService : IPayrollsService
                 //lương thười gian
                 tableRow.DynamicProperties[FieldBaseSalary] = selectedEmployee?.BaseSalary ?? 0;
                 tableRow.DynamicProperties[FieldBaseHours] = selectedEmployee?.RequiredHours ?? 0;
-                tableRow.DynamicProperties[FieldRealHours] = 130;
+                tableRow.DynamicProperties[FieldRealHours] = realHours!=null? realHours.TotalWorkedHours:0;
                 tableRow.DynamicProperties[FieldBaseDays] = selectedEmployee?.RequiredDays ?? 0;
-                tableRow.DynamicProperties[FieldRealDays] = 20;
+                tableRow.DynamicProperties[FieldRealDays] = realHours != null ? realHours.TotalWorkedHours/24 : 0;
                 tableRow.DynamicProperties[FieldBaseWageDays] = selectedEmployee?.WageDaily ?? 0;
                 tableRow.DynamicProperties[FieldBaseWageHours] = selectedEmployee?.WageHourly ?? 0;
                 tableRow.DynamicProperties[FieldBaseFactor] = selectedEmployee?.Factor ?? 1;
@@ -1795,7 +1815,6 @@ public class PayrollsService : IPayrollsService
             };
         }
     }
-
     public async Task<ApiResponse<IEnumerable<PayrollTableData>>> GetPayrollTableData_OLD(PayrollPeriod period)
     {
         try
@@ -2050,7 +2069,8 @@ public class PayrollsService : IPayrollsService
 
     }
 
-    public async Task<ApiResponse<bool>> SavePayrollHistory(PayrollHistoryUpsert payrollHistory)
+    //History
+    public async Task<ApiResponse<bool>> SavePayrollHistory(PayrollHistoryModel payrollHistory)
     {
         try
         {
@@ -2060,9 +2080,10 @@ public class PayrollsService : IPayrollsService
                 Month = payrollHistory.Month,
                 Year = payrollHistory.Year,
                 Note = payrollHistory.Note,
-                PayrollHeader = payrollHistory.PayrollHeader,
-                PayrollColumn = payrollHistory.PayrollColumn,
-                PayrollData = payrollHistory.PayrollData,
+                PayrollHeader = JsonConvert.SerializeObject(payrollHistory.PayrollHeader),
+                PayrollColumn = JsonConvert.SerializeObject(payrollHistory.PayrollColumn),
+                PayrollData = JsonConvert.SerializeObject(payrollHistory.PayrollData),
+                DisplayColumns = JsonConvert.SerializeObject(payrollHistory.DisplayColumns),
                 CreatedAt = DateTime.Now
             };
             await _payrollHistoryRepository.AddAsync(newPayrollHistory);
@@ -2083,7 +2104,83 @@ public class PayrollsService : IPayrollsService
             };
         }
     }
+    public async Task<ApiResponse<List<PayrollHistoryModel>>> GetAllPayrollHistory()
+    {
+        try
+        {
+            var lstHistory = await _payrollHistoryRepository.GetAllQueryAble().Select(x => new PayrollHistoryModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Month = x.Month,
+                Year = x.Year,
+                Note = x.Note,
+                CreatedAt = x.CreatedAt.ToString("dd/MM/yyyy") + " - " + x.CreatedAt.ToString("HH:mm"),
+            }).ToListAsync();
+            return new ApiResponse<List<PayrollHistoryModel>>()
+            {
+                IsSuccess = true,
+                Metadata = lstHistory
+            };
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<List<PayrollHistoryModel>>()
+            {
+                IsSuccess = false,
+                Message = new List<string>() { e.Message }
+            };
+        }
+    }
+    public async Task<ApiResponse<PayrollHistoryModel>> GetPayrollHistoryDetails(int payrollHistoryId)
+    {
+        try
+        {
+            var lstHistoryDB = await _payrollHistoryRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == payrollHistoryId);
+            if (lstHistoryDB == null) throw new Exception("Không tìm thấy chi tiết bảng lưuong");
 
+            var lstHistoryResult = new PayrollHistoryModel()
+            {
+                Id = lstHistoryDB.Id,
+                Name = lstHistoryDB.Name,
+                Month = lstHistoryDB.Month,
+                Year = lstHistoryDB.Year,
+                Note = lstHistoryDB.Note,
+                CreatedAt = lstHistoryDB.CreatedAt.ToString("dd/MM/yyyy") + " - " + lstHistoryDB.CreatedAt.ToString("HH:mm"),
+                PayrollHeader = JsonConvert.DeserializeObject<List<List<ColumnTableHeader>>>(lstHistoryDB.PayrollHeader),
+                PayrollColumn = JsonConvert.DeserializeObject<List<DynamicColumn>>(lstHistoryDB.PayrollColumn),
+                PayrollData = JsonConvert.DeserializeObject<List<PayrollTableData>>(lstHistoryDB.PayrollData),
+                DisplayColumns = JsonConvert.DeserializeObject<List<DynamicColumn>>(lstHistoryDB.DisplayColumns),
+            };
+            return new ApiResponse<PayrollHistoryModel>()
+            {
+                IsSuccess = true,
+                Metadata = lstHistoryResult
+            };
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<PayrollHistoryModel>()
+            {
+                IsSuccess = false,
+                Message = new List<string>() { e.Message }
+            };
+        }
+    }
+    public async Task<ApiResponse<bool>> RemovePayrollHistory(int id)
+    {
+        try
+        {
+
+            await _payrollHistoryRepository.RemoveAsync(id);
+            await _payrollHistoryRepository.SaveChangeAsync();
+            return new ApiResponse<bool> { IsSuccess = true };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { ex.Message } };
+        }
+    }
 
     //Quy công thức về các paramerter base, fix
     // VD: fomula: ([PARAM_1]+[PARAM_2]-[FORMULA_4])*3-[FORMULA_5]
@@ -2185,7 +2282,7 @@ public class PayrollsService : IPayrollsService
                  .Replace("{" + $"{FieldOtherDeduction}" + "}", "400")
                  .Replace("{" + $"{Fieldnet}" + "}", "40000000000");
             var bodyEmail = _emailService.TemplateContent
-                            .Replace("<main>","")
+                            .Replace("<main>", "")
                             .Replace("/<main>", "")
                             .Replace("{content}", bodyContentEmail);
 

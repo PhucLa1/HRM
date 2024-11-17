@@ -628,7 +628,8 @@ namespace HRM.Services.Briefcase
 
                 //Xóa bản word cũ
                 HandleFile.DELETE_FILE(FOLER, outputPath);
-
+                contract.FireUrlBase = $"{contractUpdate.Name}-hop-dong-so-{id}.pdf";
+                contract.FileUrlSigned = $"{contractUpdate.Name}-hop-dong-so-{id}_signed.pdf";
                 await _contractRepository.SaveChangeAsync();
                 return new ApiResponse<bool> { IsSuccess = true };
 

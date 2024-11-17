@@ -410,6 +410,7 @@ namespace HRM.Services.User
                 var newEmployee = new Employee
                 {
                     ContractId = employeeAdd.ContractId,
+                    Email = employeeAdd.Email,
                     PhoneNumber = employeeAdd.PhoneNumber,
                     UserName = employeeAdd.UserName,
                     Password = BCrypt.Net.BCrypt.HashPassword(employeeAdd.Password),
