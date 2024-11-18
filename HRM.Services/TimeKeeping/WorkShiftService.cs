@@ -62,10 +62,9 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate);
         Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
-        Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công 
-
-        // Tính số giờ làm cho nhân viên 
-        Task<ApiResponse<IEnumerable<TotalWorkHours>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate);
+        Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công    
+        Task<ApiResponse<IEnumerable<TotalWorkHours>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate); // Tính số giờ làm cho nhân viên 
+        Task<ApiResponse<bool>> SeedingDataAutomationForWorkShift();
 
     }
     public class WorkShiftService : IWorkShiftService
@@ -108,6 +107,273 @@ namespace HRM.Services.TimeKeeping
             _historyUpsertValidator = historyUpsertValidator;
         }
 
+
+        public async Task<ApiResponse<bool>> SeedingDataAutomationForWorkShift()
+        {
+            try
+            {
+                // Lấy hết tất cả id của nhân viên 
+                var employees = await (from em in _employeeRepository.GetAllQueryAble()
+                                       join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                       select new { em.Id, c.TypeContract })
+                                       .ToListAsync();
+
+                // Nhóm những nhân viên partime, fulltime theo nhóm
+                var partimeEmployeeIds = employees.Where(x => x.TypeContract == TypeContract.Partime).Select(x => x.Id).ToList();
+                var fulltimeEmployeeIds = employees.Where(x => x.TypeContract == TypeContract.Fulltime).Select(x => x.Id).ToList();
+
+
+                //Thời gian từ đầu năm - đến hiện tại
+                var startDate = new DateTime(2024, 9, 1, 0, 0, 0);
+                var endDate = DateTime.Now;
+                var random = new Random();
+
+
+                //Thêm lịch sử chấm công cho nhân viên fulltime - Thêm từ đầu năm
+                var historyForFullTimes = new List<History>() { };
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    foreach (var fulltimeEmployeeId in fulltimeEmployeeIds)
+                    {
+                        bool isContinue = random.Next(0, 2) == 1; //Nếu đúng thì lại tiếp tục chạy lại
+                        int maxContinue = 0;
+
+                        bool hasIn = random.Next(0, 2) == 1; // 50% có IN
+                        bool hasOut = random.Next(0, 2) == 1; // 50% có OUT
+                        while (isContinue && maxContinue <= 5)
+                        {
+                            if (hasIn)
+                            {
+                                // Random giờ từ 7h đến 9h
+                                var inTime = date.AddHours(random.Next(7, 10))
+                                                 .AddMinutes(random.Next(0, 60));
+                                historyForFullTimes.Add(new History
+                                {
+                                    StatusHistory = StatusHistory.In,
+                                    TimeSweep = inTime,
+                                    EmployeeId = fulltimeEmployeeId
+                                });
+                            }
+
+                            if (hasOut)
+                            {
+                                // Random giờ từ 5h chiều đến 7h tối
+                                var outTime = date.AddHours(random.Next(17, 20))
+                                                  .AddMinutes(random.Next(0, 60));
+                                historyForFullTimes.Add(new History
+                                {
+                                    StatusHistory = StatusHistory.Out,
+                                    TimeSweep = outTime,
+                                    EmployeeId = fulltimeEmployeeId
+                                });
+                            }
+                            maxContinue++;
+                            isContinue = random.Next(0, 2) == 1;
+                        }
+
+                    }
+                }
+
+                //Thêm lịch sử chấm công cho nhân viên partime(Thêm cả partime plan vào trước) - Thêm từ đầu năm
+                var partimePlans = new List<PartimePlan>() { };
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    foreach (var partimeEmployeeId in partimeEmployeeIds)
+                    {
+
+                        bool isContinue = random.Next(0, 2) == 1; //Nếu đúng thì lại tiếp tục chạy lại
+                        int maxContinue = 0;
+                        while (isContinue && maxContinue <= 5) //Chỉ lặp lại max nhất 5 lần
+                        {
+                            var randomStart = RandomDate(random, startDate, endDate);
+
+                            // Random khoảng cách từ 1 đến 7 ngày
+                            int maxDays = Math.Min(7, (endDate - randomStart).Days);
+                            int randomDaysDifference = random.Next(1, maxDays + 1);
+
+                            // Ngày kết thúc
+                            var randomEnd = randomStart.AddDays(randomDaysDifference);
+
+                            var randomStatus = GetRandomStatus<StatusCalendar>(random);
+
+                            partimePlans.Add(new PartimePlan
+                            {
+                                StatusCalendar = randomStatus,
+                                EmployeeId = partimeEmployeeId,
+                                TimeStart = DateOnly.FromDateTime(randomStart),
+                                TimeEnd = DateOnly.FromDateTime(randomEnd)
+                            });
+                            maxContinue++;
+                            isContinue = random.Next(0, 2) == 1;
+                        }
+                    }
+                }
+                await _partimePlanRepository.AddRangeAsync(partimePlans);
+                await _partimePlanRepository.SaveChangeAsync();
+
+                //Các thành phần trong partimeplan đã có id
+                var userCalendars = new List<UserCalendar>();
+                foreach (var partimePlan in partimePlans)
+                {
+                    /*Nếu partimeplan có trạng thái là 
+                     * Draft = 1,
+                     * Submit = 2, - UserCalendarStatus = Submit
+                     * Approved = 3 - UserCalendarStatus = Approved
+                     * Refuse = 4 - UserCalendarStatus = Inactive
+                     * Cancel = 5 - UserCalendarStatus = Inactive
+                     */
+
+                    var startPartimePlan = partimePlan.TimeStart;
+                    var endPartimePlan = partimePlan.TimeEnd;
+                    var userCalendarStatus = GetUserCalendarStatus(partimePlan.StatusCalendar);
+
+                    for (var datePartimePlan = startPartimePlan; datePartimePlan <= endPartimePlan; datePartimePlan = datePartimePlan.AddDays(1))
+                    {
+                        var listShiftTimes = new List<ShiftTime>() { };
+                        bool isHasMorning = random.Next(0, 1) == 1;
+                        bool isHasAfternoon = random.Next(0, 1) == 1;
+                        bool isHasEvening = random.Next(0, 1) == 1;
+                        if (isHasMorning)
+                        {
+                            listShiftTimes.Add(ShiftTime.Morning);
+                        }
+                        if (isHasAfternoon)
+                        {
+                            listShiftTimes.Add(ShiftTime.Afternoon);
+                        }
+                        if (isHasEvening)
+                        {
+                            listShiftTimes.Add(ShiftTime.Evening);
+                        }
+                        foreach (var shiftTime in listShiftTimes)
+                        {
+                            userCalendars.Add(new UserCalendar
+                            {
+                                PartimePlanId = partimePlan.Id,
+                                UserCalendarStatus = userCalendarStatus,
+                                PresentShift = datePartimePlan,
+                                ShiftTime = shiftTime
+                            });
+                        }
+                    }
+                }
+                await _userCalendarRepository.AddRangeAsync(userCalendars);
+                await _userCalendarRepository.SaveChangeAsync();
+
+                //Thêm chấm công cho nhân viên partime - Chỉ chấm công vào những ngày mà có lịch làm thôi
+                var userCalendarApproveds = await (from uc in _userCalendarRepository.GetAllQueryAble()
+                                                   join p in _partimePlanRepository.GetAllQueryAble() on uc.PartimePlanId equals p.Id
+                                                   where uc.UserCalendarStatus == UserCalendarStatus.Approved
+                                                   select new { uc = uc, employeeId = p.EmployeeId })
+                                            .ToListAsync();
+
+                var historyForPartTimes = new List<History>() { };
+
+                //Duyệt qua các ngày làm việc được duyệt
+                foreach (var userCalendarApproved in userCalendarApproveds)
+                {
+                    bool isContinue = random.Next(0, 2) == 1; //Nếu đúng thì lại tiếp tục chạy lại
+                    int maxContinue = 0;
+                    while (isContinue && maxContinue <= 5)
+                    {
+                        var shiftTime = userCalendarApproved.uc.ShiftTime;
+                        DateTime timeIn = DateTime.MinValue;
+                        DateTime timeOut = DateTime.MinValue;
+
+                        switch (shiftTime)
+                        {
+                            case ShiftTime.Morning:
+                                // Ca sáng: vào từ 7h - 8h, ra từ 12h - 13h
+                                timeIn = GenerateRandomTime(7, 0, 8, 0);  // Vào lúc từ 7h đến 8h
+                                timeOut = GenerateRandomTime(12, 0, 12, 30);  // Ra lúc từ 12h đến 13h
+                                break;
+
+                            case ShiftTime.Afternoon:
+                                // Ca chiều: vào từ 13h - 14h, ra từ 18h - 19h
+                                timeIn = GenerateRandomTime(12, 31, 13, 0);  // Vào lúc từ 13h đến 14h
+                                timeOut = GenerateRandomTime(17, 0, 17, 30);  // Ra lúc từ 18h đến 19h
+                                break;
+
+                            case ShiftTime.Evening:
+                                // Ca tối: vào từ 18h - 19h, ra từ 22h - 23h
+                                timeIn = GenerateRandomTime(18, 0, 19, 0);  // Vào lúc từ 18h đến 19h
+                                timeOut = GenerateRandomTime(22, 0, 23, 59);  // Ra lúc từ 22h đến 23h
+                                break;
+                        }
+                        bool hasIn = random.Next(0, 2) == 1; // 50% có IN
+                        bool hasOut = random.Next(0, 2) == 1; // 50% có OUT
+                        if (hasIn)
+                        {
+                            historyForPartTimes.Add(new History
+                            {
+                                StatusHistory = StatusHistory.In,
+                                TimeSweep = timeIn,
+                                EmployeeId = userCalendarApproved.employeeId
+                            });
+                        }
+                        if (hasOut)
+                        {
+                            historyForPartTimes.Add(new History
+                            {
+                                StatusHistory = StatusHistory.Out,
+                                TimeSweep = timeOut,
+                                EmployeeId = userCalendarApproved.employeeId
+                            });
+                        }
+                        maxContinue++;
+                        isContinue = random.Next(0, 2) == 1;
+                    }
+                }
+
+                var histories = historyForFullTimes.Concat(historyForPartTimes);
+                await _historyRepository.AddRangeAsync(histories);
+                await _historyRepository.SaveChangeAsync();
+
+                return new ApiResponse<bool> { IsSuccess = true };
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        private DateTime GenerateRandomTime(int startHour, int endHour, int startMinute, int endMinute)
+        {
+            Random random = new Random();
+            int randomHour = random.Next(startHour, endHour + 1);
+            int randomMinute = random.Next(startMinute, endMinute + 1);
+
+            return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, randomHour, randomMinute, 0);
+        }
+
+        private DateTime RandomDate(Random random, DateTime minDate, DateTime maxDate)
+        {
+            int range = (maxDate - minDate).Days;
+            return minDate.AddDays(random.Next(range + 1));
+        }
+        private UserCalendarStatus GetUserCalendarStatus(StatusCalendar statusCalendar)
+        {
+            if (statusCalendar == StatusCalendar.Submit) return UserCalendarStatus.Submit;
+            if (statusCalendar == StatusCalendar.Approved) return UserCalendarStatus.Approved;
+            return UserCalendarStatus.Inactive;
+        }
+
+        private TEnum GetRandomStatus<TEnum>(Random random) where TEnum : Enum
+        {
+            var values = Enum.GetValues(typeof(TEnum))
+                    .Cast<TEnum>()
+                    .Where(value => !value.Equals((TEnum)Enum.ToObject(typeof(TEnum), 1)))
+                    .ToArray();
+
+            // Chọn một giá trị ngẫu nhiên từ danh sách đã lọc
+            return values[random.Next(values.Length)];
+        }
+        private TEnum GetRandomEnumValue<TEnum>(Random random) where TEnum : Enum
+        {
+            var values = Enum.GetValues(typeof(TEnum));
+            return (TEnum)values.GetValue(random.Next(values.Length))!;
+        }
 
         public async Task<ApiResponse<IEnumerable<TotalWorkHours>>> GetTotalHoursOfEmployeeWork(List<int> employeeIds, string startDate, string endDate)
         {

@@ -237,7 +237,7 @@ INSERT INTO [dbo].[Employees]
            ,[created_by]
            ,[updated_by])
 VALUES
-(1, N'0866058725', N'phucminhbeos@example.com', N'PhucLa', N'$2a$12$klwPgWXc/Ga3DQ0Cgvgr5uPxRYJajtxequqKIoPOjSc571CibWAE6', 1, N'avatar1.png', GETDATE(), GETDATE(), 0, 0),
+(1, N'0866058725', N'phucminhbeos@gmail.com', N'PhucLa', N'$2a$12$klwPgWXc/Ga3DQ0Cgvgr5uPxRYJajtxequqKIoPOjSc571CibWAE6', 1, N'avatar1.png', GETDATE(), GETDATE(), 0, 0),
 (2, N'0912345678', N'employee2@example.com', N'user2', N'password2', 1, N'avatar2.png', GETDATE(), GETDATE(), 0, 0),
 (3, N'0901112233', N'employee3@example.com', N'user3', N'password3', 1, N'avatar3.png', GETDATE(), GETDATE(), 0, 0),
 (4, N'0922334455', N'employee4@example.com', N'user4', N'password4', 1, N'avatar4.png', GETDATE(), GETDATE(), 0, 0),
