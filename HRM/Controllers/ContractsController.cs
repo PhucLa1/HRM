@@ -119,5 +119,19 @@ namespace HRM.Apis.Controllers
         {
             return Ok(await _contractsService.SignContract(contractId, signatureModel));
         }
+
+        /// <summary>
+        /// Sign contract by employee
+        /// </summary>
+        /// <response code="200">Return status after signing the api response</response>
+        //[Authorize(Policy = RoleExtensions.FULLTIME_ROLE||Policy = RoleExtensions.PARTIME_ROLE)]
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("create-contract-pdf/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> GenerateContractPDF(int contractId)
+        {
+            return Ok(await _contractsService.GenerateContractPDF(contractId));
+        }
     }
 }

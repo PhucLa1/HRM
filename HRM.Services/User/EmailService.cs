@@ -37,7 +37,6 @@ namespace HRM.Services.User
             _serverCompanySetting = serverCompanySetting.Value;
             templateContent = HandleFile.READ_FILE(FOLDER, TEMPLATE_FILE)
                 .Replace("{title}", _serverCompanySetting.CompanyName)
-                .Replace("{logoImage}", _serverCompanySetting.CompanyHost + _serverCompanySetting.AvatarUrl)
                 .Replace("{currentYear}", DateTime.Now.Year.ToString());
         }
         public async Task SendEmailToRecipient(Email emailRequest)

@@ -43,5 +43,8 @@ namespace HRM.Repositories.Dtos.Results
         public List<AllowanceResult>? AllowanceResults { get; set; }
         public List<InsuranceResult>? InsuranceResults { get; set; }
 
+        public string? FireUrlBase { get; set; } //2
+        public string? FileUrlSigned { get; set; } //3  
+
     }
 }

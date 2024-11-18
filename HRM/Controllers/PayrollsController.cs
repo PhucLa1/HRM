@@ -150,15 +150,60 @@ namespace HRM.Apis.Controllers
         }
 
         /// <summary>
+        /// Get all history saving of payroll
+        /// </summary>
+        /// <response code="200">Return all history saving of payrollin the metadata of api response</response>
+        [HttpGet]
+        [Route("table-schema/history")]
+        public async Task<IActionResult> GetAllPayrollHistory()
+        {
+            return Ok(await _payrollsService.GetAllPayrollHistory());
+        }
+
+        /// <summary>
+        /// Get history saving of payroll bt id (details)
+        /// </summary>
+        /// <response code="200">Return history saving of payroll by hisID in the metadata of api response</response>
+        [HttpGet]
+        [Route("table-schema/history/{payrollHistoryId}")]
+        public async Task<IActionResult> GetPayrollHistoryDetails(int payrollHistoryId)
+        {
+            return Ok(await _payrollsService.GetPayrollHistoryDetails(payrollHistoryId));
+        }
+
+        /// <summary>
+        /// Add history
+        /// </summary>
+        /// <response code="200">Return status of  saving in the metadata of api response</response>
+        [HttpPost]
+        [Route("table-schema/history")]
+        public async Task<IActionResult> SavePayrollHistory(PayrollHistoryModel payrollHistory)
+        {
+            return Ok(await _payrollsService.SavePayrollHistory(payrollHistory));
+        }
+
+        /// <summary>
+        /// Get history saving of payroll bt id (details)
+        /// </summary>
+        /// <response code="200">Return history deleting of payroll by hisID in the metadata of api response</response>
+        [HttpDelete]
+        [Route("table-schema/history/{payrollHistoryId}")]
+        public async Task<IActionResult> RemovePayrollHistory(int payrollHistoryId)
+        {
+            return Ok(await _payrollsService.RemovePayrollHistory(payrollHistoryId));
+        }
+
+
+        /// <summary>
         /// Get columns dynamic for payroll table 
         /// </summary>
         /// <response code="200">Return columns dynamic for payroll table in the metadata of api response</response>
-        [HttpGet]
+        [HttpPost]
         [Route("{year}/{month}")]
-        public async Task<IActionResult> GetPayrollTableData(int year, MonthPeriod month)
+        public async Task<IActionResult> GetPayrollTableData(int year, MonthPeriod month, [FromBody] PayrollFilter filter)
         {
             string period = year + "/" + month;
-            return Ok(await _payrollsService.GetPayrollTableData(new PayrollPeriod() { Month = month, Year = year }));
+            return Ok(await _payrollsService.GetPayrollTableData(new PayrollPeriod() { Month = month, Year = year }, filter.Dfrom, filter.Dto));
         }
 
         /// <summary>
@@ -190,9 +235,9 @@ namespace HRM.Apis.Controllers
         /// <response code="200">Return status of email forwarding in the metadata of api response</response>
         [HttpPost]
         [Route("employee-salary/payslip/{year}/{month}")]
-        public async Task<IActionResult> GetListEmployeeSCByPeriod(int year, MonthPeriod month, [FromBody] List<int> employeeIds)
+        public async Task<IActionResult> GetListEmployeeSCByPeriod(int year, MonthPeriod month, [FromBody] PayrollFilter filter)
         {
-            return Ok(await _payrollsService.SendPayslip(new PayrollPeriod() { Month = month, Year = year }, employeeIds));
+            return Ok(await _payrollsService.SendPayslip(new PayrollPeriod() { Month = month, Year = year }, filter.Dfrom, filter.Dto, filter.EmployeeIds));
         }
     }
 }

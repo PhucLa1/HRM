@@ -11,5 +11,6 @@
         public required string CompanyBankAccount { get; set; }
         public required string CompanyBank { get; set; }
         public required string CEO { get; set; }
+        public required string CompanySite { get; set; }
     }
 }
