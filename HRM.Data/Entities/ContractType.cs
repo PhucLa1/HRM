@@ -5,6 +5,5 @@ namespace HRM.Data.Entities
     public class ContractType : BaseEntities
     {
         public required string Name { get; set; }
-        public ICollection<Contract>? Contracts { get; set; }
     }
 }

@@ -5,12 +5,14 @@ namespace HRM.Repositories.Dtos.Models
 {
     public class ContractAdd
     {
+        public String Name { get; set; }
         public int ContractSalaryId { get; set; } //1
         public int ContractTypeId { get; set; } //1
         public DateTime StartDate { get; set; } //1
         public DateTime EndDate { get; set; } //1
         public TypeContract TypeContract { get; set; }//1
         public List<int>? AllowanceIds { get; set; }
+        public List<int>? InsuranceIds { get; set; }
     }
     public class ContractAddValidator : AbstractValidator<ContractAdd>
     {

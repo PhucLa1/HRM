@@ -344,6 +344,62 @@ namespace HRM.Data.Migrations
                     b.ToTable("Calendars");
                 });
 
+            modelBuilder.Entity("HRM.Data.Entities.Chart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChartType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PageFlexibleDashboardId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PropertyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PageFlexibleDashboardId");
+
+                    b.ToTable("Charts");
+                });
+
             modelBuilder.Entity("HRM.Data.Entities.Contract", b =>
                 {
                     b.Property<int>("Id")
@@ -1071,6 +1127,42 @@ namespace HRM.Data.Migrations
                     b.ToTable("LeaveApplications");
                 });
 
+            modelBuilder.Entity("HRM.Data.Entities.PageFlexibleDashboard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PageFlexibleDashboards");
+                });
+
             modelBuilder.Entity("HRM.Data.Entities.PartimePlan", b =>
                 {
                     b.Property<int>("Id")
@@ -1173,6 +1265,66 @@ namespace HRM.Data.Migrations
                     b.HasIndex("FomulaId");
 
                     b.ToTable("Payrolls");
+                });
+
+            modelBuilder.Entity("HRM.Data.Entities.PayrollHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DisplayColumns")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayrollColumn")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayrollData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayrollHeader")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PayrollHistories");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Position", b =>
@@ -1644,6 +1796,15 @@ namespace HRM.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HRM.Data.Entities.Chart", b =>
+                {
+                    b.HasOne("HRM.Data.Entities.PageFlexibleDashboard", null)
+                        .WithMany("Charts")
+                        .HasForeignKey("PageFlexibleDashboardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HRM.Data.Entities.Contract", b =>
                 {
                     b.HasOne("HRM.Data.Entities.ContractSalary", "ContractSalary")
@@ -1653,13 +1814,13 @@ namespace HRM.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("HRM.Data.Entities.ContractType", "ContractType")
-                        .WithMany("Contracts")
+                        .WithMany()
                         .HasForeignKey("ContractTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HRM.Data.Entities.Position", "Position")
-                        .WithMany("contracts")
+                        .WithMany()
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1813,11 +1974,13 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.Position", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.Department", null)
+                    b.HasOne("HRM.Data.Entities.Department", "Department")
                         .WithMany("positions")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("HRM.Data.Entities.Questions", b =>
@@ -1898,11 +2061,6 @@ namespace HRM.Data.Migrations
                     b.Navigation("ContractInsurances");
                 });
 
-            modelBuilder.Entity("HRM.Data.Entities.ContractType", b =>
-                {
-                    b.Navigation("Contracts");
-                });
-
             modelBuilder.Entity("HRM.Data.Entities.Deduction", b =>
                 {
                     b.Navigation("deductionDetails");
@@ -1942,6 +2100,11 @@ namespace HRM.Data.Migrations
                     b.Navigation("recruitmentWebs");
                 });
 
+            modelBuilder.Entity("HRM.Data.Entities.PageFlexibleDashboard", b =>
+                {
+                    b.Navigation("Charts");
+                });
+
             modelBuilder.Entity("HRM.Data.Entities.PartimePlan", b =>
                 {
                     b.Navigation("UserCalendars");
@@ -1958,8 +2121,6 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.Position", b =>
                 {
-                    b.Navigation("contracts");
-
                     b.Navigation("jobPostings");
                 });
 

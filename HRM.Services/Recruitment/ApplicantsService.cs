@@ -78,101 +78,101 @@ namespace HRM.Services.Recruitment
 					applicant.FileDataUrl = HandleFile.UPLOAD_GETPATH(folder, applicantAdd.file);
 				}
 
-				await _baseRepository.AddAsync(applicant);
-				await _baseRepository.SaveChangeAsync();
-				return new ApiResponse<bool> { IsSuccess = true };
-			}
-			catch (Exception ex)
-			{
-				var innerException = ex.InnerException?.Message ?? ex.Message;
-				throw new Exception($"An error occurred: {innerException}");
-			}
-		}
+                await _baseRepository.AddAsync(applicant);
+                await _baseRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                var innerException = ex.InnerException?.Message ?? ex.Message;
+                throw new Exception($"An error occurred: {innerException}");
+            }
+        }
 
-		public async Task<ApiResponse<IEnumerable<ApplicantResult>>> GetAllApplicant()
-		{
-			try
-			{
-				return new ApiResponse<IEnumerable<ApplicantResult>>
-				{
-					Metadata = await (from a in _baseRepository.GetAllQueryAble()
-									  join p in _positionRepository.GetAllQueryAble() on a.PositionId equals p.Id into positionJoin
-									  from p in positionJoin.DefaultIfEmpty()
-									  join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
-									  from t in testJoin.DefaultIfEmpty()
-									  select new ApplicantResult
-									  {
-										  Id = a.Id,
-										  Name = a.Name,
-										  Email = a.Email,
-										  Phone = a.PhoneNumber,
-										  FileDataStore = a.FileDataUrl,
-										  PositionId = p.Id,
-										  PositionName = p.Name,
-										  Rate = a.Rate,
-										  TestId = t.Id,
-										  TestName = t.Name,
-										  InterviewerName = a.InterviewerName,
-										  Status = a.Status
-									  }).ToListAsync(),
-					IsSuccess = true
-				};
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(ex.Message);
-			}
-		}
+        public async Task<ApiResponse<IEnumerable<ApplicantResult>>> GetAllApplicant()
+        {
+            try
+            {
+                return new ApiResponse<IEnumerable<ApplicantResult>>
+                {
+                    Metadata = await (from a in _baseRepository.GetAllQueryAble()
+                                      join p in _positionRepository.GetAllQueryAble() on a.PositionId equals p.Id into positionJoin
+                                      from p in positionJoin.DefaultIfEmpty()
+                                      join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
+                                      from t in testJoin.DefaultIfEmpty()
+                                      select new ApplicantResult
+                                      {
+                                          Id = a.Id,
+                                          Name = a.Name,
+                                          Email = a.Email,
+                                          Phone = a.PhoneNumber,
+                                          FileDataStore = a.FileDataUrl,
+                                          PositionId = p.Id,
+                                          PositionName = p.Name,
+                                          Rate = a.Rate,
+                                          TestId = t.Id,
+                                          TestName = t.Name,
+                                          InterviewerName = a.InterviewerName,
+                                          Status = a.Status
+                                      }).ToListAsync(),
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
-		public async Task<ApiResponse<IEnumerable<ApplicantResult>>> GetApplicantById(int id)
-		{
-			try
-			{
-				return new ApiResponse<IEnumerable<ApplicantResult>>
-				{
-					Metadata = await (from a in _baseRepository.GetAllQueryAble()
-									  join p in _positionRepository.GetAllQueryAble() on a.PositionId equals p.Id into positionJoin
-									  from p in positionJoin.DefaultIfEmpty()
-									  join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
-									  from t in testJoin.DefaultIfEmpty()
-									  where a.Id == id
-									  select new ApplicantResult
-									  {
-										  Id = a.Id,
-										  Name = a.Name,
-										  Email = a.Email,
-										  Phone = a.PhoneNumber,
-										  FileDataStore = a.FileDataUrl,
-										  PositionId = p.Id,
-										  PositionName = p.Name,
-										  Rate = a.Rate,
-										  TestId = t.Id,
-										  TestName = t.Name,
-										  InterviewerName = a.InterviewerName,
-										  Status = a.Status
-									  }).ToListAsync(),
-					IsSuccess = true
-				};
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(ex.Message);
-			}
-		}
+        public async Task<ApiResponse<IEnumerable<ApplicantResult>>> GetApplicantById(int id)
+        {
+            try
+            {
+                return new ApiResponse<IEnumerable<ApplicantResult>>
+                {
+                    Metadata = await (from a in _baseRepository.GetAllQueryAble()
+                                      join p in _positionRepository.GetAllQueryAble() on a.PositionId equals p.Id into positionJoin
+                                      from p in positionJoin.DefaultIfEmpty()
+                                      join t in _testRepository.GetAllQueryAble() on a.TestId equals t.Id into testJoin
+                                      from t in testJoin.DefaultIfEmpty()
+                                      where a.Id == id
+                                      select new ApplicantResult
+                                      {
+                                          Id = a.Id,
+                                          Name = a.Name,
+                                          Email = a.Email,
+                                          Phone = a.PhoneNumber,
+                                          FileDataStore = a.FileDataUrl,
+                                          PositionId = p.Id,
+                                          PositionName = p.Name,
+                                          Rate = a.Rate,
+                                          TestId = t.Id,
+                                          TestName = t.Name,
+                                          InterviewerName = a.InterviewerName,
+                                          Status = a.Status
+                                      }).ToListAsync(),
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
-		public async Task<ApiResponse<bool>> RemoveApplicant(int id)
-		{
-			try
-			{
-				await _baseRepository.RemoveAsync(id);
-				await _baseRepository.SaveChangeAsync();
-				return new ApiResponse<bool> { IsSuccess = true };
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(ex.Message);
-			}
-		}
+        public async Task<ApiResponse<bool>> RemoveApplicant(int id)
+        {
+            try
+            {
+                await _baseRepository.RemoveAsync(id);
+                await _baseRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
 		public async Task<ApiResponse<bool>> UpdateApplicant(int id, ApplicantUpsert applicantUpdate)
 		{
@@ -204,81 +204,81 @@ namespace HRM.Services.Recruitment
 			}
 		}
 
-		public async Task<ApiResponse<bool>> UpdateApplicantPoint(int id, double point)
-		{
-			try
-			{
-				// Lấy thông tin ứng viên theo ID
-				var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstOrDefaultAsync();
-				if (applicant == null)
-				{
-					return ApiResponse<bool>.FailtureValidation(applicant);
-				}
-				// Lấy toàn bộ điểm từ TestResult của ứng viên
-				var testResults = await _testResultRepository.GetAllQueryAble()
-					.Where(e => e.ApplicantId == id)
-					.ToListAsync();
+        public async Task<ApiResponse<bool>> UpdateApplicantPoint(int id, double point)
+        {
+            try
+            {
+                // Lấy thông tin ứng viên theo ID
+                var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstOrDefaultAsync();
+                if (applicant == null)
+                {
+                    return ApiResponse<bool>.FailtureValidation(applicant);
+                }
+                // Lấy toàn bộ điểm từ TestResult của ứng viên
+                var testResults = await _testResultRepository.GetAllQueryAble()
+                    .Where(e => e.ApplicantId == id)
+                    .ToListAsync();
 
-				// Tính tổng điểm và số lượng câu hỏi
-				double totalPoints = testResults.Sum(tr => tr.Point);
-				int questionCount = testResults.Count;
+                // Tính tổng điểm và số lượng câu hỏi
+                double totalPoints = testResults.Sum(tr => tr.Point);
+                int questionCount = testResults.Count;
 
 				// Tính điểm trung bình và làm tròn tới 1 chữ số thập phân (hàng phần trăm)
 				double averagePoint = questionCount > 0 ? totalPoints / questionCount : 0;
 				applicant.Rate = Math.Round(averagePoint, 1);
 
-				// Cập nhật thông tin ứng viên
-				_baseRepository.Update(applicant);
-				await _baseRepository.SaveChangeAsync();
+                // Cập nhật thông tin ứng viên
+                _baseRepository.Update(applicant);
+                await _baseRepository.SaveChangeAsync();
 
-				return new ApiResponse<bool> { IsSuccess = true };
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(ex.Message); // Trả về thông báo lỗi nếu có ngoại lệ
-			}
-		}
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message); // Trả về thông báo lỗi nếu có ngoại lệ
+            }
+        }
 
 
-		//public async Task<ApiResponse<bool>> UpdateApplicantPoint(int id, double point)
-		//{
-		//	try
-		//	{
-		//		var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
-		//		var testResult = await _testResultRepository.GetAllQueryAble().Where(e => e.ApplicantId == id).ToListAsync();
-		//		//Nhập lại dữ liệu
-		//		applicant.Rate = point;
-		//		_baseRepository.Update(applicant);
-		//		await _baseRepository.SaveChangeAsync();
-		//		return new ApiResponse<bool> { IsSuccess = true };
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		throw new Exception(ex.Message);
-		//	}
-		//}
+        //public async Task<ApiResponse<bool>> UpdateApplicantPoint(int id, double point)
+        //{
+        //	try
+        //	{
+        //		var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+        //		var testResult = await _testResultRepository.GetAllQueryAble().Where(e => e.ApplicantId == id).ToListAsync();
+        //		//Nhập lại dữ liệu
+        //		applicant.Rate = point;
+        //		_baseRepository.Update(applicant);
+        //		await _baseRepository.SaveChangeAsync();
+        //		return new ApiResponse<bool> { IsSuccess = true };
+        //	}
+        //	catch (Exception ex)
+        //	{
+        //		throw new Exception(ex.Message);
+        //	}
+        //}
 
-		//public async Task<ApiResponse<bool>> UpdateApplicantTest(int id, ApplicantTestAdd applicantUpdate)
-		//{
-		//	try
-		//	{
-		//		var resultValidation = _applicantUpsertValidator.Validate();
-		//		if (!resultValidation.IsValid)
-		//		{
-		//			return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
-		//		}
-		//		var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
-		//		//Nhập lại dữ liệu
-		//		applicant.TestId = applicantUpdate.TestId ?? null;
-		//		//Lưu thông tin
-		//		_baseRepository.Update(applicant);
-		//		await _baseRepository.SaveChangeAsync();
-		//		return new ApiResponse<bool> { IsSuccess = true };
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		throw new Exception(ex.Message);
-		//	}
-		//}
-	}
+        //public async Task<ApiResponse<bool>> UpdateApplicantTest(int id, ApplicantTestAdd applicantUpdate)
+        //{
+        //	try
+        //	{
+        //		var resultValidation = _applicantUpsertValidator.Validate();
+        //		if (!resultValidation.IsValid)
+        //		{
+        //			return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+        //		}
+        //		var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+        //		//Nhập lại dữ liệu
+        //		applicant.TestId = applicantUpdate.TestId ?? null;
+        //		//Lưu thông tin
+        //		_baseRepository.Update(applicant);
+        //		await _baseRepository.SaveChangeAsync();
+        //		return new ApiResponse<bool> { IsSuccess = true };
+        //	}
+        //	catch (Exception ex)
+        //	{
+        //		throw new Exception(ex.Message);
+        //	}
+        //}
+    }
 }

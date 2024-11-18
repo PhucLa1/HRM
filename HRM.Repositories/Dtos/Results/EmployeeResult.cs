@@ -25,5 +25,10 @@ namespace HRM.Repositories.Dtos.Results
         public string PhoneNumber { get; set; } = "";
         public string Email { get; set; } = "";
 
+        public int ContractId { get; set; } = 0;
+        public List<int> TaxDeductionIds { get; set; } = new List<int>();
+        public string UserName { get; set; } = "";
+        public string Password { get; set; } = "";
+
     }
 }

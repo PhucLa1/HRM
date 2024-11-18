@@ -13,7 +13,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/contracts")]
     [ApiController]
-    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
+    //[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class ContractsController : ControllerBase
     {
         private readonly IContractsService _contractsService;
@@ -106,6 +106,32 @@ namespace HRM.Apis.Controllers
         public async Task<IActionResult> RemoveContract(int id)
         {
             return Ok(await _contractsService.RemoveContract(id));
+        }
+
+        /// <summary>
+        /// Sign contract by employee
+        /// </summary>
+        /// <response code="200">Return status after signing the api response</response>
+        [HttpPost]
+        [Route("add-employee-signature/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> AddEmployeeSignature(int contractId, [FromForm] DigitalSignature signatureModel)
+        {
+            return Ok(await _contractsService.SignContract(contractId, signatureModel));
+        }
+
+        /// <summary>
+        /// Sign contract by employee
+        /// </summary>
+        /// <response code="200">Return status after signing the api response</response>
+        //[Authorize(Policy = RoleExtensions.FULLTIME_ROLE||Policy = RoleExtensions.PARTIME_ROLE)]
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("create-contract-pdf/{contractId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> GenerateContractPDF(int contractId)
+        {
+            return Ok(await _contractsService.GenerateContractPDF(contractId));
         }
     }
 }

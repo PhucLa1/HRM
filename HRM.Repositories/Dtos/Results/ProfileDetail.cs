@@ -1,4 +1,6 @@
-﻿namespace HRM.Repositories.Dtos.Results
+﻿using HRM.Data.Entities;
+
+namespace HRM.Repositories.Dtos.Results
 {
     public class ProfileDetail
     {
@@ -27,5 +29,7 @@
 
         public string? FireUrlBase { get; set; }
         public string? FileUrlSigned { get; set; }
+        public int? ContractId { get; set; }
+        public EmployeeSignStatus EmployeeSignStatus { get; set; }
     }
 }

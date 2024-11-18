@@ -8,7 +8,7 @@ namespace HRM.Data.Entities
         public int CurrentPositionsFilled { get; set; }
         public int TotalPositionsNeeded { get; set; }
         public int DepartmentId { get; set; }
-        public ICollection<Contract>? contracts { get; set; }
+        public Department? Department { get; set; }
         public ICollection<JobPosting>? jobPostings { get; set; }
     }
 }
