@@ -127,7 +127,18 @@ namespace HRM.Apis.Controllers
         }
 
 
-
+        /// <summary>
+        /// Send login information to employee defination
+        /// </summary>
+        /// <response code="200">Return the api response when sent succesfully</response>
+        [HttpPost]
+        [Route("send-login-info")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+        [SwaggerRequestExample(typeof(EmployeeUpsert), typeof(EmployeeUpsert))]
+        public async Task<IActionResult> SendLoginInfo([FromBody] EmployeeUpsert employeeUpsert)
+        {
+            return Ok(await _employeesService.SendEmailToEmployee(employeeUpsert));
+        }
 
         /// <summary>
         /// Get current profile of current user

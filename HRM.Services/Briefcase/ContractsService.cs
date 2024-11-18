@@ -39,6 +39,7 @@ namespace HRM.Services.Briefcase
         Task<ApiResponse<bool>> UpdateContract(int id, ContractUpsert contractUpdate);
         Task<ApiResponse<bool>> UpdateContractStatus(int id, ContractStatus status);
         Task<ApiResponse<bool>> SignContract(int contractId, DigitalSignature signatureModel);
+        Task<ApiResponse<bool>> GenerateContractPDF(int id);
     }
     public class ContractsService : IContractsService
     {
@@ -161,7 +162,10 @@ namespace HRM.Services.Briefcase
                                                                 Name = insurance.Name,
                                                                 PercentCompany = insurance.PercentCompany,
                                                                 PercentEmployee = insurance.PercentEmployee
-                                                            }).ToList()
+                                                            }).ToList(),
+                                        FireUrlBase = c.FireUrlBase,
+                                        FileUrlSigned = c.FileUrlSigned,
+
                                     }).ToListAsync();
                 return new ApiResponse<IEnumerable<ContractResult>>
                 {
@@ -782,5 +786,111 @@ namespace HRM.Services.Briefcase
             }
         }
 
+        public async Task<ApiResponse<bool>> GenerateContractPDF(int id)
+        {
+            try
+            {
+                //Update thông tin về hợp đồng sau khi ứng viên điền
+                var contract = await _contractRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if(contract == null) throw new Exception("Hợp đồng không tồn tại");
+
+                //Tạo mới file PDF hợp đồng và trả về URL cho ứng cử viên xem lại
+                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", CONTRACT_FOLDER, CONTRACT_TEMPLATE_WORD_FILE);
+                string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", CONTRACT_FOLDER, $"{contract.Name}-hop-dong-so-{id}.docx");
+
+                //Tạo bản sao mới của file
+                File.Copy(templatePath, outputPath, true);
+
+                //Mở file và ghi file
+                try
+                {
+                    using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(outputPath, true))
+                    {
+                        if (wordDoc.MainDocumentPart != null)
+                        {
+                            var body = wordDoc.MainDocumentPart.Document.Body;
+                            if (body != null)
+                            {
+                                //Tạo dictionary
+                                var replacements = new Dictionary<string, string>
+                                {
+                                    { "{{DAY}}", ConvertDayOfWeekFromEngToVn(DateTime.Now.DayOfWeek.ToString()) },
+                                    { "{{DATE}}", DateTime.Now.Day.ToString() },
+                                    { "{{MONTH}}", DateTime.Now.Month.ToString() },
+                                    { "{{YEAR}}", DateTime.Now.Year.ToString() },
+                                    { "{{CONTRACT_ID}}", id.ToString() },
+                                    { "{{COMPANY_NAME}}", _serverCompanySetting.CompanyName },
+                                    { "{{COMPANY_LOCATION}}", _serverCompanySetting.CompanyLocation },
+                                    { "{{COMPANY_PHONENUMBER}}", _serverCompanySetting.CompanyPhonenumber },
+                                    { "{{COMPANY_TAX_NUMBER}}", _serverCompanySetting.CompanyTax },
+                                    { "{{COMPANY_BANK_ACCOUNT}}", _serverCompanySetting.CompanyBankAccount },
+                                    { "{{COMPANY_BANK}}", _serverCompanySetting.CompanyBank },
+                                    { "{{APPLICANT_FULL_NAME}}", contract.Name??"Không có" },
+                                    { "{{APPLICANT_DOB}}", contract.DateOfBirth.ToString("dd/MM/yyyy") },
+                                    { "{{APPLICANT_SEX}}", contract.Gender == true ? "Nam" : "Nữ" },
+                                    { "{{APPLICANT_COUNTRYSIDE}}", contract.CountrySide??"Không có" },
+                                    { "{{APPLICANT_ADDRESS}}", contract.Address??"Không có" },
+                                    { "{{APPLICANT_NATIONALID}}", contract.NationalID??"Không có" },
+                                    { "{{APPLICANT_START_DATE}}", contract.NationalStartDate.ToString("dd/MM/yyyy") },
+                                    { "{{APPLICANT_NATIONAL_ADDRESS}}", contract.NationalAddress??"Không có" },
+                                    { "{{APPLICANT_LEVEL}}", contract.Level??"Không có" },
+                                    { "{{APPLICANT_MAJOR}}", contract.Major??"Không có" },
+                                    { "{{CONTRACT_TYPE}}", contract.TypeContract.ToString() },
+                                    { "{{CONTRACT_TIME}}", CalculateDifferenceInYearsOrMonths(contract.StartDate,contract.EndDate) },
+                                    { "{{CONTRACT_START_DATE}}", contract.StartDate.ToString("dd/MM/yyyy") },
+                                    { "{{CONTRACT_END_DATE}}", contract.EndDate.ToString("dd/MM/yyyy") },
+                                    //{ "{{EMPLOYEE_DEPARTMENT}}", contract.Department.Name },
+                                    { "{{EMPLOYEE_POSITION}}", contract.Position?.Name??"Không có" },
+                                    { "{{COMPANY_CEO}}", _serverCompanySetting.CEO },
+                                    { "{{CONTRACT_WORK_TIME}}", contract.ContractSalary?.RequiredHours.ToString()??"Không có" },
+                                    { "{{CONTRACT_TYPE_SALARY}}",contract.ContractSalary?.BaseSalary.ToString()??"Không có" },
+                                    { "{{ALLOWANCE}}", "" },
+                                    { "{{COMPANY_SIGNATURE}}", DateTime.Now.Date.ToString() },
+                                };
+
+                                // Thay thế các placeholder với thông tin thực tế
+                                foreach (var replacement in replacements)
+                                {
+                                    ReplacePlaceholder(body, replacement.Key, replacement.Value);
+                                }
+
+                            }
+                            wordDoc.MainDocumentPart.Document.Save();
+                        }
+                    }
+
+                }
+                catch (FileFormatException ex)
+                {
+                    throw new Exception($"File format exception: {ex.Message}");
+                }
+                catch (IOException ex)
+                {
+                     throw new Exception($"I/O exception: {ex.Message}");
+                }
+
+                //Chuyển file word thành file PDF
+                AsposeDocument doc = new AsposeDocument(outputPath);
+                string pdfOutputPath = Path.ChangeExtension(outputPath, ".pdf");
+                doc.Save(pdfOutputPath, SaveFormat.Pdf);
+
+                //Xóa bản word cũ
+                HandleFile.DELETE_FILE(FOLER, outputPath);
+                contract.FireUrlBase = $"{contract.Name}-hop-dong-so-{id}.pdf";
+                contract.FileUrlSigned = $"{contract.Name}-hop-dong-so-{id}_signed.pdf";
+                _contractRepository.Update(contract);
+                await _contractRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { IsSuccess = false, Message=new List<string>() { ex.Message} };
+            }
+        }
     }
 }

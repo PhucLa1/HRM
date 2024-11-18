@@ -30,6 +30,7 @@ namespace HRM.Services.User
         Task<ApiResponse<bool>> RemoveEmployee(int id);
         Task<ApiResponse<ProfileDetail>> GetCurrentProfileUser();
         Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription();
+        Task<ApiResponse<bool>> SendEmailToEmployee(EmployeeUpsert employeeAdd);
     }
     public class EmployeesService : IEmployeesService
     {
@@ -46,6 +47,7 @@ namespace HRM.Services.User
         private const string FOLDER_CV_NAME = "CV";
         private readonly IBaseRepository<TaxDeductionDetails> _taxDeductionDetailsRepository;
         private readonly IValidator<EmployeeUpsert> _employeeUpsertValidator;
+        private readonly IEmailService _emailService;
         public EmployeesService(
             IBaseRepository<Employee> employeeRepository,
             IBaseRepository<EmployeeImage> employeeImageRepository,
@@ -57,7 +59,8 @@ namespace HRM.Services.User
             IBaseRepository<Department> departmentRepository,
             IBaseRepository<Position> positionRepository,
             IValidator<EmployeeUpsert> employeeUpsertValidator,
-            IBaseRepository<ContractType> contractTypeRepository)
+            IBaseRepository<ContractType> contractTypeRepository,
+            IEmailService emailService)
         {
             _employeeRepository = employeeRepository;
             _employeeImageRepository = employeeImageRepository;
@@ -72,6 +75,7 @@ namespace HRM.Services.User
             _departmentRepository = departmentRepository;
             _positionRepository = positionRepository;
             _employeeUpsertValidator = employeeUpsertValidator;
+            _emailService = emailService;
         }
         public async Task<ApiResponse<List<LabelDescriptions>>> GetAllLabelDescription()
         {
@@ -566,6 +570,48 @@ namespace HRM.Services.User
                         throw new Exception(ex.Message);
                     }
                 }
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { IsSuccess = false, Message = new List<string>() { ex.Message } };
+            }
+        }
+
+        public async Task<ApiResponse<bool>> SendEmailToEmployee(EmployeeUpsert employeeAdd)
+        {
+            try
+            {
+                var resultValidation = _employeeUpsertValidator.Validate(employeeAdd);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
+                }
+        
+                var selectedContract = await _contractRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == employeeAdd.ContractId);
+                if (selectedContract != null)
+                {
+                    var bodyContentEmail = HandleFile.READ_FILE("Email", "LoginInfo.html")
+                     .Replace("{employeeName}", selectedContract.Name)
+                     .Replace("{linkWebsite}", $"{_serverCompanySetting.CompanySite}/login-employee")
+                     .Replace("{companyName}", _serverCompanySetting.CompanyName)
+                     .Replace("{email}", employeeAdd.Email)
+                     .Replace("{password}", employeeAdd.Password);
+                    var bodyEmail = _emailService.TemplateContent
+                        .Replace("{content}", bodyContentEmail);
+
+                    var email = new Email()
+                    {
+                        To = employeeAdd.Email,
+                        Body = bodyEmail,
+                        Subject = "Thông báo về kích hoạt tài khoản phần mềm myHRM"
+                    };
+                    await _emailService.SendEmailToRecipient(email);
+
+                }
+                else throw new Exception("Không tìm thấy hợp đồng!");
+
+
                 return new ApiResponse<bool> { IsSuccess = true };
             }
             catch (Exception ex)
