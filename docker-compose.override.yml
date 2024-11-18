@@ -1,0 +1,12 @@
+services:
+  hrm.apis:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=7025
+      - ASPNETCORE_HTTPS_PORTS=7021
+    ports:
+      - "7025:7025"
+      - "7021:7021"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

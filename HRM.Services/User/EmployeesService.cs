@@ -45,7 +45,7 @@ namespace HRM.Services.User
             IValidator<FaceRegis> faceRegisValidator,
             IBaseRepository<Contract> contractRepository,
             IOptions<CompanySetting> serverCompanySetting,
-            IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository)
+            IBaseRepository<TaxDeductionDetails> taxDeductionDetailsRepository,
             
             IBaseRepository<ContractSalary> contractSalaryRepository,
             IBaseRepository<Department> departmentRepository,

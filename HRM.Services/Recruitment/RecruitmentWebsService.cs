@@ -62,6 +62,9 @@ namespace HRM.Services.Recruitment
 				var jobpost = await (from jp in _jobPostingRepository.GetAllQueryAble()
 										 where jp.Id == recruitmentWebAdd.JobPostingId
 										 select jp).FirstOrDefaultAsync();
+				var web = await (from w in _webRepository.GetAllQueryAble()
+									 where w.Id == recruitmentWebAdd.WebId
+									 select w).FirstOrDefaultAsync();
 				var Mess = await (from jp in _jobPostingRepository.GetAllQueryAble()
 									  join p in _positionRepository.GetAllQueryAble() on jp.PositionId equals p.Id into positionJoin
 									  from p in positionJoin.DefaultIfEmpty() // Left join on positions

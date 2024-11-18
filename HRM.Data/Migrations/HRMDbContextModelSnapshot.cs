@@ -180,9 +180,6 @@ namespace HRM.Data.Migrations
                     b.Property<string>("FileDataUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("InterviewerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("InterviewerName")
                         .HasColumnType("nvarchar(max)");
 
@@ -214,8 +211,6 @@ namespace HRM.Data.Migrations
                         .HasColumnName("updated_by");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InterviewerId");
 
                     b.HasIndex("PositionId");
 
@@ -1619,10 +1614,6 @@ namespace HRM.Data.Migrations
 
             modelBuilder.Entity("HRM.Data.Entities.Applicants", b =>
                 {
-                    b.HasOne("HRM.Data.Entities.Employee", "Interviewer")
-                        .WithMany()
-                        .HasForeignKey("InterviewerId");
-
                     b.HasOne("HRM.Data.Entities.Position", "Position")
                         .WithMany()
                         .HasForeignKey("PositionId")
@@ -1632,8 +1623,6 @@ namespace HRM.Data.Migrations
                     b.HasOne("HRM.Data.Entities.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId");
-
-                    b.Navigation("Interviewer");
 
                     b.Navigation("Position");
 
