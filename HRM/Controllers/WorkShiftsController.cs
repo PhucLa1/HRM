@@ -61,6 +61,17 @@ namespace HRM.Apis.Controllers
             return Ok(await _workShiftService.GetAllPartimePlanByCurrentEmployeeId());
         }
 
+        /// <summary>
+        /// Seeding data for 3 tables : usercalendar, history, partimeplan 
+        /// </summary>
+        /// <response code="200">Return the api response</response>
+        [HttpPost]
+        [Route("seeding-data-automation")]
+        public async Task<IActionResult> SeedingDataAutomationForWorkShift()
+        {
+            return Ok(await _workShiftService.SeedingDataAutomationForWorkShift());
+        }
+
 
 
         /// <summary>

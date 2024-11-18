@@ -262,8 +262,8 @@ namespace HRM.Services.Dashboard
                         }
                         else if (property == "Employee")
                         {
-                            var employeeInfo = c.Contract.GetType().GetProperty(properyName.Split("_")[1]);
-                            var employeeValue = employeeInfo?.GetValue(c.Contract)?.ToString()!;
+                            var employeeInfo = c.Employee.GetType().GetProperty(properyName.Split("_")[1]);
+                            var employeeValue = employeeInfo?.GetValue(c.Employee)?.ToString()!;
                             var employeeType = employeeInfo?.PropertyType.ToString();
                             contractDictionary.Add(properyName, new TypeResult
                             {
@@ -273,8 +273,8 @@ namespace HRM.Services.Dashboard
                         }
                         else if (property == "Department")
                         {
-                            var departmentInfo = c.Contract.GetType().GetProperty(properyName.Split("_")[1]);
-                            var departmentValue = departmentInfo?.GetValue(c.Contract)?.ToString()!;
+                            var departmentInfo = c.Department.GetType().GetProperty(properyName.Split("_")[1]);
+                            var departmentValue = departmentInfo?.GetValue(c.Department)?.ToString()!;
                             var departmentType = departmentInfo?.PropertyType.ToString();
                             contractDictionary.Add(properyName, new TypeResult
                             {
@@ -284,8 +284,8 @@ namespace HRM.Services.Dashboard
                         }
                         else if (property == "ContractType")
                         {
-                            var contractTypeInfo = c.Contract.GetType().GetProperty(properyName.Split("_")[1]);
-                            var contractTypeValue = contractTypeInfo?.GetValue(c.Contract)?.ToString()!;
+                            var contractTypeInfo = c.ContractType.GetType().GetProperty(properyName.Split("_")[1]);
+                            var contractTypeValue = contractTypeInfo?.GetValue(c.ContractType)?.ToString()!;
                             var contractTypeType = contractTypeInfo?.PropertyType.ToString();
                             contractDictionary.Add(properyName, new TypeResult
                             {
@@ -295,8 +295,8 @@ namespace HRM.Services.Dashboard
                         }
                         else if (property == "ContractSalary")
                         {
-                            var contractSalaryInfo = c.Contract.GetType().GetProperty(properyName.Split("_")[1]);
-                            var contractSalaryValue = contractSalaryInfo?.GetValue(c.Contract)?.ToString()!;
+                            var contractSalaryInfo = c.ContractSalary.GetType().GetProperty(properyName.Split("_")[1]);
+                            var contractSalaryValue = contractSalaryInfo?.GetValue(c.ContractSalary)?.ToString()!;
                             var contractSalaryType = contractSalaryInfo?.PropertyType.ToString();
                             contractDictionary.Add(properyName, new TypeResult
                             {
@@ -306,8 +306,8 @@ namespace HRM.Services.Dashboard
                         }
                         else if (property == "Position")
                         {
-                            var positionInfo = c.Contract.GetType().GetProperty(properyName.Split("_")[1]);
-                            var positionValue = positionInfo?.GetValue(c.Contract)?.ToString()!;
+                            var positionInfo = c.Position.GetType().GetProperty(properyName.Split("_")[1]);
+                            var positionValue = positionInfo?.GetValue(c.Position)?.ToString()!;
                             var positionType = positionInfo?.PropertyType.ToString();
                             contractDictionary.Add(properyName, new TypeResult
                             {
