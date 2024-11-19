@@ -25,6 +25,7 @@ namespace HRM.Services.Recruitment
 		Task<ApiResponse<bool>> AddNewApplicant(ApplicantUpsert applicantAdd);
 		Task<ApiResponse<bool>> UpdateApplicant(int id, ApplicantUpsert applicantUpdate);
 		Task<ApiResponse<bool>> UpdateApplicantPoint(int id, double point);
+        Task<ApiResponse<bool>> UpdateApplicantTest(int id, ApplicantTestUpdate applicantUpdate);
 		Task<ApiResponse<bool>> RemoveApplicant(int id);
 	}
 	public class ApplicantsService : IApplicantsService
@@ -36,11 +37,13 @@ namespace HRM.Services.Recruitment
 		private readonly IBaseRepository<Contract> _contractRepository;
 		private readonly IBaseRepository<TestResult> _testResultRepository;
 		private readonly IValidator<ApplicantUpsert> _applicantUpsertValidator;
+		private readonly IValidator<ApplicantTestUpdate> _applicantTestUpdateValidator;
 		private readonly IMapper _mapper;
 		public ApplicantsService(
 			IBaseRepository<Applicants> baseRepository,
 			IValidator<ApplicantUpsert> applicantUpsertValidator,
-			IBaseRepository<Test> testRepository,
+			IValidator<ApplicantTestUpdate> applicantTestUpdateValidator,
+		IBaseRepository<Test> testRepository,
 			IBaseRepository<Employee> employeeRepository,
 			IBaseRepository<Contract> contractRepository,
 		IBaseRepository<TestResult> testResultRepository,
@@ -48,6 +51,7 @@ namespace HRM.Services.Recruitment
 			IMapper mapper)
 		{
 			_baseRepository = baseRepository;
+			_applicantTestUpdateValidator = applicantTestUpdateValidator;
 			_applicantUpsertValidator = applicantUpsertValidator;
 			_positionRepository = positionRepository;
 			_contractRepository = contractRepository;
@@ -277,27 +281,22 @@ namespace HRM.Services.Recruitment
         //	}
         //}
 
-        //public async Task<ApiResponse<bool>> UpdateApplicantTest(int id, ApplicantTestAdd applicantUpdate)
-        //{
-        //	try
-        //	{
-        //		var resultValidation = _applicantUpsertValidator.Validate();
-        //		if (!resultValidation.IsValid)
-        //		{
-        //			return ApiResponse<bool>.FailtureValidation(resultValidation.Errors);
-        //		}
-        //		var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
-        //		//Nhập lại dữ liệu
-        //		applicant.TestId = applicantUpdate.TestId ?? null;
-        //		//Lưu thông tin
-        //		_baseRepository.Update(applicant);
-        //		await _baseRepository.SaveChangeAsync();
-        //		return new ApiResponse<bool> { IsSuccess = true };
-        //	}
-        //	catch (Exception ex)
-        //	{
-        //		throw new Exception(ex.Message);
-        //	}
-        //}
+        public async Task<ApiResponse<bool>> UpdateApplicantTest(int id, ApplicantTestUpdate applicantUpdate)
+        {
+            try
+            {
+                var applicant = await _baseRepository.GetAllQueryAble().Where(e => e.Id == id).FirstAsync();
+                //Nhập lại dữ liệu
+                applicant.TestId = applicantUpdate.TestId ?? null;
+                //Lưu thông tin
+                _baseRepository.Update(applicant);
+                await _baseRepository.SaveChangeAsync();
+                return new ApiResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

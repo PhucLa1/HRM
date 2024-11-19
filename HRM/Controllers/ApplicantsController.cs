@@ -94,13 +94,13 @@ namespace HRM.Apis.Controllers
 		/// Update a applicantTest in the company by id
 		/// </summary>
 		/// <response code="200">Return the api response </response>
-		//[HttpPut]
-		//[Route("{id}")]
-		//[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
-		//public async Task<IActionResult> UpdateApplicantTest(int id, [FromForm] ApplicantTestAdd applicantUpdate)
-		//{
-		//	return Ok(await _applicantService.UpdateApplicantTest(id, applicantUpdate));
-		//}
+		[HttpPut]
+		[Route("update-test/{id}")]
+		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
+		public async Task<IActionResult> UpdateApplicantTest(int id, [FromBody] ApplicantTestUpdate applicantUpdate)
+		{
+			return Ok(await _applicantService.UpdateApplicantTest(id, applicantUpdate));
+		}
 
 
 		/// <summary>
