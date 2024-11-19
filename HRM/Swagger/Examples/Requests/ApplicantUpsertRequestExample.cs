@@ -15,7 +15,7 @@ namespace HRM.Apis.Swagger.Examples.Requests
 				PositionId = 1,
 				Rate = 4.5,
 				TestId = 1,
-				InterviewerName = "Jane Doe" 
+				InterviewerId = 1,
 			};
 		}
 	}

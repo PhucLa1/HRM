@@ -72,7 +72,7 @@ namespace HRM.Apis.Controllers
 		[HttpPut]
 		[Route("update/{id}")]
 		[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
-		public async Task<IActionResult> UpdateApplicant(int id, [FromBody] ApplicantUpsert applicantUpdate)
+		public async Task<IActionResult> UpdateApplicant(int id, [FromForm] ApplicantUpsert applicantUpdate)
 		{
 			return Ok(await _applicantService.UpdateApplicant(id, applicantUpdate));
 		}

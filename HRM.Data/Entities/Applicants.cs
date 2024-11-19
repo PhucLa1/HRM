@@ -13,11 +13,10 @@ namespace HRM.Data.Entities
         public int PositionId { get; set; }
         public double? Rate { get; set; }
         public int? TestId { get; set; }
-        public string? InterviewerName { get; set; }
-		//public int? InterviewerId { get; set; }
+		public int? InterviewerId { get; set; }
 		public Position? Position { get; set; }
         public Test? Test { get; set; }
-        //public Employee? Interviewer { get; set; }
+        public Employee? Interviewer { get; set; }
 		public ICollection<TestResult>? testResults { get; set; }
         public ApplicantStatus Status { get; set; }
 
