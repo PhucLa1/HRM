@@ -72,7 +72,7 @@ namespace HRM.Services.Recruitment
 					InterviewerName = applicantAdd.InterviewerName,
 					Status = statusEnum
 				};
-				if (applicantAdd.file.Length > 0)
+				if (applicantAdd.file != null && applicantAdd.file.Length > 0)
 				{
 					string folder = "CV"; // Target folder for CV uploads in wwwroot
 					applicant.FileDataUrl = HandleFile.UPLOAD_GETPATH(folder, applicantAdd.file);

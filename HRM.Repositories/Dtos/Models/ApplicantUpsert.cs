@@ -26,7 +26,7 @@ namespace HRM.Repositories.Dtos.Models
 			RuleFor(p => p.Email.Trim())
 				   .NotEmpty().WithMessage("Email không được để trống.");
 			RuleFor(p => p.Phone.Trim())
-				   .NotEmpty().WithMessage("Email không được để trống.");
+				   .NotEmpty().WithMessage("Điện thoại không được để trống.");
 		}
 	}
 }
