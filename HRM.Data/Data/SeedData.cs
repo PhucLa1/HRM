@@ -18,7 +18,8 @@ namespace HRM.Data.Data
                 }
                 await context.Admins.AddRangeAsync(
                     new Admin { Email = "phucminhbeos@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("Phucdeptrai") },
-                    new Admin { Email = "nguyendinhlehoang2003@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("1234") }
+                    new Admin { Email = "nguyendinhlehoang2003@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("1234") },
+                    new Admin { Email = "admin@hrm.com", Password = BCrypt.Net.BCrypt.HashPassword("123456") }
                     );
                 await context.SaveChangesAsync();          
             }
