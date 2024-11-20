@@ -775,6 +775,7 @@ namespace HRM.Services.Briefcase
                 pdfStamper.Close();
 
                 selectedContract.FileUrlSigned = contractFileName + "_signed.pdf";
+                selectedContract.EmployeeSignStatus = EmployeeSignStatus.Signed;
                 _contractRepository.Update(selectedContract);
                 await _contractRepository.SaveChangeAsync();
 
@@ -884,6 +885,12 @@ namespace HRM.Services.Briefcase
                 contract.FileUrlSigned = $"{contract.Name}-hop-dong-so-{id}_signed.pdf";
                 _contractRepository.Update(contract);
                 await _contractRepository.SaveChangeAsync();
+
+                await CompanySignContract(contract.Id);
+
+                string destinationFilePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Contract\\{contract.FireUrlBase}";
+                string sourceFilePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Contract\\{contract.FileUrlSigned}";
+                File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
                 return new ApiResponse<bool> { IsSuccess = true };
 
             }
@@ -892,5 +899,81 @@ namespace HRM.Services.Briefcase
                 return new ApiResponse<bool> { IsSuccess = false, Message=new List<string>() { ex.Message} };
             }
         }
+
+        public async Task CompanySignContract(int contractId)
+        {
+            try
+            {
+                var selectedContract = await _contractRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == contractId);
+                if (selectedContract == null) throw new Exception("Không tìm thấy hợp đồng tương ứng!");
+
+                // Step 2: Load PDF Document
+                var contractFileName = $"{selectedContract.Name}-hop-dong-so-{selectedContract.Id}";
+                var fileURLRaw = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Contract\\{contractFileName}";
+                string pdfFilePath = $"{fileURLRaw}.pdf";
+                PdfReader pdfReader = new PdfReader(pdfFilePath);
+
+                // Step 3: Load PFX Certificate
+                var pfxFilePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Company\\company_signature.pfx";
+                string pfxPassword = "123456";
+                Pkcs12Store pfxKeyStore = new Pkcs12Store(new FileStream(pfxFilePath, FileMode.Open, FileAccess.Read), pfxPassword.ToCharArray());
+
+                // Step 4: Initialize the PDF Stamper And Creating the Signature Appearance
+                Stream fileStream = new FileStream($"{fileURLRaw}_signed.pdf", FileMode.Create);
+                PdfStamper pdfStamper = PdfStamper.CreateSignature(pdfReader, fileStream, '\0', null, true);
+
+                PdfSignatureAppearance signatureAppearance = pdfStamper.SignatureAppearance;
+                signatureAppearance.SignDate = DateTime.Now;
+                signatureAppearance.Reason = "Kí hợp đồng lao động";
+                // signatureAppearance.Location = signatureModel.Location;
+
+                signatureAppearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION;
+                signatureAppearance.SignatureGraphic = Image.GetInstance($"{Directory.GetCurrentDirectory()}\\wwwroot\\Company\\hrm_company_stamp.png");
+               
+
+                // Set the signature appearance location (in points)
+                float x = 100;
+                float y = 530;
+                float width = 200; // Width of the signature rectangle
+                float height = 100; // Height of the signature rectangle
+                int page = 5;
+                signatureAppearance.Acro6Layers = false;
+                //signatureAppearance.Layer4Text = PdfSignatureAppearance.questionMark;
+                signatureAppearance.Layer4Text = "Signature valid";
+
+                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature");
+
+                // Step 5: Sign the Document
+                string alias = pfxKeyStore.Aliases.Cast<string>().FirstOrDefault(entryAlias => pfxKeyStore.IsKeyEntry(entryAlias));
+
+                if (alias != null)
+                {
+                    ICipherParameters privateKey = pfxKeyStore.GetKey(alias).Key;
+                    IExternalSignature pks = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256);
+                    MakeSignature.SignDetached(signatureAppearance, pks, new X509Certificate[] { pfxKeyStore.GetCertificate(alias).Certificate }, null, null, null, 0, CryptoStandard.CMS);
+                }
+                else
+                {
+                    throw new Exception("Private key not found in the PFX certificate.");
+                }
+
+                // Step 6: Save the Signed PDF
+                pdfStamper.Close();
+
+
+                selectedContract.FileUrlSigned = contractFileName+"_signed.pdf";
+                selectedContract.FireUrlBase = contractFileName+".pdf";
+                selectedContract.CompanySignStatus = CompanySignStatus.Signed;
+                _contractRepository.Update(selectedContract);
+                await _contractRepository.SaveChangeAsync();
+
+                
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Signed failure!");
+            }
+        }
+
     }
 }

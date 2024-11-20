@@ -10,6 +10,7 @@ using HRM.Repositories.Helper;
 using NPOI.HSSF.Record.Chart;
 using Newtonsoft.Json;
 using HRM.Services.TimeKeeping;
+using System;
 
 namespace HRM.Services.Salary;
 
@@ -339,31 +340,36 @@ public class PayrollsService : IPayrollsService
                 foreach (var sc in lstAllowances)
                 {
                     if (sc.Field.Contains("NOTAX")) continue;
-                    htmlAllowanceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                    double val = payroll.DynamicProperties.ContainsKey(sc.Field.Replace("dp.", "")) ? payroll.DynamicProperties[sc.Field.Replace("dp.", "")] : 0;
+                    htmlAllowanceList += getTemplateSCHtml(sc, val);
                 }
 
                 var htmlBonusList = "";
                 foreach (var sc in lstBonus)
                 {
-                    htmlBonusList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                    double val = payroll.DynamicProperties.ContainsKey(sc.Field.Replace("dp.", "")) ? payroll.DynamicProperties[sc.Field.Replace("dp.", "")] : 0;
+                    htmlBonusList += getTemplateSCHtml(sc, val);
                 }
 
                 var htmlInsuranceList = "";
                 foreach (var sc in lstInsurance)
                 {
-                    htmlInsuranceList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                    double val = payroll.DynamicProperties.ContainsKey(sc.Field.Replace("dp.", "")) ? payroll.DynamicProperties[sc.Field.Replace("dp.", "")] : 0;
+                    htmlInsuranceList += getTemplateSCHtml(sc, val);
                 }
 
                 var htmlITaxDeductionList = "";
                 foreach (var sc in lstTaxDeduction)
                 {
-                    htmlITaxDeductionList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                    double val = payroll.DynamicProperties.ContainsKey(sc.Field.Replace("dp.", "")) ? payroll.DynamicProperties[sc.Field.Replace("dp.", "")] : 0;
+                    htmlITaxDeductionList += getTemplateSCHtml(sc, val);
                 }
 
                 var htmlDeductionNoTaxList = "";
                 foreach (var sc in lstDeductionNoTax)
                 {
-                    htmlDeductionNoTaxList += getTemplateSCHtml(sc, payroll.DynamicProperties[sc.Field.Replace("dp.", "")]);
+                    double val = payroll.DynamicProperties.ContainsKey(sc.Field.Replace("dp.", "")) ? payroll.DynamicProperties[sc.Field.Replace("dp.", "")] : 0;
+                    htmlDeductionNoTaxList += getTemplateSCHtml(sc, val);
                 }
 
 
@@ -377,19 +383,19 @@ public class PayrollsService : IPayrollsService
                  .Replace("{positionName}", payroll.PositionName)
                  .Replace("{departmentName}", payroll.DepartmentName)
                  .Replace("{taxCode}", "102-231-322-123")
-                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldBaseSalary}" + "}", payroll.DynamicProperties[FieldBaseSalary].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldBaseWageHours}" + "}", payroll.DynamicProperties[FieldBaseWageHours].ToString("#,##0.00") + "/h")
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0"))
+                 .Replace("{" + $"{FieldBaseSalary}" + "}", payroll.DynamicProperties[FieldBaseSalary].ToString("#,##0"))
+                 .Replace("{" + $"{FieldBaseWageHours}" + "}", payroll.DynamicProperties[FieldBaseWageHours].ToString("#,##0") + "/h")
                  .Replace("{" + $"{FieldBaseHours}" + "}", payroll.DynamicProperties[FieldBaseHours].ToString())
                  .Replace("{" + $"{FieldRealHours}" + "}", payroll.DynamicProperties[FieldRealHours].ToString())
-                 .Replace("{" + $"{FieldHourWageCheckout}" + "}", payroll.DynamicProperties[FieldHourWageCheckout].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldOtherBonus}" + "}", payroll.DynamicProperties[FieldOtherBonus].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldTotalTaxDeduction}" + "}", payroll.DynamicProperties[FieldTotalTaxDeduction].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldTaxCheckout}" + "}", payroll.DynamicProperties[FieldTaxCheckout].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldTotalAdvance}" + "}", payroll.DynamicProperties[FieldTotalAdvance].ToString("#,##0.00"))
-                 .Replace("{" + $"{FieldOtherDeduction}" + "}", payroll.DynamicProperties[FieldRealHours].ToString("#,##0.00"))
-                 .Replace("{" + $"{Fieldnet}" + "}", payroll.DynamicProperties[Fieldnet].ToString("#,##0.00"))
+                 .Replace("{" + $"{FieldHourWageCheckout}" + "}", payroll.DynamicProperties[FieldHourWageCheckout].ToString("#,##0"))
+                 .Replace("{" + $"{FieldOtherBonus}" + "}", payroll.DynamicProperties[FieldOtherBonus].ToString("#,##0"))
+                 .Replace("{" + $"{FieldTotalIncome}" + "}", payroll.DynamicProperties[FieldTotalIncome].ToString("#,##0"))
+                 .Replace("{" + $"{FieldTotalTaxDeduction}" + "}", payroll.DynamicProperties[FieldTotalTaxDeduction].ToString("#,##0"))
+                 .Replace("{" + $"{FieldTaxCheckout}" + "}", payroll.DynamicProperties[FieldTaxCheckout].ToString("#,##0"))
+                 .Replace("{" + $"{FieldTotalAdvance}" + "}", payroll.DynamicProperties[FieldTotalAdvance].ToString("#,##0"))
+                 .Replace("{" + $"{FieldOtherDeduction}" + "}", payroll.DynamicProperties[FieldRealHours].ToString("#,##0"))
+                 .Replace("{" + $"{Fieldnet}" + "}", payroll.DynamicProperties[Fieldnet].ToString("#,##0"))
                  .Replace("{allowanceList}", htmlAllowanceList)
                  .Replace("{bonusList}", htmlBonusList)
                  .Replace("{insuranceList}", htmlInsuranceList)
@@ -435,7 +441,7 @@ public class PayrollsService : IPayrollsService
                             <div class=""label"" style=""font-weight: 700; width: 120px;""></div>
                             <div class=""detail"" style=""font-weight: 600; width: 130px;"">{column.Header}</div>
                             <div class=""rate"" style=""font-weight: 400; width: 80px; font-style: italic; letter-spacing: 1px;""></div>
-                            <div class="""" style=""text-align: right; width: 170px;"">{value.ToString("#,##0.00")}</div>
+                            <div class="""" style=""text-align: right; width: 170px;"">{value.ToString("#,##0")}</div>
                         </div>";
 
 
@@ -2108,6 +2114,8 @@ public class PayrollsService : IPayrollsService
     {
         try
         {
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
             var lstHistory = await _payrollHistoryRepository.GetAllQueryAble().Select(x => new PayrollHistoryModel()
             {
                 Id = x.Id,
@@ -2115,7 +2123,7 @@ public class PayrollsService : IPayrollsService
                 Month = x.Month,
                 Year = x.Year,
                 Note = x.Note,
-                CreatedAt = x.CreatedAt.ToString("dd/MM/yyyy") + " - " + x.CreatedAt.ToString("HH:mm"),
+                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(x.CreatedAt, timeZoneInfo) .ToString("dd/MM/yyyy - HH:mm")
             }).ToListAsync();
             return new ApiResponse<List<PayrollHistoryModel>>()
             {
@@ -2136,9 +2144,10 @@ public class PayrollsService : IPayrollsService
     {
         try
         {
+          
             var lstHistoryDB = await _payrollHistoryRepository.GetAllQueryAble().FirstOrDefaultAsync(x => x.Id == payrollHistoryId);
             if (lstHistoryDB == null) throw new Exception("Không tìm thấy chi tiết bảng lưuong");
-
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var lstHistoryResult = new PayrollHistoryModel()
             {
                 Id = lstHistoryDB.Id,
@@ -2146,7 +2155,7 @@ public class PayrollsService : IPayrollsService
                 Month = lstHistoryDB.Month,
                 Year = lstHistoryDB.Year,
                 Note = lstHistoryDB.Note,
-                CreatedAt = lstHistoryDB.CreatedAt.ToString("dd/MM/yyyy") + " - " + lstHistoryDB.CreatedAt.ToString("HH:mm"),
+                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(lstHistoryDB.CreatedAt, timeZoneInfo).ToString("dd/MM/yyyy - HH:mm"),
                 PayrollHeader = JsonConvert.DeserializeObject<List<List<ColumnTableHeader>>>(lstHistoryDB.PayrollHeader),
                 PayrollColumn = JsonConvert.DeserializeObject<List<DynamicColumn>>(lstHistoryDB.PayrollColumn),
                 PayrollData = JsonConvert.DeserializeObject<List<PayrollTableData>>(lstHistoryDB.PayrollData),

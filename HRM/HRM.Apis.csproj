@@ -50,6 +50,7 @@
     <Folder Include="wwwroot\CV\" />
     <Folder Include="wwwroot\Employee\" />
     <Folder Include="APIHelper\" />
+    <Folder Include="wwwroot\Company\" />
   </ItemGroup>
 
 </Project>

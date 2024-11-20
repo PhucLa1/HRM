@@ -13,7 +13,7 @@ namespace HRM.Apis.Controllers
     [ApiVersion(1)]
     [Route("api/v{v:apiVersion}/contracts")]
     [ApiController]
-    [Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
+    //[Authorize(Policy = RoleExtensions.ADMIN_ROLE)]
     public class ContractsController : ControllerBase
     {
         private readonly IContractsService _contractsService;
@@ -125,7 +125,7 @@ namespace HRM.Apis.Controllers
         /// </summary>
         /// <response code="200">Return status after signing the api response</response>
         //[Authorize(Policy = RoleExtensions.FULLTIME_ROLE||Policy = RoleExtensions.PARTIME_ROLE)]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("create-contract-pdf/{contractId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
