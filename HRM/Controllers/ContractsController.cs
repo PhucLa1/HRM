@@ -125,7 +125,7 @@ namespace HRM.Apis.Controllers
         /// </summary>
         /// <response code="200">Return status after signing the api response</response>
         //[Authorize(Policy = RoleExtensions.FULLTIME_ROLE||Policy = RoleExtensions.PARTIME_ROLE)]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("create-contract-pdf/{contractId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<bool>))]
