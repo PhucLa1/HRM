@@ -99,6 +99,8 @@ builder.Services.AddScoped<IValidator<AccountUpdate>, AccountUpdateValidator>();
 builder.Services.AddScoped<IValidator<EmployeeUpsert>, EmployeeUpsertValidator>();
 builder.Services.AddScoped<IValidator<ChartUpsert>, ChartUpsertValidator>();
 
+builder.Services.AddScoped<IValidator<ApplicantTestUpdate>, ApplicantTestUpdateValidator>();
+
 #endregion
 
 

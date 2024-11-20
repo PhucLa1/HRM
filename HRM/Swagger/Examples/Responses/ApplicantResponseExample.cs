@@ -24,6 +24,7 @@ namespace HRM.Apis.Swagger.Examples.Responses
 						Rate = 4.5,
 						TestId = 1,
 						TestName = "Full Stack Developer Test",
+						InterviewerId = 1,
 						InterviewerName = "Jane Doe",
 						Status = ApplicantStatus.Wait,
 					}

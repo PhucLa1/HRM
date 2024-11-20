@@ -275,7 +275,7 @@ public class PayrollsService : IPayrollsService
                             ContractId = selectedEmployee.ContractId,
                             OtherDeduction = 0,
                             OtherBonus = 0,
-                            FomulaId = 6
+                            FomulaId = 5
                         };
                         listInsertPayroll.Add(payroll);
                     }

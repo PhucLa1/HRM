@@ -13,7 +13,7 @@ namespace HRM.Repositories.Dtos.Models
 		public int PositionId { get; set; }
 		public double? Rate { get; set; }
 		public int? TestId { get; set; }
-		public string? InterviewerName { get; set; }
+		public int? InterviewerId { get; set; }
 		public ApplicantStatus Status { get; set; }
 	}
 	public class ApplicantUpsertValidator : AbstractValidator<ApplicantUpsert>
@@ -25,7 +25,7 @@ namespace HRM.Repositories.Dtos.Models
 			RuleFor(p => p.Email.Trim())
 				   .NotEmpty().WithMessage("Email không được để trống.");
 			RuleFor(p => p.Phone.Trim())
-				   .NotEmpty().WithMessage("Email không được để trống.");
+				   .NotEmpty().WithMessage("Điện thoại không được để trống.");
 		}
 	}
 }
