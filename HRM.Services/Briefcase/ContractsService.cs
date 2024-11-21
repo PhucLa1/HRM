@@ -208,7 +208,8 @@ namespace HRM.Services.Briefcase
                     NationalAddress = contractAdd.NationalAddress,
                     Level = contractAdd.Level,
                     Major = contractAdd.Major,
-                };
+                    EmployeeSignStatus = EmployeeSignStatus.NotSigned,
+				};
                 using (var transaction = await _contractRepository.Context.Database.BeginTransactionAsync())
                 {
                     try
@@ -755,7 +756,7 @@ namespace HRM.Services.Briefcase
                 //signatureAppearance.Layer4Text = PdfSignatureAppearance.questionMark;
                 signatureAppearance.Layer4Text = "Signature valid";
 
-                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature");
+                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature_employee");
 
                 // Step 5: Sign the Document
                 string alias = pfxKeyStore.Aliases.Cast<string>().FirstOrDefault(entryAlias => pfxKeyStore.IsKeyEntry(entryAlias));
@@ -941,7 +942,7 @@ namespace HRM.Services.Briefcase
                 //signatureAppearance.Layer4Text = PdfSignatureAppearance.questionMark;
                 signatureAppearance.Layer4Text = "Signature valid";
 
-                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature");
+                signatureAppearance.SetVisibleSignature(new iTextSharp.text.Rectangle(x, y, x + width, y + height), page, "signature_company");
 
                 // Step 5: Sign the Document
                 string alias = pfxKeyStore.Aliases.Cast<string>().FirstOrDefault(entryAlias => pfxKeyStore.IsKeyEntry(entryAlias));
@@ -961,8 +962,8 @@ namespace HRM.Services.Briefcase
                 pdfStamper.Close();
 
 
-                selectedContract.FileUrlSigned = contractFileName+"_signed.pdf";
-                selectedContract.FireUrlBase = contractFileName+".pdf";
+                //selectedContract.FileUrlSigned = contractFileName+"_signed.pdf";
+                //selectedContract.FireUrlBase = contractFileName+".pdf";
                 selectedContract.CompanySignStatus = CompanySignStatus.Signed;
                 _contractRepository.Update(selectedContract);
                 await _contractRepository.SaveChangeAsync();
