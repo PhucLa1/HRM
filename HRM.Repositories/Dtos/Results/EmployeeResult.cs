@@ -30,5 +30,7 @@ namespace HRM.Repositories.Dtos.Results
         public string UserName { get; set; } = "";
         public string Password { get; set; } = "";
 
+        public TypeContract TypeContract { get; set; }
+
     }
 }
