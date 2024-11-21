@@ -308,8 +308,9 @@ namespace HRM.Services.User
 
                                         TaxDeductionIds = allTaxDeductionDetails.Where(x=>x.EmployeeId == e.Id).Select(x=>x.TaxDeductionId).ToList(),
                                         UserName = e.UserName??"undefined",
-                                        Password = "?????????"
-                                        
+                                        Password = "?????????",
+                                        TypeContract = c.TypeContract
+
                                     }).ToList();
                 return new ApiResponse<IEnumerable<EmployeeResult>>
                 {
@@ -351,7 +352,8 @@ namespace HRM.Services.User
                     Major = selectedContract.Major??"",
                     PositionId = selectedPosition.Id,
                     DepartmentId = department?.Id??0,
-                    Password = "?????????"
+                    Password = "?????????",
+                    TypeContract = selectedContract.TypeContract,
 
                 };
                 return new ApiResponse<EmployeeResult> { IsSuccess = true, Metadata = employeeInfor };
