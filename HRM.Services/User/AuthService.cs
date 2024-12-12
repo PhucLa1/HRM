@@ -25,6 +25,7 @@ namespace HRM.Services.User
         Task<ApiResponse<string>> AdminLogin(AccountLogin adminLogin); //Chỉ dùng riêng cho admin
         Task<ApiResponse<bool>> ChangeAccountInformation(int employeeId, AccountUpdate accountUpdate); //Dùng cho cả admin và user
         Task<ApiResponse<string>> EmployeeLogin(AccountLogin employeeLogin); //Dùng cho nhân viên
+        Task<ApiResponse<string>> EmployeeLoginByQr(AccountLogin employeeLogin);
         Task<ApiResponse<AccountInfo>> GetCurrentAccount();
     }
     public class AuthService : IAuthService
@@ -52,6 +53,48 @@ namespace HRM.Services.User
             _accountUpdateValidator = accountUpdateValidator;
         }
 
+
+        public async Task<ApiResponse<string>> EmployeeLoginByQr(AccountLogin employeeLogin)
+        {
+            try
+            {
+                var resultValidation = _accountLoginValidator.Validate(employeeLogin);
+                if (!resultValidation.IsValid)
+                {
+                    return ApiResponse<string>.FailtureValidation(resultValidation.Errors);
+                }
+                var employeeInDb = await _employeeRepository.GetAllQueryAble().
+                   Where(e => e.Email == employeeLogin.Email)
+                   .FirstOrDefaultAsync();
+                if (employeeInDb == null)
+                {
+                    return new ApiResponse<string> { Message = [AuthError.EMAIL_NOT_CORRECT] };
+                }
+                bool isCorrectPass = employeeLogin.Password == employeeInDb.Password;
+                if (!isCorrectPass)
+                {
+                    return new ApiResponse<string> { Message = [AuthError.PASS_NOT_CORRECT] };
+                }
+                var typeContract = await _contractRepository
+                    .GetAllQueryAble()
+                    .Where(e => e.Id == employeeInDb.ContractId)
+                    .Select(e => e.TypeContract)
+                    .FirstAsync();
+                string encrypterToken = await JWTGenerator(new UserJwt
+                {
+                    Email = employeeInDb.Email!,
+                    Password = employeeInDb.Password!,
+                    Role = typeContract == TypeContract.Partime ? Role.Partime : Role.FullTime,
+                    Id = employeeInDb.Id
+                }
+                );
+                return new ApiResponse<string> { Metadata = encrypterToken, IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         public async Task<ApiResponse<bool>> ChangeAccountInformation(int employeeId, AccountUpdate accountUpdate)
         {
             try
