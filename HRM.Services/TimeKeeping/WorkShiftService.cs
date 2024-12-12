@@ -8,6 +8,7 @@ using HRM.Repositories.Setting;
 using HRM.Services.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NPOI.HPSF;
 using OfficeOpenXml;
 
 namespace HRM.Services.TimeKeeping
@@ -58,8 +59,8 @@ namespace HRM.Services.TimeKeeping
         Task<ApiResponse<List<UserCalendarResult>>> GetAllWorkShiftByPartimePlanId(int partimePlanId);
         Task<ApiResponse<bool>> ProcessPartimePlanRequest(int partimePlanId, StatusCalendar statusCalendar);
         Task<ApiResponse<List<List<CalendarEntry>>>> GetAllWorkShiftByPartimeEmployee(int employeeId, string startDate, string endDate);
-        Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate);
-        Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<string>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate);
+        Task<ApiResponse<string>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate);
         Task<ApiResponse<List<EmployeeAttendanceRecord>>> GetAllWorkShiftByFullTimeEmployee(int employeeId, string startDate, string endDate);
         Task<ApiResponse<HistoryCheckResult>> CheckInOutEmployee(int employeeId, HistoryUpsert historyAdd); //Chấm công đầu vào , đầu ra cho nhân viên
         Task<ApiResponse<bool>> UpdateHistoryAttendance(int historyId, HistoryUpsert historyUpdate); //Sửa thời gian chấm công    
@@ -524,7 +525,7 @@ namespace HRM.Services.TimeKeeping
 
 
 
-        public async Task<ApiResponse<bool>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate)
+        public async Task<ApiResponse<string>> PrintFullTimeAttendanceToExcel(int employeeId, string startDate, string endDate)
         {
             try
             {
@@ -537,7 +538,7 @@ namespace HRM.Services.TimeKeeping
 
                 if (!isValidStartDate || !isValidEndDate)
                 {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_REGULAR] };
+                    return new ApiResponse<string> { Message = [WorkShiftError.FAILED_REGULAR] };
                 }
 
                 //Chuyển sang dạng DateOnly
@@ -547,19 +548,21 @@ namespace HRM.Services.TimeKeeping
                 //Kiểm tra xem nhân viên đang xét có phải là nhân viên fulltime không ?
                 var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
                                           join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          where em.Id == employeeId
                                           select c.TypeContract).FirstAsync();
 
                 if (employeeType == TypeContract.Partime)
                 {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_FULLTIME_EMPLOYEE] };
+                    return new ApiResponse<string> { Message = [WorkShiftError.NOT_FULLTIME_EMPLOYEE] };
                 }
                 var employeeAttendanceRecords = await GetAllHistoryAttendanceFullTimeEmployee(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                string fileName = DateTime.Now.Ticks.ToString() + "_FullTime.xlsx";
                 try
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     int length = employeeAttendanceRecords.Count;
                     //Tao file name 
-                    string fileName = DateTime.Now.Ticks.ToString() + "_FullTime.xlsx";
+
 
                     // Đường dẫn đến thư mục wwwroot
                     var exactPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Excel", fileName);
@@ -602,7 +605,7 @@ namespace HRM.Services.TimeKeeping
                     var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "Không có thông tin chi tiết";
                     throw new Exception($"Lỗi: {ex.Message}. Chi tiết nội bộ: {innerMessage}", ex);
                 }
-                return new ApiResponse<bool> { IsSuccess = true };
+                return new ApiResponse<string> { Metadata = _serverCompanySetting.CompanyHost + "/Excel/" + fileName, IsSuccess = true };
             }
             catch (Exception ex)
             {
@@ -633,6 +636,7 @@ namespace HRM.Services.TimeKeeping
                 //Kiểm tra xem nhân viên đang xét có phải là nhân viên fulltime không ?
                 var employeeType = await (from em in _employeeRepository.GetAllQueryAble()
                                           join c in _contractRepository.GetAllQueryAble() on em.ContractId equals c.Id
+                                          where em.Id == employeeId
                                           select c.TypeContract).FirstAsync();
 
                 if (employeeType == TypeContract.Partime)
@@ -777,7 +781,7 @@ namespace HRM.Services.TimeKeeping
                 return ShiftTime.Evening; // Hoặc ca tương ứng
             }
         }
-        public async Task<ApiResponse<bool>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate)
+        public async Task<ApiResponse<string>> PrintPartimeWorkShiftToExcel(int employeeId, string startDate, string endDate)
         {
             try
             {
@@ -790,7 +794,7 @@ namespace HRM.Services.TimeKeeping
 
                 if (!isValidStartDate || !isValidEndDate)
                 {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.FAILED_REGULAR] };
+                    return new ApiResponse<string> { Message = [WorkShiftError.FAILED_REGULAR] };
                 }
 
                 //Chuyển sang dạng DateOnly
@@ -805,16 +809,17 @@ namespace HRM.Services.TimeKeeping
 
                 if (employeeType == TypeContract.Fulltime)
                 {
-                    return new ApiResponse<bool> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
+                    return new ApiResponse<string> { Message = [WorkShiftError.NOT_PARTIME_EMPLOYEE] };
                 }
 
                 var calendarEntries = await GetAllWorkShiftAttendanceTracking(employeeId, dateOnlyStartDate, dateOnlyEndDate);
+                string fileName = DateTime.Now.Ticks.ToString() + "_Partime.xlsx";
                 try
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     int length = calendarEntries.Count;
                     //Tao file name 
-                    string fileName = DateTime.Now.Ticks.ToString() + "_Partime.xlsx";
+                    
 
                     // Đường dẫn đến thư mục wwwroot
                     var exactPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Excel", fileName);
@@ -937,7 +942,7 @@ namespace HRM.Services.TimeKeeping
                     var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "Không có thông tin chi tiết";
                     throw new Exception($"Lỗi: {ex.Message}. Chi tiết nội bộ: {innerMessage}", ex);
                 }
-                return new ApiResponse<bool> { IsSuccess = true };
+                return new ApiResponse<string> { Metadata = _serverCompanySetting.CompanyHost + "/Excel/" + fileName, IsSuccess = true };
             }
             catch (Exception ex)
             {
@@ -1108,16 +1113,19 @@ namespace HRM.Services.TimeKeeping
                 }
 
                 //Những ngày đã được đăng kí trước sẽ bị đè vào
-                /*Lấy những ngày đã đăng kí trong khoảng thời gian này*/
-                var userCalendarIdDeletes = await _userCalendarRepository
+                /*Lấy những ngày đã đăng kí trong khoảng thời gian này
+                 Nếu lịch làm được duyệt mới gọi vào hàm*/
+                if(statusCalendar == StatusCalendar.Approved)
+                {
+                    var userCalendarIdDeletes = await _userCalendarRepository
                     .GetAllQueryAble()
                     .Where(e => e.PresentShift <= partimePlan.TimeEnd
                     && e.PresentShift >= partimePlan.TimeStart
                     && (e.UserCalendarStatus == UserCalendarStatus.Submit
                     || e.UserCalendarStatus == UserCalendarStatus.Approved))
                     .ExecuteUpdateAsync(s => s.SetProperty(w => w.UserCalendarStatus, UserCalendarStatus.Inactive));
-
-
+                }
+                
                 partimePlan.StatusCalendar = statusCalendar;
                 _partimePlanRepository.Update(partimePlan);
                 var userCalendarIds = await _userCalendarRepository

@@ -61,6 +61,27 @@ namespace HRM.Apis.Controllers
         }
 
 
+        /// <summary>
+        /// This endpoint is login by QR in page user 
+        /// </summary>
+        /// <param name="employeeLogin"></param>
+        /// <returns>Return the api response , the message is the error of api return</returns>
+        /// <response code="200">Return the api response</response>
+        [HttpPost]
+        [Route("employee-login-qr")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
+        public async Task<IActionResult> EmployeeLoginByQr([FromBody] AccountLogin employeeLogin)
+        {
+            var result = await _authService.EmployeeLoginByQr(employeeLogin);
+            if (result.Metadata != null)
+            {
+                SetJWT(result.Metadata);
+            }
+            return Ok(result);
+        }
+
+
+
 
         /// <summary>
         /// This endpoint get the info of current user
