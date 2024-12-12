@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRM.Repositories", "HRM.Rep
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRM.Services", "HRM.Services\HRM.Services.csproj", "{8DC45347-D558-487C-A831-C56DB3C8557F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HRM.ServiceDefaults", "HRM.ServiceDefaults\HRM.ServiceDefaults.csproj", "{836099BB-4F5E-4DEC-B1C6-F92941F90867}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8DC45347-D558-487C-A831-C56DB3C8557F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DC45347-D558-487C-A831-C56DB3C8557F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DC45347-D558-487C-A831-C56DB3C8557F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{836099BB-4F5E-4DEC-B1C6-F92941F90867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{836099BB-4F5E-4DEC-B1C6-F92941F90867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{836099BB-4F5E-4DEC-B1C6-F92941F90867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{836099BB-4F5E-4DEC-B1C6-F92941F90867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

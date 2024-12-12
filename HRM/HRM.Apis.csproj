@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HRM.ServiceDefaults\HRM.ServiceDefaults.csproj" />
     <ProjectReference Include="..\HRM.Services\HRM.Services.csproj" />
   </ItemGroup>
 

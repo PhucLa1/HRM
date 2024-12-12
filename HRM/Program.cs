@@ -1,4 +1,4 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Coravel;
 using FluentValidation;
@@ -29,6 +29,8 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // Add services to the container.
 // Add DB Connect SQLServer
@@ -250,6 +252,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 
 #region Scheduler

@@ -18,6 +18,7 @@ namespace HRM.Services.Recruitment
 		Task PostToLinkedIn2();
 		Task PostToLinkedIn3(string message);
 		Task<bool> PostToLinkedIn4(string message);
+		Task<bool> PostToLinkedIn5(string message, string webApi);
 	}
 
 	public class LinkedinPostsService : ILinkedInPostService
@@ -177,6 +178,48 @@ namespace HRM.Services.Recruitment
 		{
 			using var client = new HttpClient();
 			var request = new HttpRequestMessage(HttpMethod.Post, "https://api.linkedin.com/rest/posts");
+			request.Headers.Add("Authorization", "Bearer AQVwL4qVaXW2Hd5gwNT7bKrD7mjZnVaak0kkXafV6UiS1omXRl3uIfqJrvfFTXWn1ySiN5mjAhRH-u2XTlMZzzPA6rNEdzsSOlt4wdk52U1tAl23Hd85LIwMjiqR3_NWKesTIJ4_HNDQV7rbEMC77lGngJ41pR5OOwU7rUnJzK6YPK0rfvPdYnCeiL5fniezkbkOl6MtrZdTlRLQr-hUuqbiqMN7d9EDwbZhVCd0CsqS9StIFOZ_I94rsrw68Np1LQR7hXnn9ttNfEPeRzMtm8GtClN02dUV3cfdxbCgEsHmrN2R41xyjc8wsZ1-Wa5k9lO60IAfzRq6d5ceviWIhsOmt3sxLg");
+			request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
+			request.Headers.Add("LinkedIn-Version", "202410");
+
+			var content = new StringContent(
+				$@"{{
+					""author"": ""urn:li:organization:104872800"",
+					""commentary"": ""{message}"",
+					""visibility"": ""PUBLIC"",
+					""distribution"": {{
+						""feedDistribution"": ""MAIN_FEED"",
+						""targetEntities"": [],
+						""thirdPartyDistributionChannels"": []
+					}},
+					""lifecycleState"": ""PUBLISHED"",
+					""isReshareDisabledByAuthor"": false
+				}}", System.Text.Encoding.UTF8, "application/json");
+			request.Content = content;
+			try
+			{
+				var response = await client.SendAsync(request);
+				if (response.IsSuccessStatusCode)
+				{
+					Console.WriteLine("Post successful!");
+					return true;
+				}
+				else
+				{
+					Console.WriteLine("Post failed. Response: " + await response.Content.ReadAsStringAsync());
+					return false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Exception: {ex.Message}");
+				return false;
+			}
+		}
+		public async Task<bool> PostToLinkedIn5(string message, string webApi)
+		{
+			using var client = new HttpClient();
+			var request = new HttpRequestMessage(HttpMethod.Post, webApi);
 			request.Headers.Add("Authorization", "Bearer AQVwL4qVaXW2Hd5gwNT7bKrD7mjZnVaak0kkXafV6UiS1omXRl3uIfqJrvfFTXWn1ySiN5mjAhRH-u2XTlMZzzPA6rNEdzsSOlt4wdk52U1tAl23Hd85LIwMjiqR3_NWKesTIJ4_HNDQV7rbEMC77lGngJ41pR5OOwU7rUnJzK6YPK0rfvPdYnCeiL5fniezkbkOl6MtrZdTlRLQr-hUuqbiqMN7d9EDwbZhVCd0CsqS9StIFOZ_I94rsrw68Np1LQR7hXnn9ttNfEPeRzMtm8GtClN02dUV3cfdxbCgEsHmrN2R41xyjc8wsZ1-Wa5k9lO60IAfzRq6d5ceviWIhsOmt3sxLg");
 			request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
 			request.Headers.Add("LinkedIn-Version", "202410");

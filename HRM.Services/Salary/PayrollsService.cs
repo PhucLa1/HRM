@@ -1672,7 +1672,7 @@ public class PayrollsService : IPayrollsService
 
                 //TThành tiền lương thời gian
                 var stringFormulaLCB = extractFormulaPartial(selectedFormula.Id, ConstantPartWageCheckout, lstAllFormula);
-                if (stringFormulaLCB != null)
+                if (!String.IsNullOrWhiteSpace(stringFormulaLCB))
                 {
                     tableRow.DynamicProperties[FieldHourWageCheckout] = calculateFormulaString(stringFormulaLCB, tableRow.DynamicProperties);
                     tableRow.DynamicProperties[FieldRealHours] = stringFormulaLCB.Contains(FieldRealDays) ?
@@ -1686,7 +1686,7 @@ public class PayrollsService : IPayrollsService
                 }
 
                 var stringFormulaTotalIncome = extractFormulaPartial(selectedFormula.Id, ConstantPartWageTotalIncome, lstAllFormula);
-                if (stringFormulaTotalIncome != null)
+                if (!String.IsNullOrWhiteSpace(stringFormulaTotalIncome))
                 {
                     tableRow.DynamicProperties[FieldTotalIncome] = calculateFormulaString(stringFormulaTotalIncome, tableRow.DynamicProperties);
                 }

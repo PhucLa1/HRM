@@ -105,6 +105,7 @@ namespace HRM.Services.Recruitment
 				if (success == false) {
 					return new ApiResponse<bool> { IsSuccess = false };
 				}
+				
 				await _baseRepository.AddAsync(
 						new RecruitmentWeb
 						{
@@ -169,11 +170,6 @@ namespace HRM.Services.Recruitment
 				throw new Exception(ex.Message);
 			}
 		}
-
-		/*public async Task<ApiResponse<bool>> UpdateRecruitmentWeb(int id, RecruitmentWebUpsert recruitmentWebUpdate)
-		{
-			throw new NotImplementedException();
-		}*/
 	}
 
 }
